@@ -41,6 +41,26 @@ const style  = StyleSheet.create({
           paddingLeft:35,
           paddingRight:35,
           fontWeight:'400'
+       },
+       sendCodeBtnView:{
+           flex:1,
+           justifyContent:'flex-end',
+           margin:20,
+           marginBottom:30,
+       },
+       sendBtnCode:{
+           backgroundColor:'#3ed943',
+           padding:14,
+           borderRadius:10
+       },
+       btnView:{
+          color:'white',
+          alignItems:'center',
+       },
+       sendCode:{
+          color:'white',
+          fontSize:18,
+          fontWeight:'700'
        } 
 });
 

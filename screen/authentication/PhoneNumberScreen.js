@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, TextInput, View } from "react-native";
+import { Button, Text, TextInput, View , TouchableHighlight } from "react-native";
 import style from "../../style/phone-number-screen/style";
 
 const PhoneNumberScreen = () => {
@@ -23,6 +23,14 @@ const PhoneNumberScreen = () => {
                     We'll send you a verification code. Message and 
                     data rates may apply.    
                   </Text> 
+              </View>
+
+              <View style={style.sendCodeBtnView}>
+                    <TouchableHighlight style={style.sendBtnCode}>
+                        <View style={style.btnView}>
+                           <Text style={style.sendCode}>Send Code</Text>
+                        </View>
+                    </TouchableHighlight>
               </View>
 
         </View>
