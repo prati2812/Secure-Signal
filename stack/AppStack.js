@@ -4,6 +4,7 @@ import {NavigationContainer} from '@react-navigation/native'
 import SplashScreen from "../screen/SplashScreen";
 import HomeScreen from "../screen/HomeScreen";
 import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
+import OtpNumberScreen from "../screen/authentication/OtpNumberScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,7 @@ const AppStack = () => {
                    <Stack.Screen name="Splash" component={SplashScreen} options={{headerShown:false}}/>
                    <Stack.Screen name="Home" component={HomeScreen} options={{headerShown:false}} />
                    <Stack.Screen name="PhoneNumber" component={PhoneNumberScreen} options={{headerShown:false}} />
+                   <Stack.Screen name="OtpNumber" component={OtpNumberScreen} options={{headerShown:false}} />
                </Stack.Navigator>
          </NavigationContainer>
    );   

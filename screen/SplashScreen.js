@@ -14,7 +14,7 @@ const SplashScreen = ({navigation}) => {
     <View style={style.splashMain}>
 
       <LinearGradient
-        colors={['#3ed943', '#cbe4cb']}
+        colors={['#3ebb6e', '#cbe4cb']}
         style={style.splashLinearGradient}>
             <View style={style.viewImage}>
                   <Image 

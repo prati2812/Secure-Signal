@@ -1,12 +1,24 @@
 import React from "react";
-import { Button, Text, TextInput, View , TouchableHighlight } from "react-native";
+import {Text, TextInput, View , TouchableHighlight } from "react-native";
 import style from "../../style/phone-number-screen/style";
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const PhoneNumberScreen = () => {
+
+
+const PhoneNumberScreen = ({navigation}) => {
    return(
         <View style={style.phoneNumberMain}>
+              
+              <View style={style.iconArrowBackView}>
+                    <Text style={style.iconArrowBack}>
+                        <Icon name="keyboard-backspace" size={40}/>
+                    </Text>
+              </View>
+
               <View style={style.phoneNumberView}>
-                    <Text style={style.phoneNumberText}>Enter your phone number</Text>
+                    <Text style={style.phoneNumberText}>
+                        Enter your phone number
+                    </Text>
               </View>
               
               <View style={style.phoneNumebrTextInputView}>
@@ -14,7 +26,8 @@ const PhoneNumberScreen = () => {
                        <TextInput 
                           style={style.phoneNumber} 
                           placeholder="Phone number"
-                          keyboardType="numeric"/>
+                          keyboardType="numeric"
+                          maxLength={10}/>
                   </View>
               </View>
               
@@ -26,10 +39,16 @@ const PhoneNumberScreen = () => {
               </View>
 
               <View style={style.sendCodeBtnView}>
-                    <TouchableHighlight style={style.sendBtnCode}>
+                    <TouchableHighlight 
+                        style={style.sendBtnCode} 
+                        onPress={()=>navigation.navigate('OtpNumber')}>
+
                         <View style={style.btnView}>
-                           <Text style={style.sendCode}>Send Code</Text>
+                           <Text style={style.sendCode}>
+                              Send Code
+                           </Text>
                         </View>
+
                     </TouchableHighlight>
               </View>
 

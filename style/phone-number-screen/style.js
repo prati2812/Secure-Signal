@@ -5,10 +5,18 @@ const style  = StyleSheet.create({
             flex:1,
             backgroundColor:'#FFFFFF',
        },
+       iconArrowBackView:{
+          marginTop:20
+       },
+       iconArrowBack:{
+          justifyContent:'center',
+          marginLeft:10,
+          color:'black'  
+       },
        phoneNumberView:{
-           marginTop:70,
+           marginTop:10,
            alignItems:'center',
-           justifyContent:'center'
+           justifyContent:'center',
        },
        phoneNumberText:{
           fontSize:25,
@@ -28,7 +36,7 @@ const style  = StyleSheet.create({
           borderRadius:15
        },
        phoneNumber:{
-          fontSize:18,
+          fontSize:20,
           color:'black'  
        },
        informationView:{
@@ -49,13 +57,14 @@ const style  = StyleSheet.create({
            marginBottom:30,
        },
        sendBtnCode:{
-           backgroundColor:'#3ed943',
-           padding:14,
+           backgroundColor:'#3ebb6e',
+           padding:13,
            borderRadius:10
        },
        btnView:{
           color:'white',
           alignItems:'center',
+          margin:1
        },
        sendCode:{
           color:'white',
