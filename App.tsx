@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {Text, View} from 'react-native'
-import AppStack  from './stack/AppStack';
+import AppStack  from './src/stack/AppStack';
 
 const App = () => {
   return(

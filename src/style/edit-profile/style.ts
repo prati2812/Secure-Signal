@@ -1,0 +1,72 @@
+import { StyleSheet } from "react-native";
+
+const style = StyleSheet.create({
+    editProfileMain:{
+        flex:1,
+        backgroundColor:'#FFFFFF'
+    },
+    editProfileIconView:{
+        marginTop:20,
+    },
+    closeIcon:{
+        paddingLeft:20,
+    },
+    editProfileTextView:{
+        marginTop:10,
+    },
+    editText:{
+        textAlign:'center',
+        fontSize:20,
+        color:'black',
+        fontWeight:'700',
+    },
+    editProfileImagePickerView:{
+        marginTop:10,
+        alignItems:'center',
+        justifyContent:'center',
+        paddingTop:10,
+    },
+    editProfileImagePicker:{
+        backgroundColor:'lightgray',
+        width:200,
+        height:200,
+        borderRadius:120,
+    },
+    editTextInputView:{
+        backgroundColor:'white',
+        padding:20,
+    },
+    editTextInput:{
+        backgroundColor:'#F3FAFF',
+        margin:2,
+        padding:10,
+        borderRadius:15
+    },
+    editUsername:{
+        fontSize:20,
+        color:'black' 
+    },
+    saveProfileBtnView:{
+        flex:1,
+        justifyContent:'flex-end',
+        margin:20,
+        marginBottom:30,
+    },
+    SaveProfileBtn:{
+        backgroundColor:'#3ebb6e',
+        padding:13,
+        borderRadius:10
+    },
+    btnView:{
+        alignItems:'center',
+        margin:1
+    },
+    saveProfile:{
+        color:'white',
+        fontSize:18,
+        fontWeight:'700'
+    }
+  
+});
+
+export default style;

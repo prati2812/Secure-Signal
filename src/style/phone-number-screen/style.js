@@ -39,6 +39,15 @@ const style  = StyleSheet.create({
           fontSize:20,
           color:'black'  
        },
+       errorPhoneNumberView:{
+          paddingLeft:25,
+          marginTop:-33,
+          padding:10, 
+       }, 
+       errorPhoneNumber:{
+         color:'red',
+         marginLeft:2,
+       }, 
        informationView:{
           margin:-10,
           justifyContent:'center', 
@@ -70,7 +79,8 @@ const style  = StyleSheet.create({
           color:'white',
           fontSize:18,
           fontWeight:'700'
-       } 
+       },
+     
 });
 
 
