@@ -5,7 +5,7 @@ import SplashScreen from "../screen/SplashScreen";
 import HomeScreen from "../screen/HomeScreen";
 import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
 import OtpNumberScreen from "../screen/authentication/OtpNumberScreen";
-import EditProfile from "../screen/Account/EditProfile";
+import EditProfile from "../screen/account/EditProfile";
 
 const Stack = createNativeStackNavigator();
 

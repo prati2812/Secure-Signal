@@ -3,6 +3,7 @@ import { Text, TextInput, View, TouchableOpacity } from "react-native";
 import style from "../../style/phone-number-screen/style";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from "../../hook/useError";
+import axios from "axios";
 
 interface PhoneNumberScreenProps {
   navigation: any; 
@@ -10,22 +11,35 @@ interface PhoneNumberScreenProps {
 
 const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [sessionInfo , setSessionInfo] = useState('');
   const [isError, setIsError] = useState(false);
 
-  const handlePhoneNumber = () => {
-    if (!phoneNumber) {
-      return setIsError(true);
-    } else {
-      setIsError(false);
-    }
+  const handlePhoneNumber = async() => {
+    try {
+      if (!phoneNumber) {
+        return setIsError(true);
+      } else {
+        setIsError(false);
+      }
 
-    if (phoneNumber.length < 10) {
-      return setIsError(true);
-    } else {
-      setIsError(false);
-    }
+      if (phoneNumber.length < 10) {
+        return setIsError(true);
+      } else {
+        setIsError(false);
+      }
 
-    navigation.navigate('OtpNumber');
+      let phoneno = '+91'+phoneNumber.toString();
+      console.log(phoneno);
+      
+      const response = await axios.post('http://10.0.2.2:3000' , {phoneNumber:phoneno});
+     
+      setSessionInfo(response.data.sessionInfo);
+      navigation.navigate('OtpNumber' ,{ sessionInfo: sessionInfo });
+    } catch (error) 
+    {
+      console.error('Error sending OTP:', error.response ? error.response.data.error : error.message);
+    }
+  
   }
 
   return (
