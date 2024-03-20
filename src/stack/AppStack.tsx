@@ -6,6 +6,8 @@ import HomeScreen from "../screen/HomeScreen";
 import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
 import OtpNumberScreen from "../screen/authentication/OtpNumberScreen";
 import EditProfile from "../screen/account/EditProfile";
+import TabNavigator from "../navigator/TabNavigator";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -17,7 +19,7 @@ const AppStack: React.FC = () => {
         <Stack.Screen name="PhoneNumber" component={PhoneNumberScreen} options={{ headerShown: false }} />
         <Stack.Screen name="OtpNumber" component={OtpNumberScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EditProfile" component={EditProfile} options={{headerShown: false}}/>
-        <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="TabNavigator" component={TabNavigator} options={{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

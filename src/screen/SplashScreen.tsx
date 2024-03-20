@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
-import { Image, StatusBar, Text, View } from 'react-native';
+import { Image, StatusBar, Text, View , StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import style from '../style/splash-screen/style';
-
 
 interface SplashScreenProps {
   navigation:any
@@ -32,6 +30,33 @@ const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
     </View>
   );
 };
+
+const style = StyleSheet.create({
+  splashMain:{
+      flex:1
+  },
+  splashLinearGradient:{
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center'
+  },
+  viewImage:{
+      flexDirection:'row',
+      justifyContent:'center',
+      alignItems:'center'     
+  },
+  splashImage:{
+      width:80,
+      height:80,
+      tintColor:'white'
+  },
+  splashText:{
+     color:'white',
+     fontSize:30,
+     fontWeight:'bold'
+  }
+
+})
 
 export default SplashScreen;
 

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Text, TextInput, View, TouchableOpacity } from "react-native";
-import style from "../../style/phone-number-screen/style";
+import React, { useEffect, useState } from "react";
+import { Text, TextInput, View, TouchableOpacity, StyleSheet} from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from "../../hook/useError";
 import axios from "axios";
+
+
 
 interface PhoneNumberScreenProps {
   navigation: any; 
@@ -11,8 +12,10 @@ interface PhoneNumberScreenProps {
 
 const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [sessionInfo , setSessionInfo] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [isError, setIsError] = useState(false);
+
+ 
 
   const handlePhoneNumber = async() => {
     try {
@@ -28,16 +31,10 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
         setIsError(false);
       }
 
-      let phoneno = '+91'+phoneNumber.toString();
-      console.log(phoneno);
-      
-      const response = await axios.post('http://10.0.2.2:3000' , {phoneNumber:phoneno});
-     
-      setSessionInfo(response.data.sessionInfo);
-      navigation.navigate('OtpNumber' ,{ sessionInfo: sessionInfo });
+      navigation.navigate('OtpNumber');
     } catch (error) 
     {
-      console.error('Error sending OTP:', error.response ? error.response.data.error : error.message);
+      
     }
   
   }
@@ -90,5 +87,89 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
     </View>
   )
 }
+
+const style  = StyleSheet.create({
+  phoneNumberMain:{
+       flex:1,
+       backgroundColor:'#FFFFFF',
+  },
+  iconArrowBackView:{
+     marginTop:20
+  },
+  iconArrowBack:{
+     justifyContent:'center',
+     marginLeft:10,
+     color:'black'  
+  },
+  phoneNumberView:{
+      marginTop:10,
+      alignItems:'center',
+      justifyContent:'center',
+  },
+  phoneNumberText:{
+     fontSize:25,
+     color:'black',
+     fontWeight:'500',
+     padding:10,
+     textAlign:'center'
+  },
+  phoneNumebrTextInputView:{
+     backgroundColor:'white',
+     padding:20
+  },
+  phoneNumberTextInput:{
+     backgroundColor:'#F3FAFF',
+     margin:2,
+     padding:10,
+     borderRadius:15
+  },
+  phoneNumber:{
+     fontSize:20,
+     color:'black'  
+  },
+  errorPhoneNumberView:{
+     paddingLeft:25,
+     marginTop:-33,
+     padding:10, 
+  }, 
+  errorPhoneNumber:{
+    color:'red',
+    marginLeft:2,
+  }, 
+  informationView:{
+     margin:-10,
+     justifyContent:'center', 
+  },
+  informationText:{
+     color:'black',
+     fontSize:16,
+     paddingLeft:35,
+     paddingRight:35,
+     fontWeight:'400'
+  },
+  sendCodeBtnView:{
+      flex:1,
+      justifyContent:'flex-end',
+      margin:20,
+      marginBottom:30,
+  },
+  sendBtnCode:{
+      backgroundColor:'#3ebb6e',
+      padding:13,
+      borderRadius:10
+  },
+  btnView:{
+     color:'white',
+     alignItems:'center',
+     margin:1
+  },
+  sendCode:{
+     color:'white',
+     fontSize:18,
+     fontWeight:'700'
+  },
+
+});
+
 
 export default PhoneNumberScreen;
