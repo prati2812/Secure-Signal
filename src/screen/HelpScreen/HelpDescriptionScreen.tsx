@@ -50,6 +50,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const data = route.params.query;
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>
+
       <View style={styles.backPressBtnContainer}>
       <Pressable onPress={() => navigation.goBack()}>
         <View style={styles.backPressBtnView}>
@@ -177,6 +178,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
 
       </ScrollView>
+      
     </SafeAreaView>
   );
 };
