@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StatusBar, Text, View , StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -7,10 +7,19 @@ interface SplashScreenProps {
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
+  const [verified , setVerified] = useState(true);
   useEffect(() => {
-    setTimeout(() => {
-      navigation.replace('PhoneNumber');
-    }, 4000);
+    if(verified){
+      setTimeout(() => {
+        navigation.replace('TabNavigator');
+      }, 4000);
+    }
+    else{
+      setTimeout(() => {
+        navigation.replace('PhoneNumber');
+      }, 4000);
+    }
+    
   }, []);
 
   return (

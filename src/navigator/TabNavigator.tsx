@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../screen/HomeScreen";
-import UserDestination from "../screen/UserDestination";
+import HomeScreen from "../screen/DashBoardScreen/HomeScreen";
+import UserDestination from "../screen/DashBoardScreen/UserDestination";
 import AccountProfile from "../screen/account/AccountProfile";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as React from 'react';

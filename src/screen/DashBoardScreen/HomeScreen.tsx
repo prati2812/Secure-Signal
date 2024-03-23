@@ -1,12 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, Pressable, GestureResponderEvent} from 'react-native';
-import CustomHeader from '../component/CustomHeader';
+import CustomHeader from '../../component/CustomHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 
 const width =  Dimensions.get('window').width;
 
-const HomeScreen = () => {
+interface HomeScreenProps {
+  navigation: any; 
+  mapNumber:number;
+}
+
+
+const HomeScreen: React.FC<HomeScreenProps> = ({navigation , mapNumber}) => {
+
+  
+  const handleLocationMap = (mapNumber:number) => {
+    navigation.navigate('HelpScreen', { mapNumber: mapNumber}); 
+  }
 
   return (
     <SafeAreaView style={style.homeMain}>
@@ -23,25 +36,24 @@ const HomeScreen = () => {
         {/* Guardians Contact List */}
         <View style={style.caretakerView}>
           <Text style={style.caretakerText}>My Caretaker</Text>
-
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={style.caretakerScrollView}>
             <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
+              <Text style={style.contactText}>+</Text>
             </View>
             <View style={style.contactView}>
               <Text style={style.contactText}>A</Text>
             </View>
             <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
+              <Text style={style.contactText}>B</Text>
             </View>
             <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
+              <Text style={style.contactText}>C</Text>
             </View>
             <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
+              <Text style={style.contactText}>D</Text>
             </View>
             <View style={style.contactView}>
               <Text style={style.contactText}>A</Text>
@@ -63,42 +75,53 @@ const HomeScreen = () => {
           </Text>
 
           <View style={style.nearEmergencyStationMapView}>
+            <View style={style.mapContainer}>
             <MapView
+              onPress={() => handleLocationMap(1)}
               style={style.nearStationMap}
               provider={PROVIDER_GOOGLE}
+              scrollEnabled={false}
+              zoomEnabled={false}
               region={{
                 latitude: 37.78825,
                 longitude: -122.4324,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
-              <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}} />
+              <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}} >
+                  <Icon name='local-police' size={40} color={'#5F4C24'}/>
+              </Marker>
             </MapView>
+            </View>
           </View>
         </View>
 
         {/* Near Hospital */}
         <View style={style.nearEmergencyStationView}>
           <Text style={style.nearEmergencyStationViewText}>
-            Near Police Station
+            Near Hospital
           </Text>
           <View style={style.nearEmergencyStationMapView}>
+           <View style={style.mapContainer}>
             <MapView
+              onPress={() => handleLocationMap(2) }
               style={style.nearStationMap}
               provider={PROVIDER_GOOGLE}
+              scrollEnabled={false}
+              zoomEnabled={false}
               region={{
                 latitude: 37.78825,
                 longitude: -122.4324,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
-              <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}} />
+              <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}} >
+                    <Icon name='local-hospital' size={40} color={'red'}/>
+              </Marker>
             </MapView>
+           </View>  
           </View>
         </View>
-
-
-       
 
       </ScrollView>
     </SafeAreaView>
@@ -111,7 +134,6 @@ const style = StyleSheet.create({
   homeMain: {
     flex: 1,
     backgroundColor: 'white',
-    marginBottom: 10,
   },
   usernameText: {
     marginTop: 10,
@@ -146,6 +168,7 @@ const style = StyleSheet.create({
     alignItems: 'center',
     margin: 7,
     flex: 1,
+    elevation:8,
   },
   contactText: {
     fontSize: 35,
@@ -153,6 +176,7 @@ const style = StyleSheet.create({
   },
   nearEmergencyStationView: {
     marginTop: 10,
+    marginBottom:10,
   },
   nearEmergencyStationViewText: {
     fontSize: 25,
@@ -163,13 +187,19 @@ const style = StyleSheet.create({
   nearEmergencyStationMapView: {
     marginTop: 10,
     width: width,
-    height: 170,
+    height: 175,
+  },
+  mapContainer:{
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden', 
+    backgroundColor:'black',
+    marginLeft:18,
+    marginRight:18,
+    elevation:8,
   },
   nearStationMap: {
     flex: 1,
-    marginLeft: 18,
-    marginRight: 18,
-    borderRadius: 100,
   },
 });
 

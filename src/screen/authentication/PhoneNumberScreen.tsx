@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Text, TextInput, View, TouchableOpacity, StyleSheet} from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from "../../hook/useError";
-import axios from "axios";
 
 
 

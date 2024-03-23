@@ -30,7 +30,9 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   
 
   const handleUserImage = async () =>{
-      const res  = await launchCamera();
+      const res  = await launchImageLibrary();
+      console.log(res?.assets[0].uri);
+      
       setImageUri(res?.assets[0].uri);
 
   }

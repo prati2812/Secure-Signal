@@ -6,8 +6,8 @@ import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 
 interface OtpNumberScreenProps {
-  navigation: any; // Adjust the type according to your navigation prop type
-}
+  navigation: any; 
+}  
 
 const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
   const [otp, setOtp] = useState('');
