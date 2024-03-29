@@ -1,10 +1,11 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import HomeScreen from "../screen/DashBoardScreen/HomeScreen";
-import UserDestination from "../screen/DashBoardScreen/UserDestination";
+import HomeScreen from "../screen/dashBoardScreen/HomeScreen";
+import UserDestination from "../screen/dashBoardScreen/UserDestination";
 import AccountProfile from "../screen/account/AccountProfile";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,7 +13,7 @@ const TabNavigator = () => {
   return (
       <Tab.Navigator
           initialRouteName="Home">
-             <Tab.Group
+             <Tab.Group  
                  screenOptions={{
                     headerShown:false , 
                     tabBarShowLabel:false , 

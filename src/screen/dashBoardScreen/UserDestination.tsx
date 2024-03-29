@@ -7,12 +7,14 @@ import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {retroMap, nightMap, standardMap} from '../../utils/mapstyle/map';
 import { useEffect } from 'react';
 
-interface UserDestinationProps {}
+interface UserDestinationProps {
+   navigation:any;
+}
 
 
 
 
-const UserDestination = (props: UserDestinationProps) => {
+const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [desiredLocation , setDesiredLocation] = React.useState([]);
   const places = [
@@ -64,14 +66,17 @@ const UserDestination = (props: UserDestinationProps) => {
     setDesiredLocation(filteredData);
   }
 
+  const handleLocation = () =>{
+    navigation.navigate('Location');
+  }
+
   useEffect(() => {
-    // Log the updated desiredLocation after it's set
     console.log("Updated desiredLocation:", desiredLocation);
   }, [desiredLocation]);
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
-      <CustomHeader name="Add location" icon="map" />
+    <View style={styles.mainContainer}>
+      <CustomHeader name="Add location" icon="map" call={handleLocation} />
       <Searchbar
         placeholder="Search"
         onChangeText={setSearchQuery}
@@ -83,31 +88,52 @@ const UserDestination = (props: UserDestinationProps) => {
       
 
       <View style={styles.mapContainer}>
-        <MapView
-          style={styles.mapView}
-          provider={PROVIDER_GOOGLE}
-          customMapStyle={nightMap}
-          region={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}>
+        {
+            desiredLocation.length > 0 ?
+            <MapView
+            style={styles.mapView}
+            provider={PROVIDER_GOOGLE}
+            customMapStyle={nightMap}
+            region={{
+              latitude: desiredLocation[0].coordinates.latitude,
+              longitude: desiredLocation[0].coordinates.longitude,
+              latitudeDelta: 0.015,
+              longitudeDelta: 0.0121,
+            }}>
+           
+                   <Marker coordinate={{latitude: desiredLocation[0].coordinates.latitude, longitude: desiredLocation[0].coordinates.longitude}}>
+                      
+                   </Marker>    
+            </MapView>
 
+            : 
+
+            <MapView
+            style={styles.mapView}
+            provider={PROVIDER_GOOGLE}
+            customMapStyle={nightMap}
+            region={{
+              latitude: 37.7882,
+              longitude: -122.4324,
+              latitudeDelta: 0.015,
+              longitudeDelta: 0.0121,
+            }}>
+           
+                   <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
+                      
+                   </Marker>    
+            </MapView>
+
+
+
+        }
+       
           
-{desiredLocation.map(location => (
-            <Marker
-              key={location.name} // Use a unique key for each Marker
-              coordinate={{
-                latitude: location.coordinates.latitude,
-                longitude: location.coordinates.longitude,
-              }}
-            />
-          ))}    
         
-          </MapView>
+          
       </View>
-    </SafeAreaView>
+      
+    </View>
   );
 };
 

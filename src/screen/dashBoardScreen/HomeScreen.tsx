@@ -1,32 +1,49 @@
 import React, { useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, Pressable, GestureResponderEvent} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, Pressable, GestureResponderEvent, TouchableOpacity} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { connect } from 'react-redux';
+
 
 
 const width =  Dimensions.get('window').width;
 
+
+interface Contact {
+  recordID: string;
+  givenName: string;
+  phoneNumbers: { number: string }[];
+}
+
 interface HomeScreenProps {
   navigation: any; 
-  mapNumber:number;
+  selectedContacts: Contact []; 
 }
 
 
-const HomeScreen: React.FC<HomeScreenProps> = ({navigation , mapNumber}) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({navigation , selectedContacts}) => {
 
   
   const handleLocationMap = (mapNumber:number) => {
     navigation.navigate('HelpScreen', { mapNumber: mapNumber}); 
   }
 
+  const handleNotification = () =>{
+    navigation.navigate('Notification');
+  }
+
+  const handleContactList = () => {
+      navigation.navigate('EmergencyContactList');
+  }
+
   return (
-    <SafeAreaView style={style.homeMain}>
+    <View style={style.homeMain}>
       <StatusBar backgroundColor={'#3ebb6e'} />
 
       {/* custom header */}
-      <CustomHeader name="Secure Signal" icon="bell" />
+      <CustomHeader name="Secure Signal" icon="bell" call={handleNotification}/>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={style.usernameText}>
@@ -40,30 +57,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation , mapNumber}) => {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={style.caretakerScrollView}>
-            <View style={style.contactView}>
+
+
+            <TouchableOpacity style={style.contactView} onPress={() => handleContactList()}>
               <Text style={style.contactText}>+</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>B</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>C</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>D</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
-            </View>
-            <View style={style.contactView}>
-              <Text style={style.contactText}>A</Text>
-            </View>
+            </TouchableOpacity>
+
+            {
+               selectedContacts.length > 0 &&
+               selectedContacts.map((item) => {
+                return(
+                  <TouchableOpacity style={style.contactSelectedView}>
+                  <Text style={style.contactText}>{item.givenName[0]}</Text>
+                </TouchableOpacity>
+    
+               )})
+            }
+
           </ScrollView>
         </View>
 
@@ -124,7 +134,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation , mapNumber}) => {
         </View>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -159,6 +169,18 @@ const style = StyleSheet.create({
     marginRight: 10,
   },
   contactView: {
+    backgroundColor: '#25a5be',
+    width: 60,
+    height: 60,
+    borderRadius: 33,
+    marginTop: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 7,
+    flex: 1,
+    elevation:8,
+  },
+  contactSelectedView:{
     backgroundColor: 'lightblue',
     width: 60,
     height: 60,
@@ -196,11 +218,16 @@ const style = StyleSheet.create({
     backgroundColor:'black',
     marginLeft:18,
     marginRight:18,
-    elevation:8,
+    elevation:5,
   },
   nearStationMap: {
     flex: 1,
   },
 });
 
-export default HomeScreen;
+
+const mapStateToProps = (state : any) => ({
+  selectedContacts: state.selectedContacts,
+});
+
+export default connect(mapStateToProps)(HomeScreen);

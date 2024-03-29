@@ -2,11 +2,14 @@ import React from "react";
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import SplashScreen from "../screen/SplashScreen";
 import TabNavigator from "../navigator/TabNavigator";
-import HelpScreen from "../screen/HelpScreen/HelpScreen";
-import HomeScreen from "../screen/DashBoardScreen/HomeScreen";
-import HelpDescriptionScreen from "../screen/HelpScreen/HelpDescriptionScreen";
-import HelpConfirmationScreen from "../screen/HelpScreen/HelpConfirmationScreen";
-import LocationRouteScreen from "../screen/locationRouteScreen/locationRouteScreen";
+import HelpScreen from "../screen/helpScreen/HelpScreen";
+import HelpDescriptionScreen from "../screen/helpScreen/HelpDescriptionScreen";
+import HelpConfirmationScreen from "../screen/helpScreen/HelpConfirmationScreen";
+import LocationRouteScreen from "../screen/location/LocationRouteScreen";
+import NotificationHistory from "../screen/notification/NotificationHistory";
+import LocationHistory from "../screen/location/LocationHistory";
+import EmergencyContactListScreen from "../screen/emergencyContactList/EmergencyContactListScreen";
+import SubscriptionScreen from "../screen/subscription/SubscriptionScreen";
 const Stack = createNativeStackNavigator();
 
 const NavigationStack: React.FC = () => {
@@ -19,6 +22,10 @@ const NavigationStack: React.FC = () => {
           <Stack.Screen name="HelpDescription" component={HelpDescriptionScreen} options={{headerShown:false}}/>
           <Stack.Screen name="HelpConfirmation" component={HelpConfirmationScreen} options={{headerShown:false}}/>
           <Stack.Screen name="LocationRouting" component={LocationRouteScreen} options={{headerShown:false}} />
+          <Stack.Screen name="Notification" component={NotificationHistory} options={{headerShown:false}} />
+          <Stack.Screen name="Location" component={LocationHistory} options={{headerShown:false}} />
+          <Stack.Screen name="EmergencyContactList" component={EmergencyContactListScreen} options={{headerShown:false}}/>
+          <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{headerShown:false}}/>
         </Stack.Navigator>
     
     );

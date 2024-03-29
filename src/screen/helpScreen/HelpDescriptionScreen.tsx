@@ -288,6 +288,7 @@ const styles = StyleSheet.create({
         marginTop:20, 
         marginLeft:20 , 
         flexDirection:'row',
+        marginRight:20,
       },
       dataShowView:{
         margin:5

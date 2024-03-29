@@ -51,6 +51,12 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation}) => {
       navigation.navigate('HelpDescription' , {query});
     }
   }
+
+  const handleLocationMap = () => {
+    if(mapNumber){
+      navigation.navigate('LocationRouting' , {mapNumber});
+    }
+  }
    
     
   return (
@@ -73,7 +79,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation}) => {
             <Pressable onPress={() => navigation.navigate('Profile')}>
               <Image
                 resizeMode="cover"
-                source={require('../../assets/image/boy.png')}
+                source={{uri:'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}
                 style={styles.profileImage}
               />
             </Pressable>
@@ -86,7 +92,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation}) => {
 
         {/* location map */}
         <View style={styles.locationMapView}>
-          <Pressable style={styles.locationmapContainer} onPress={() => navigation.navigate('LocationRouting')}>
+          <Pressable style={styles.locationmapContainer} onPress={() => handleLocationMap()}>
             <MapView
               style={styles.locationMap}
               provider={PROVIDER_GOOGLE}
