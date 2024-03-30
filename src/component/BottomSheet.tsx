@@ -1,12 +1,15 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef , useState} from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ImagePickerSheet from './ImagePickerSheet';
 
 interface BottomSheetProps {
   setBottomSheetVisible:any;
 }
 
 const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
+
+  const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
   const slide = React.useRef(new Animated.Value(300)).current;
 
 
@@ -39,6 +42,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
     }
 
   return (
+    <>
     <Pressable style={styles.container} onPress={closeModal}>
       <Pressable style={{ width: '100%', height: '45%', }}>
         <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
@@ -56,8 +60,8 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
             style={{flex: 1}}
             resizeMode="cover"
           />
-          <TouchableOpacity style={styles.editProfileIcon}>
-            <Icon name="edit" size={20} color={'black'} />
+          <TouchableOpacity style={styles.editProfileIcon} onPress={()=>setImageSelectionSheetVisible(true)}>
+            <Icon name="edit" size={20} color={'black'}/>
           </TouchableOpacity>
               </View>
         </View>
@@ -91,6 +95,11 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
         </Animated.View>
       </Pressable> 
     </Pressable>
+
+    {
+         isImageSelectionSheetVisible && <ImagePickerSheet setBottomSheetVisible={ setBottomSheetVisible}/> 
+    }
+    </>
   );
 };
 

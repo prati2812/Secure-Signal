@@ -3,7 +3,7 @@ import { ADD_SELECTED_CONTACTS, REMOVE_SELECTED_CONTACTS } from './action';
 
 const initialState: never[] = [];
 
-const selectedContactsReducer = (state = initialState, action) => {
+const selectedContactsReducer = (state = initialState, action: { type: any; payload: any; }) => {
   switch (action.type) {
     case ADD_SELECTED_CONTACTS:
       return [...state, action.payload];

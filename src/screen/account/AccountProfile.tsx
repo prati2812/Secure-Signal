@@ -69,7 +69,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({navigation}) => {
                 <CustomProfileOption optionName='subscription' icon='bolt'/>
                 </TouchableOpacity>
 
-                <CustomProfileOption optionName='Payment' icon='payments'/>
                 
           </View>
 
