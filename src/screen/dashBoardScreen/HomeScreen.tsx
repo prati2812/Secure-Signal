@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter, DeviceEventEmitter, ToastAndroid} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,11 +18,18 @@ const sleep = (time: number | undefined) => new Promise<void>((resolve) => setTi
 
 
 const veryIntensiveTask = async (taskDataArguments: { delay: any; }) => {
-  // Example of an infinite loop task
   const { delay } = taskDataArguments;
   await new Promise( async (resolve) => {
       for (let i = 0; BackgroundService.isRunning(); i++) {
           console.log(i);
+          const eventEmitter = new NativeEventEmitter(NativeModules.MainActivity);
+    
+    const subscription = eventEmitter.addListener('onKeyMessage', event => {
+      const keyMessage = event.keyMessage;
+      console.log(keyMessage);
+    });
+    return () => subscription.remove();
+        
           await sleep(delay);
       }
   });
@@ -73,7 +80,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   useEffect(() =>{
      requestLocationPermission(); 
      requestSMSPermission();
+     backgroundService();
   },[]);
+
 
 
   const backgroundService = async() => {

@@ -36,5 +36,14 @@
       <meta-data
         android:name="com.google.android.geo.API_KEY"
         android:value="AIzaSyDJC3NHmX6wDMaWyRldowFP0nlAutoKpXY"/>
+
+        <service android:name=".KeyEventListenerService"  android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </service>
+
+
     </application>
 </manifest>
