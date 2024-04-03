@@ -1,11 +1,47 @@
-import React, { useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, Pressable, GestureResponderEvent, TouchableOpacity} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
+import BackgroundService from 'react-native-background-actions';
+import { SendDirectSms } from 'react-native-send-direct-sms';
 
+
+
+
+
+
+
+
+const sleep = (time: number | undefined) => new Promise<void>((resolve) => setTimeout(() => resolve(), time));
+
+
+const veryIntensiveTask = async (taskDataArguments: { delay: any; }) => {
+  // Example of an infinite loop task
+  const { delay } = taskDataArguments;
+  await new Promise( async (resolve) => {
+      for (let i = 0; BackgroundService.isRunning(); i++) {
+          console.log(i);
+          await sleep(delay);
+      }
+  });
+};
+
+
+const options = {
+  taskName: 'Location',
+  taskTitle: 'Location Sharing',
+  taskDesc: 'ExampleTask description',
+  taskIcon: {
+      name: 'ic_launcher',
+      type: 'mipmap',
+  },
+  color: '#ff00ff',
+  parameters: {
+      delay: 5000,
+  },
+};
 
 
 const width =  Dimensions.get('window').width;
@@ -17,17 +53,74 @@ interface Contact {
   phoneNumbers: { number: string }[];
 }
 
-interface HomeScreenProps {
-  navigation: any; 
-  selectedContacts: Contact []; 
+interface RootState {
+  userProfile: {
+    userName: string; 
+  };
+  selectedContacts: Contact[]; 
 }
 
 
-const HomeScreen: React.FC<HomeScreenProps> = ({navigation , selectedContacts}) => {
+interface HomeScreenProps {
+  navigation: any; 
+}
 
+
+const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
+  const userName  = useSelector((state : RootState) => state.userProfile.userName);
+  const selectedContacts = useSelector((state : RootState) => state.selectedContacts);
+
+  useEffect(() =>{
+     requestLocationPermission(); 
+     requestSMSPermission();
+  },[]);
+
+
+  const backgroundService = async() => {
+    await BackgroundService.start(veryIntensiveTask, options);
+    await BackgroundService.updateNotification({taskDesc: 'New ExampleTask description'});
+  }
+
+  const sendSMS = () => {
+    SendDirectSms("+918733049183", `https://www.google.com/maps/search/?api=1&query=${21.1702},${72.8311}`)
+    .then((res) => console.log("then", res))
+    .catch((err) => console.log("catch", err))
+  }
+
+  const requestLocationPermission = async() => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      } else {
+                   
+      }
+    }
+  }
+
+  const requestSMSPermission = async() => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.SEND_SMS,
+        {
+          title: 'SMS Permission',
+          message: 'This app needs permission to send SMS.',
+          buttonPositive: 'OK',
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          //sendSMS();
+      } else {
+        console.log('SMS permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
   
   const handleLocationMap = (mapNumber:number) => {
-    navigation.navigate('HelpScreen', { mapNumber: mapNumber}); 
+    navigation.navigate('HelpScreen', { mapNumber: mapNumber});
   }
 
   const handleNotification = () =>{
@@ -38,6 +131,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation , selectedContacts}) 
       navigation.navigate('EmergencyContactList');
   }
 
+ 
+ 
+
+  
+
+
   return (
     <View style={style.homeMain}>
       <StatusBar backgroundColor={'#3ebb6e'} />
@@ -47,7 +146,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation , selectedContacts}) 
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={style.usernameText}>
-          <Text style={style.username}>Hello Pratik</Text>
+          <Text style={style.username}>Hello {userName}</Text>
         </View>
 
         {/* Guardians Contact List */}
@@ -226,8 +325,6 @@ const style = StyleSheet.create({
 });
 
 
-const mapStateToProps = (state : any) => ({
-  selectedContacts: state.selectedContacts,
-});
 
-export default connect(mapStateToProps)(HomeScreen);
+
+export default HomeScreen;

@@ -6,19 +6,36 @@ import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import  poyline from 'google-polyline';
 import { useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Geolocation from 'react-native-geolocation-service';
 
 interface LocationRouteScreenProps {}
 const LocationRouteScreen = (props: LocationRouteScreenProps) => {
-  const [origin, setOrigin] = useState({ latitude: 21.1702, longitude: 72.8311 });
+  const [origin, setOrigin] = useState({ latitude: 0, longitude: 0 });
   const [destination, setDestination] = useState({ latitude: 22.3072, longitude: 73.1812 });
-  const [routeData, setRouteData] = useState(null);
-  const [coordinates, setCoordinates] = useState([]);
+  const [routeData, setRouteData] = useState<{ routes: any[] } | null>(null);
+  const [coordinates, setCoordinates] = useState<[number, number][]>([]);
+
+  
 
   const route  = useRoute();
-  const mapNumber = route.params?.mapNumber;
+  const mapNumber = (route.params as { mapNumber?: number })?.mapNumber;
 
   useEffect(() => {
+    const currentLocation = () => {
+      Geolocation.getCurrentPosition(
+        position => {
+          console.log(position.coords.latitude , position.coords.longitude);
+          setOrigin({latitude:position.coords.latitude , longitude:position.coords.longitude});
+        },
+        error => {
+          console.log(error.code, error.message);
+        },
+        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      );
+    };  
+    currentLocation();
     const fetchRouteData = async () => {
+      
       const options = {
         method: 'GET',
         url: `https://fast-routing.p.rapidapi.com/route/v1/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
@@ -39,16 +56,29 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
       }
     };
     console.log("map-numberrrr" , mapNumber);
-    fetchRouteData();
-  }, []);
+    if(origin.latitude !== 0 || origin.longitude !== 0){
+      console.log("helllo");
+      
+      fetchRouteData();  
+    }
+    
+  }, [origin]);
+
+  
+
+ 
 
   useEffect(() => {
     if (routeData && routeData.routes && routeData.routes.length > 0) {
       const routeGeometry = routeData.routes[0].geometry;
+      console.log("    ", routeData);
+      
       const data = poyline.decode(routeGeometry);
       setCoordinates(data);
     }
   }, [routeData]);
+
+  
    
 
 

@@ -2,6 +2,9 @@ import React, {useEffect, useRef , useState} from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePickerSheet from './ImagePickerSheet';
+import { useSelector , useDispatch } from 'react-redux';
+import { changeUserName } from '../redux/action';
+
 
 interface BottomSheetProps {
   setBottomSheetVisible:any;
@@ -10,7 +13,13 @@ interface BottomSheetProps {
 const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
 
   const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
+  const [edittedUsername , setedittedUserName] = useState('');
   const slide = React.useRef(new Animated.Value(300)).current;
+  const dispatch = useDispatch();
+
+
+  const imageUri = useSelector((state : any) => state.userProfile.imageUri);
+  const userName = useSelector((state : any) => state.userProfile.userName);
 
 
   const slideUp = () => {
@@ -31,74 +40,86 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
     };
 
     useEffect(() => {
+      if(userName){
+        setedittedUserName(userName);
+      }  
       slideUp()
-    })
+    },[])
 
     const closeModal = () => {
+      
        slideDown();
        setTimeout(() => {
         setBottomSheetVisible(false);
        },800);
     }
 
+    const handleUpdateData = () => {
+       dispatch(changeUserName(edittedUsername)); 
+       closeModal();
+    }
+
   return (
     <>
-    <Pressable style={styles.container} onPress={closeModal}>
-      <Pressable style={{ width: '100%', height: '45%', }}>
-        <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
-
-        <View style={styles.editProfileView}> 
-          <Text style={styles.editProfileTxt}>Edit Profile</Text>
-        </View>  
-        {/* Edit User Image */}
-        <View style={styles.editUserImageView}>
-              <View style={styles.editProfileImage}>
-          <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-            }}
-            style={{flex: 1}}
-            resizeMode="cover"
-          />
-          <TouchableOpacity style={styles.editProfileIcon} onPress={()=>setImageSelectionSheetVisible(true)}>
-            <Icon name="edit" size={20} color={'black'}/>
-          </TouchableOpacity>
+      <Pressable style={styles.container} onPress={closeModal}>
+        <Pressable style={{width: '100%', height: '45%'}}>
+          <Animated.View
+            style={[styles.bottomSheet, {transform: [{translateY: slide}]}]}>
+            <View style={styles.editProfileView}>
+              <Text style={styles.editProfileTxt}>Edit Profile</Text>
+            </View>
+            {/* Edit User Image */}
+            <View style={styles.editUserImageView}>
+              <View style={styles.editProfileImage}>  
+                <Image
+                  source={{
+                    uri: imageUri
+                      ? imageUri
+                      : 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                  }}
+                  style={{flex: 1}}
+                  resizeMode="cover"
+                 />
               </View>
-        </View>
+              <TouchableOpacity
+                  style={styles.editProfileIcon}
+                  onPress={() => setImageSelectionSheetVisible(true)}>
+                  <Icon name="edit" size={20} color={'black'} />
+              </TouchableOpacity>
+            </View>
 
-        {/* Edit Username */}
-          <View style={styles.editTextInput}>
-            <TextInput
-              style={styles.editUsername}
-              placeholder="Enter your name"
-            />
-          </View>
-
-        <View style={styles.buttonView}>
-               <TouchableOpacity
-                   style={styles.cancelButton}
-                   onPress={() => closeModal()}>
-                            <Text style={styles.btnText}>
-                                   Cancel 
-                            </Text>
-               </TouchableOpacity>
-
-               <TouchableOpacity
-                   style={styles.updateButton}>
-                            <Text style={styles.btnText}>
-                                   Update
-                            </Text>
-               </TouchableOpacity>
-        </View>
+            {/* Edit Username */}
+            <View style={styles.editTextInput}>
+              <TextInput
+                style={styles.editUsername}
+                placeholder="Enter your name"
+                onChangeText={(text) => setedittedUserName(text)}
+                value={edittedUsername}
+              />
+            </View>
 
 
-        </Animated.View>
-      </Pressable> 
-    </Pressable>
 
-    {
-         isImageSelectionSheetVisible && <ImagePickerSheet setBottomSheetVisible={ setBottomSheetVisible}/> 
-    }
+            <View style={styles.buttonView}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => closeModal()}>
+                <Text style={styles.btnText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.updateButton} onPress={() => handleUpdateData()}>
+                <Text style={styles.btnText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </Pressable>
+      </Pressable>
+
+      {isImageSelectionSheetVisible && (
+        <ImagePickerSheet
+          setImageSelectionSheetVisible={setImageSelectionSheetVisible}
+        />
+      )}
     </>
   );
 };
@@ -141,16 +162,19 @@ const styles = StyleSheet.create({
         elevation:5,
         backgroundColor:'lightblue',
         flexDirection:'row',
+        overflow:'hidden',
+        
     },
     editProfileIcon:{
-        position:'absolute' , 
-        bottom:7, 
+        bottom:5, 
         backgroundColor:'white', 
         borderRadius:20,
-        right:4,
+        right:'35%',
         padding:5,
         borderColor:'black',
         borderWidth:2,
+        position:'absolute',
+       
     },
     editTextInput:{
         backgroundColor:'white',
@@ -204,6 +228,8 @@ const styles = StyleSheet.create({
         fontWeight:'600',
     }
 });
+
+
   
 export default BottomSheet;
 

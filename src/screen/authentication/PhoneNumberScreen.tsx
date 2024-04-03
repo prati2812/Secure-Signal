@@ -93,7 +93,7 @@ const style  = StyleSheet.create({
        backgroundColor:'#FFFFFF',
   },
   iconArrowBackView:{
-     marginTop:20
+     marginTop:20,
   },
   iconArrowBack:{
      justifyContent:'center',
@@ -120,7 +120,8 @@ const style  = StyleSheet.create({
      backgroundColor:'#F3FAFF',
      margin:2,
      padding:10,
-     borderRadius:15
+     borderRadius:15,
+     elevation:3,
   },
   phoneNumber:{
      fontSize:20,
@@ -155,7 +156,8 @@ const style  = StyleSheet.create({
   sendBtnCode:{
       backgroundColor:'#3ebb6e',
       padding:13,
-      borderRadius:10
+      borderRadius:10,
+      elevation:3,
   },
   btnView:{
      color:'white',

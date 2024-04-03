@@ -1,9 +1,13 @@
 package com.reactdemo
 
+import android.view.KeyEvent
+import android.widget.Toast
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
+import com.reactdemo.KeyDetectModule
+import com.facebook.react.modules.core.DeviceEventManagerModule
 
 class MainActivity : ReactActivity() {
 
@@ -19,4 +23,23 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+
+  override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean{
+
+    when (keyCode) {
+      KeyEvent.KEYCODE_VOLUME_DOWN -> {
+        Toast.makeText(applicationContext, "Volume Down Key Pressed", Toast.LENGTH_SHORT).show()
+
+      }
+      KeyEvent.KEYCODE_VOLUME_UP -> {
+        Toast.makeText(applicationContext, "Volume Up Key Pressed", Toast.LENGTH_SHORT).show()
+
+      }
+      KeyEvent.KEYCODE_BACK -> {
+        Toast.makeText(applicationContext, "Back Key Pressed", Toast.LENGTH_SHORT).show()
+
+      }
+    }
+    return true;
+  }
 }

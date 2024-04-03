@@ -15,43 +15,44 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import HandleError from '../../hook/useError';
-import { launchCamera , launchImageLibrary } from 'react-native-image-picker';
+import { useState } from 'react';
+import ImagePickerSheet from '../../component/ImagePickerSheet';
+import { useSelector , useDispatch} from 'react-redux';
+import { changeUserName } from '../../redux/action';
+
+
 
 
 interface EditProfileProps {
   navigation: any,
 }
 
+
+
 const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
-  const [userName , setUserName] = React.useState('');
-  const [isError , setIsError] = React.useState(false);
-  const [imageUri , setImageUri] = React.useState('');
+  const [userName , setUserName] = useState('');
+  const [isError , setIsError] = useState(false);
+  const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
+  const dispatch = useDispatch();
+
+
+  const imageUri = useSelector((state:any) => state.userProfile.imageUri);
 
   
 
   const handleUserImage = async () =>{
-      const res  = await launchImageLibrary();
-      console.log(res?.assets[0].uri);
-      
-      setImageUri(res?.assets[0].uri);
+      setImageSelectionSheetVisible(true);
 
   }
 
   const handleSaveProfile = () => {
-     if(!userName)
-     {
-         setIsError(true); 
-         return false;
-     }
-     else{
-      setIsError(false);
-      navigation.navigate('TabNavigator'); 
-     }
-     
+      dispatch(changeUserName(userName));
+      navigation.navigate('TabNavigator');  
   }
 
 
   return (
+    <>
     <SafeAreaView style={style.editProfileMain}>
       
 
@@ -77,12 +78,12 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
            </Text>
       </View>
 
-      <Pressable onPress={() => handleUserImage()}>
+      <Pressable onPress={() => handleUserImage()} style={{elevation:15, alignItems:'center'}}>
       <View 
         style={style.editProfileImagePickerView}>
             <Image  
                style={style.editProfileImagePicker}
-               source={{uri:imageUri}}>              
+               source={{uri: imageUri ? imageUri : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}>              
             </Image>
       </View>
       </Pressable>
@@ -118,6 +119,14 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
       
     </SafeAreaView>
+
+     {isImageSelectionSheetVisible && (
+        <ImagePickerSheet
+          setImageSelectionSheetVisible={setImageSelectionSheetVisible}
+        />
+      )}  
+
+    </>
   );
 };
 
@@ -145,13 +154,16 @@ const style = StyleSheet.create({
       marginTop:10,
       alignItems:'center',
       justifyContent:'center',
-      paddingTop:10,
+      backgroundColor:'lightblue',
+      width:200,
+      borderRadius:120,
+      elevation:3,
+      marginBottom:2,
+      overflow:'hidden'
   },
   editProfileImagePicker:{
-      backgroundColor:'lightgray',
       width:200,
       height:200,
-      borderRadius:120,
   },
   editTextInputView:{
       backgroundColor:'white',
@@ -161,7 +173,8 @@ const style = StyleSheet.create({
       backgroundColor:'#F3FAFF',
       margin:2,
       padding:10,
-      borderRadius:15
+      borderRadius:15,
+      elevation:3,
   },
   editUsername:{
       fontSize:20,
@@ -176,7 +189,8 @@ const style = StyleSheet.create({
   SaveProfileBtn:{
       backgroundColor:'#3ebb6e',
       padding:13,
-      borderRadius:10
+      borderRadius:10,
+      elevation:3,
   },
   btnView:{
       alignItems:'center',

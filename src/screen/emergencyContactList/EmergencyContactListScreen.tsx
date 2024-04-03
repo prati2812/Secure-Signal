@@ -5,8 +5,8 @@ import { Searchbar } from 'react-native-paper';
 import Contacts  from 'react-native-contacts';
 import Contact from '../../component/Contact';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { connect } from 'react-redux';
-import { addSelectedContact,  removeSelectedContact , addContact} from '../../redux/contacts/action';
+import { connect, useDispatch , useSelector } from 'react-redux';
+import { addSelectedContact,  removeSelectedContact , addContact} from '../../redux/action';
 
 interface Contact {
   recordID: string;
@@ -14,23 +14,36 @@ interface Contact {
   phoneNumbers: { number: string }[];
 }
 
-interface EmergencyContactListScreenProps {
-  contacts: Contact [];
-  selectedContacts: Contact[];
-  addSelectedContact: (contact: Contact) => void;
-  removeSelectedContact: (recordID: string) => void;
-  addContact: (contact: Contact) => void;
+interface RootState {
+  contacts:Contact[];
 }
 
-const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({selectedContacts, addSelectedContact , removeSelectedContact , addContact , contacts}) => {
+interface EmergencyContactListScreenProps {
+  userProfile: {
+    userName: string;
+  };
+  selectedContacts: Contact[];
+  contacts: RootState; 
+}
+
+const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<Contact[]>([]);
   const [isVisible, setVisible] = useState(false);
   const [isSelectedContact , setSelectedContact] = useState(false);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-       handleContactList();
-  },[]);
+  const selectedContacts = useSelector((state : EmergencyContactListScreenProps) => state.selectedContacts);
+  const contacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.contacts);
+  
+
+  useEffect(() => { 
+       if(contacts.length > 0){
+       }
+       else{
+        handleContactList();
+       }
+  });
 
 
   const handleContactList = async() => {
@@ -49,7 +62,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
 
   const getContactList = () => {
     Contacts.getAll()
-      .then(contacts => addContact(contacts))
+      .then(contacts => dispatch(addContact(contacts)))
       .catch(e => {
         console.log(e);
       }); 
@@ -58,7 +71,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
  
   const handleSearch = (text: string) =>{
     if(text){
-       const newData = contacts.filter((item)=>{
+       const newData = contacts.filter((item : Contact)=>{
 
            const Name = item.givenName ? item.givenName.toUpperCase() : ''.toUpperCase();
            const itemName = Name.replace(/\s/g,'');
@@ -84,34 +97,31 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
 
     const isSelected = selectedContacts.some((contact) => contact.recordID === item.recordID);
     if (isSelected) {
-      removeSelectedContact(item.recordID);  
+      dispatch(removeSelectedContact(item.recordID));  
     } else {
-      addSelectedContact(item);
+      dispatch(addSelectedContact(item));
     }
    
     setVisible(true);
     setSelectedContact(true);   
   }
 
-  const handleDeleteSelectedContact = (item: Contact) => {
-      console.log("ITEEEEEM" , item);
-   
-    
-      
-             
-  }
-
-
   const handleSetasGuardian = () =>{
-    
     setVisible(!isVisible); 
     setSelectedContact(false);
-    const updatedContact = contacts.filter(contact => !selectedContacts.some(selectedContact => selectedContact.recordID === contact.recordID));
-    addContact(updatedContact);
-    
-    
-    
-    
+    const updatedContact = contacts.filter((contact: { recordID: string; }) => !selectedContacts.some(selectedContact => selectedContact.recordID === contact.recordID));
+    dispatch(addContact(updatedContact));
+        
+  }
+
+  const handleDeleteSelectedContact = (item: Contact) => {
+    console.log("ITEEEEEM" , item); 
+    dispatch(removeSelectedContact(item.recordID));
+   
+    const unselectedContacts = contacts.filter((contact: { recordID: string; }) => contact.recordID !== item.recordID);
+
+    dispatch(addContact([...unselectedContacts, item]));
+  
   }
 
   
@@ -131,6 +141,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
         elevation={1}
       />
 
+      {/* Selected Contacts list */}
       <View>
         { isVisible===false && selectedContacts.length > 0 && (
           <View style={styles.guardiansView}>
@@ -168,12 +179,12 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
         )}
       </View>
 
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 30}}
         style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
-        {filteredData.length > 0
-          ? filteredData.map(item => {
+        {filteredData.length > 0 ? filteredData.map(item => {
               return (
                 <Contact
                   contact={item}
@@ -184,7 +195,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
                 />
               );
             })
-          : contacts ? contacts.map(item => {
+            :
+            contacts && Array.isArray(contacts) ? contacts.map(item => {
               return (
                 <Contact
                   contact={item}
@@ -193,10 +205,14 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
                   ))}
                   handleSelected={() => handleSelectedContact(item)}
                 />
-              );
-            }) : null
-          }
+              ); 
+            })
+             : null
+             
+        }
       </ScrollView>
+
+
       { (selectedContacts.length > 0 && isVisible) && (
         <TouchableOpacity
           style={styles.guardiansBtnView} onPress={() => handleSetasGuardian()}>
@@ -206,6 +222,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({s
           </View>
         </TouchableOpacity>
       )}
+
     </View>
   );
 };
@@ -301,18 +318,7 @@ const styles = StyleSheet.create({
 
 });
   
-const mapStateToProps = (state: {
-  contacts: any; selectedContacts: any;
-}) => ({
-  contacts: state.contacts.contacts,
-  selectedContacts: state.selectedContacts,
-});
 
-const mapDispatchToProps = {
-  addContact,
-  addSelectedContact,
-  removeSelectedContact,
-};
 
-export default connect(mapStateToProps, mapDispatchToProps)(EmergencyContactListScreen);
+export default EmergencyContactListScreen;
 

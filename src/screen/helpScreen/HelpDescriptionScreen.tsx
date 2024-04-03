@@ -1,5 +1,6 @@
 import { useRoute } from '@react-navigation/native';
 import * as React from 'react';
+import { useState } from 'react';
 import { Text, View, StyleSheet , Pressable , Image, ScrollView, TouchableOpacity, ImageBackground} from 'react-native';
 import ImagePicker, { openPicker } from 'react-native-image-crop-picker';
 import { TextInput } from 'react-native-paper';
@@ -7,16 +8,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
-interface HelpDescriptionScreenProps {
-    navigation: any,
-    query:string,
+interface ImageInfo {
+  uri: string;
+  width: number;
+  height: number;
+  mime: string;
+  path: string;
 }
 
-const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation}) => {
+interface HelpDescriptionScreenProps {
+    navigation: any,
+    route: {
+      params?: {
+        query?: string; 
+      };
+    };
+}
 
-    const [isYes , setYesButton] = React.useState(false);
-    const [isNo , setNoButton] = React.useState(true);
-    const [uri , setUri] = React.useState([]);
+const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation,route}) => {
+
+    const [isYes , setYesButton] = useState(false);
+    const [isNo , setNoButton] = useState(true);
+    const [uri , setUri] = useState<ImageInfo[]>([]);
 
     const handleYes = () => {
         setYesButton(true);
@@ -36,18 +49,13 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         });           
     }
 
-    const removeImage = (data) => {
+    const removeImage = (data:number) => {
          let newDataList;
          newDataList = uri.filter((item , index) => index!== data);   
-         setUri(newDataList);
-         
-         
+         setUri(newDataList);      
     }
 
-
-
-    const route = useRoute();
-    const data = route.params.query;
+    const data = route.params?.query;
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>
 

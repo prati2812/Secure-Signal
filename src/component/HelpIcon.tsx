@@ -1,20 +1,17 @@
-//import liraries
 import React, { Component, version } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Svg ,Path, G } from 'react-native-svg';
 
 interface HelpIconProps{
-  version:string;
+  
 }
 
-const HelpIcon:  React.FC<HelpIconProps> = ({version}) => (
+const HelpIcon:  React.FC<HelpIconProps> = ({}) => (
  <View> 
   <Svg
     fill="#3ebb6e"
     height="231"
     width="231"
-    version="1.1"
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 308.00 308.00"
     enable-background="new 0 0 308 308"
     stroke="#3ebb6e"

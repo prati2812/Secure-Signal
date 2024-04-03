@@ -13,21 +13,27 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconFont from 'react-native-vector-icons/FontAwesome';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import { useRoute } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+
 
 const width = Dimensions.get('window').width;
 
 interface HelpScreenProps {
   navigation: any;
+  route: {
+    params?: {
+      mapNumber?: number; 
+    };
+  };
 }
 
-const HelpScreen: React.FC<HelpScreenProps> = ({navigation}) => {
+const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   
   const [isVictim , setVictimButton] = useState(false);
   const [isWitness , setWitnessButton] = useState(false);
   const [query , setQuery] = useState('');
+  const imageUri = useSelector((state:any) => state.userProfile.imageUri);
 
-  const route  = useRoute();
   const mapNumber = route.params?.mapNumber;
 
   console.log("numberr" , mapNumber);
@@ -79,7 +85,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation}) => {
             <Pressable onPress={() => navigation.navigate('Profile')}>
               <Image
                 resizeMode="cover"
-                source={{uri:'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}
+                source={{uri: imageUri ? imageUri : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}
                 style={styles.profileImage}
               />
             </Pressable>

@@ -163,7 +163,8 @@ const style = StyleSheet.create({
       textAlign:'center',
       color:'black',
       backgroundColor:'#F3FAFF',
-      borderColor:'white' 
+      borderColor:'white',
+      elevation:3, 
   },
   otpFilledStyle: {
       backgroundColor: '#F3FAFF',
@@ -199,7 +200,8 @@ const style = StyleSheet.create({
   verifyBtnCode:{
       backgroundColor:'#3ebb6e',
       padding:13,
-      borderRadius:10
+      borderRadius:10,
+      elevation:3,
   },
   btnView:{
       alignItems:'center',

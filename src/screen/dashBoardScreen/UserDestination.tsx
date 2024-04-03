@@ -5,18 +5,25 @@ import CustomHeader from '../../component/CustomHeader';
 import {Searchbar} from 'react-native-paper';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {retroMap, nightMap, standardMap} from '../../utils/mapstyle/map';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+
+interface Place {
+  name: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}
 
 interface UserDestinationProps {
    navigation:any;
 }
 
 
-
-
 const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [desiredLocation , setDesiredLocation] = React.useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [desiredLocation , setDesiredLocation] = useState<Place[]>([]);
   const places = [
     {
       name: 'surat',

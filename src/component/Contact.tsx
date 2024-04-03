@@ -2,8 +2,15 @@ import React, { useEffect, useState } from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Pressable} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+interface ContactRoot {
+  recordID: string;
+  givenName: string;
+  phoneNumbers: { number: string }[];
+}
+
+
 interface ContactProps{
-     contact:object;
+     contact:ContactRoot;
      isSelected:boolean;
      handleSelected:Function;
 }

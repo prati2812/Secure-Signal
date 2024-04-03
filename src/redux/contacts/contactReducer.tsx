@@ -1,4 +1,4 @@
-import { ADD_CONTACTS} from "./action";
+import { ADD_CONTACTS} from "../action";
 
 const initialState = {
     contacts: [],

@@ -14,7 +14,7 @@ const HelpConfirmationScreen: React.FC<HelpConfirmationScreenProps> = ({navigati
     <SafeAreaView style={styles.main}>
      
         <View style={styles.helpIconView}>
-          <HelpIcon version={'1.1'} />
+          <HelpIcon/>
           <Text style={styles.helpIconText}> Help is on the way</Text>
         </View>
     

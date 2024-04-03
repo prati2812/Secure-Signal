@@ -1,16 +1,22 @@
 import React,{useEffect} from 'react';
-import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated } from 'react-native';
+import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { CameraOptions, ImageLibraryOptions, MediaType, launchCamera , launchImageLibrary } from 'react-native-image-picker';
+import { useDispatch } from 'react-redux';
+import { addImageUri } from '../redux/action';
 
 interface ImagePickerSheetProps {
-    setBottomSheetVisible:any;
+  setImageSelectionSheetVisible:any;
+ 
 }
 
-const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setBottomSheetVisible}) => {
+const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionSheetVisible}) => {
+    const [imageUri , setImageUri] = React.useState('');
     const slide = React.useRef(new Animated.Value(300)).current;
+    const dispatch = useDispatch();
 
 
-    const slideUp = () => {
+      const slideUp = () => {
         Animated.timing(slide, {
           toValue: 0,
           duration: 800,
@@ -30,16 +36,78 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setBottomSheetVisible
       useEffect(() => {
         slideUp()
       })
-  
+
+      useEffect(() => {
+          requestCameraPermission();
+          requestGalleryPermission();
+      },[]);
+
       const closeModal = () => {
          slideDown();
          setTimeout(() => {
-          setBottomSheetVisible(false);
+          setImageSelectionSheetVisible(false);
          },800);
       }  
+
+      const requestCameraPermission = async() => {
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.CAMERA
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                 
+          } else {
+                 requestCameraPermission();      
+          }
+        }
+      }
+
+      const requestGalleryPermission = async() => {
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+               
+          } else {
+                 requestGalleryPermission();      
+          }
+        }
+      }
+
+      const handleCamera = async() => {
+       
+          const options:CameraOptions = {
+            mediaType: 'photo' as MediaType,
+            quality: 1,
+          };
+          const res = await launchCamera(options);
+          if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
+            setImageUri(res.assets[0].uri);
+            dispatch(addImageUri(res.assets[0].uri));
+          }
+          closeModal();
+        
+      }
+
+      const handleImageGallery = async() => {
+       
+          const options:ImageLibraryOptions = {
+            mediaType: 'photo' as MediaType,
+            quality: 1,
+          };
+          const res = await launchImageLibrary(options);
+          if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
+            setImageUri(res.assets[0].uri);
+            dispatch(addImageUri(res.assets[0].uri));
+          }
+          closeModal();
+        
+      }
+
   return (
        <Pressable style={styles.container} onPress={closeModal}>
-           <Pressable style={{ width: '100%', height: '20%', }}>
+           <Pressable style={{ width: '100%', height: '23%', }}>
                  <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
                       <View style={styles.imageSelectionTitleView}>
                               <Text style={styles.titleText}>Select Action</Text>
@@ -47,18 +115,17 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setBottomSheetVisible
 
                       <View style={styles.selectionOptionView}>
  
-                               <TouchableOpacity style={styles.selection}>
+                               <TouchableOpacity style={styles.selection} onPress={() => handleCamera()}>
                                       <Icon name="photo-camera" size={40} color={'black'} />
                                       <Text style={styles.txt}>Camera</Text>
                                </TouchableOpacity>
 
                                <TouchableOpacity style={styles.selection}>
-                                      <Icon name="photo-library" size={40} color={'black'} />
+                                      <Icon name="photo-library" size={40} color={'black'} onPress={() => handleImageGallery()}/>
                                       <Text style={styles.txt}>Gallery</Text>
                                </TouchableOpacity>
 
-                            
-                               
+                                            
                       </View>
 
 
@@ -67,8 +134,6 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setBottomSheetVisible
        </Pressable>
   );
 };
-
-export default ImagePickerSheet;
 
 const styles = StyleSheet.create({
   container: {
@@ -122,3 +187,10 @@ const styles = StyleSheet.create({
   }
 
 });
+
+
+
+
+
+export default ImagePickerSheet;
+
