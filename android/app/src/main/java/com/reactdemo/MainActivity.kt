@@ -1,14 +1,13 @@
 package com.reactdemo
 
 import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.widget.Toast
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
-import com.facebook.react.ReactInstanceManager
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -22,12 +21,20 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    // Start the service
-    startService(Intent(this, KeyEventListenerService::class.java))
+
+//    if (!foregroundServiceRunning()) {
+//      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//        val i: Intent = Intent(this, KeyEventDetectService::class.java)
+//        startForegroundService(i)
+//      }
+//    }
+    
   }
+
   override fun getMainComponentName(): String = "ReactDemo"
 
 
@@ -51,17 +58,31 @@ class MainActivity : ReactActivity() {
 //        KeyMessage = "Volume Up Key";
 //
 //      }
-//      KeyEvent.KEYCODE_BACK -> {
-//        Toast.makeText(applicationContext, "Back Key Pressed", Toast.LENGTH_SHORT).show()
-//        KeyMessage = "Back Key";
 //
-//      }
 //    }
-//    sendEventToReactNative(KeyMessage);
+//    KeyMessage?.let { sendEventToReactNative(it) }
+//
 //    return true;
 //  }
 //
-//  private fun sendEventToReactNative(keyMessage: String) {
+//  private fun handleKeyEvent(keyCode: Int) {
+//    when (keyCode) {
+//      KeyEvent.KEYCODE_VOLUME_DOWN -> {
+//        // Handle volume down key
+//        sendEventToReactNative("Volume Down Key")
+//      }
+//      KeyEvent.KEYCODE_VOLUME_UP -> {
+//        // Handle volume up key
+//        sendEventToReactNative("Volume Up Key")
+//      }
+//      KeyEvent.KEYCODE_BACK -> {
+//        // Handle back key
+//        sendEventToReactNative("Back Key")
+//      }
+//    }
+//  }
+//
+//   private fun sendEventToReactNative(keyMessage: String) {
 //    val reactContext: ReactContext? = reactInstanceManager?.currentReactContext
 //    reactContext?.let {
 //      val params = Arguments.createMap().apply {
@@ -72,8 +93,19 @@ class MainActivity : ReactActivity() {
 //              .emit("onKeyMessage", params)
 //    }
 //  }
+//
+//
+//  fun foregroundServiceRunning(): Boolean {
+//    val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+//    for (services in activityManager.getRunningServices(Int.MAX_VALUE)) {
+//      if (KeyEventDetectService::class.java.getName() == services.service.className) {
+//        return true
+//      }
+//    }
+//    return false
+//  }
+//
 
- 
 
 
 
