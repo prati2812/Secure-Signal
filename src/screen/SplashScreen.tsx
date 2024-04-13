@@ -1,15 +1,19 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Image, StatusBar, Text, View , StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useSelector } from 'react-redux';
 
 interface SplashScreenProps {
   navigation:any
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
-  const [verified , setVerified] = useState(true);
+ 
+  const token = useSelector((state:any) => state.userProfile.token);
+ 
   useEffect(() => {
-    if(verified){
+    if(token){
       setTimeout(() => {
         navigation.replace('TabNavigator');
       }, 4000);

@@ -1,24 +1,47 @@
-import React, {useState, useRef, useMemo} from 'react';
-import {View, Text, TextInput, TouchableOpacity , StyleSheet} from 'react-native';
+import React, {useState, useRef, useMemo, useEffect} from 'react';
+import {View, Text, TextInput, TouchableOpacity , StyleSheet , ActivityIndicator} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from '../../hook/useError';
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
+import auth from '@react-native-firebase/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { addUserId } from '../../redux/userprofile/action';
+import { requestUserPermission } from '../../utils/NotificationService';
+
+
+
+
 
 interface OtpNumberScreenProps {
   navigation: any; 
 }  
 
 const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
+  const regex = /[.,+\-]/;
   const [otp, setOtp] = useState('');
   const [isError, setIsError] = useState(false);
   const inputRef = useRef<TextInput>(null);
+  const [isIndicatorVisible, setIndicatorVisible] = useState(false);
+  const dispatch = useDispatch();
+
+  const verificationId = useSelector((state : any) => state.verification.verificationId);
 
   const onPress = () => inputRef.current?.focus();
 
+  useEffect(() => {
+    requestUserPermission();
+  },[]);
 
+
+  useEffect(() => {
+     setIsError(false);
+  },[otp]);
+
+
+  // Otp Number Verification
   const handleOtpNumber = async() => {
-  
+    
     try
     {
 
@@ -26,17 +49,22 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
         setIsError(true);
         return false;
       } 
-      else if (otp.length > 1 && otp.length < 6) {
+      else if ((otp.length > 1 && otp.length < 6)) {
+        setIsError(true);
+        return false;
+      }
+      else if(regex.test(otp)){
         setIsError(true);
         return false;
       } 
-      else 
-      {
-        setIsError(false);
-      } 
+      setIsError(false);
+      setIndicatorVisible(true);
+      const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+      const response = await auth().signInWithCredential(credential);
+      dispatch(addUserId(response));
       
+      setIndicatorVisible(false);
       navigation.navigate('EditProfile');
-
     }
     catch(error)
     {
@@ -86,7 +114,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
         />
         {otpContent}
       </View>
-      {isError && otp.length > 1 && otp.length < 6 ? (
+      {isError && (otp.length > 1 && otp.length < 6 || regex.test(otp)) ? (
         <View style={{marginTop: 23, marginLeft: -2}}>
           <HandleError title="please enter the valid code" />
         </View>
@@ -108,7 +136,9 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
           style={style.verifyBtnCode}
           onPress={() => handleOtpNumber()}>
           <View style={style.btnView}>
-            <Text style={style.verifyCode}>Next</Text>
+              {  isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>  
+                 : <Text style={style.verifyCode}>Next</Text>
+              }   
           </View>
         </TouchableOpacity>
       </View>

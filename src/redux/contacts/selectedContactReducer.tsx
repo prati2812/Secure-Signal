@@ -1,5 +1,5 @@
 // selectedContactsReducer.js
-import { ADD_SELECTED_CONTACTS, REMOVE_SELECTED_CONTACTS } from '../action';
+import { ADD_SELECTED_CONTACTS, REMOVE_SELECTED_CONTACTS } from './action';
 
 const initialState: never[] = [];
 

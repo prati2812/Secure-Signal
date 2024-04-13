@@ -1,45 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter, DeviceEventEmitter, ToastAndroid} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { connect, useSelector } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
-
-
-
-
-
-
+import { VolumeManager } from 'react-native-volume-manager';
+import { firebase } from '@react-native-firebase/auth';
+import { addImageUri, addToken, addUserPhoneNumber, changeUserName } from '../../redux/userprofile/action';
+import RNFetchBlob from 'rn-fetch-blob';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addSelectedContact } from '../../redux/contacts/action';
+import axios from 'axios';
+import { requestUserPermission } from '../../utils/NotificationService';
 
 
 const sleep = (time: number | undefined) => new Promise<void>((resolve) => setTimeout(() => resolve(), time));
+const width =  Dimensions.get('window').width;
+
+
 
 
 const veryIntensiveTask = async (taskDataArguments: { delay: any; }) => {
   const { delay } = taskDataArguments;
   await new Promise( async (resolve) => {
       for (let i = 0; BackgroundService.isRunning(); i++) {
-          console.log(i);
-          const eventEmitter = new NativeEventEmitter(NativeModules.MainActivity);
+      
     
-    const subscription = eventEmitter.addListener('onKeyMessage', event => {
-      const keyMessage = event.keyMessage;
-      console.log(keyMessage);
-    });
-    return () => subscription.remove();
+        VolumeManager.showNativeVolumeUI({ enabled: true });    
+        const { volume } = await VolumeManager.getVolume();
+        //console.log("Current", volume);
+        // tempValue = volume;
+        // flag = true;
+       
+      
+        
+        // Listen to volume changes
+        // const volumeListener = VolumeManager.addVolumeListener((result) => {
+        //   console.log("change volume" , result.volume);
+        // });
+        
+        
         
           await sleep(delay);
       }
   });
 };
 
+const volumeLevel = async() => {
+  VolumeManager.showNativeVolumeUI({ enabled: true });
 
+  await VolumeManager.setVolume(0.5);
+  
+  const { volume } = await VolumeManager.getVolume();
+
+ 
+  const volumeListener = VolumeManager.addVolumeListener((result) => {
+    console.log("change volume" , result.volume);
+  });
+
+  console.log("volume Listener" , volumeListener);
+  
+  
+}
+
+
+// Create Notification
 const options = {
   taskName: 'Location',
   taskTitle: 'Location Sharing',
-  taskDesc: 'ExampleTask description',
+  taskDesc: 'Location Share',
   taskIcon: {
       name: 'ic_launcher',
       type: 'mipmap',
@@ -50,8 +81,6 @@ const options = {
   },
 };
 
-
-const width =  Dimensions.get('window').width;
 
 
 interface Contact {
@@ -67,7 +96,6 @@ interface RootState {
   selectedContacts: Contact[]; 
 }
 
-
 interface HomeScreenProps {
   navigation: any; 
 }
@@ -76,26 +104,160 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : RootState) => state.selectedContacts);
+  const imageResponse = useSelector((state) => state.userProfile.imageResponse);
+  const [appState,setAppState] = useState(AppState.currentState);
+  const userId = firebase.auth().currentUser?.uid; 
+  const dispatch = useDispatch();
+  const [volume , setVolume] = useState(-1);  
+  const [token , setToken] = useState(null);
+  
+  const getToken = async() => {
+    const value = await AsyncStorage.getItem('token');
+    setToken(value);
+    dispatch(addToken(value));
+  }
+  
+
+  // Fetch Selected Contact From Database
+  const fetchContacts  = async() => {
+      
+      const response = await axios.post('http://10.0.2.2:3000/fetchContacts', {
+        userId,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+       if(response.status === 200){
+
+        const responseData = await response.data;
+        const {contacts} = responseData;
+        
+        for(let i=0; i < contacts[0].length; i++){
+             dispatch(addSelectedContact(contacts[0][i]));
+        }
+
+       }
+       else{
+          console.log("something occured");
+           
+       }
+      
+       
+
+  }
+
+  // Fetch User Details From Database
+  const fetchUserDetails = async() =>{
+      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
+      userId,},{
+        headers:{
+          'Content-Type':'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+
+      if(response.status === 200){
+        const responseData = await response.data;
+        const{phoneNumber , userName} = responseData;
+        dispatch(changeUserName(userName));
+        dispatch(addUserPhoneNumber(phoneNumber));
+      }
+      else{
+        console.log("Something occured");
+        
+      }
+      
+      
+
+      
+      
+  }
+
+  // Fetch User Image From Database
+  const fetchUserProfile = async() => {
+    const response = await RNFetchBlob.fetch(
+                'POST' , 
+                'http://10.0.2.2:3000/fetchUserProfile',
+                {
+                  'Content-Type' : 'application/json' , 
+                  'Authorization': `Bearer ${token}`,
+                },
+                JSON.stringify({userId})
+              );
+
+    
+    if(response.data){
+      const imageData = response.data;
+      const image = `data:image/jpeg;base64,${imageData.toString('base64')}`;
+      dispatch(addImageUri(image));  
+      
+    }
+    else{
+      console.log("Something occured");
+      
+    }
+
+  }
+
+ 
+
+  useEffect(() => {
+
+    getToken();
+    fetchContacts();  
+    fetchUserDetails();
+    fetchUserProfile();
+  
+  },[token]);
+  
+  useEffect(() => {
+    volumeLevel();     
+  },[volume]);
+
 
   useEffect(() =>{
      requestLocationPermission(); 
      requestSMSPermission();
-     backgroundService();
+     //backgroundService();  
   },[]);
 
 
+  const volumeLevel = async() => {
+    VolumeManager.showNativeVolumeUI({ enabled: true });
 
+    await VolumeManager.setVolume(0.5);
+    
+    const { volume } = await VolumeManager.getVolume();
+  
+   
+    const volumeListener = VolumeManager.addVolumeListener((result) => {
+      console.log("change volume" , result.volume);
+      setVolume(result.volume);
+
+    });
+  
+       
+  }
+
+
+  // Start Background Service
   const backgroundService = async() => {
     await BackgroundService.start(veryIntensiveTask, options);
     await BackgroundService.updateNotification({taskDesc: 'New ExampleTask description'});
   }
 
+  // Send SMS
   const sendSMS = () => {
     SendDirectSms("+918733049183", `https://www.google.com/maps/search/?api=1&query=${21.1702},${72.8311}`)
     .then((res) => console.log("then", res))
     .catch((err) => console.log("catch", err))
   }
 
+  // Request Location Permission
   const requestLocationPermission = async() => {
     if (Platform.OS === 'android') {
       const granted = await PermissionsAndroid.request(
@@ -108,6 +270,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }
 
+  // Request SMS Permission
   const requestSMSPermission = async() => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -128,23 +291,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }
   
+
+  // Navigation to HelpScreen
   const handleLocationMap = (mapNumber:number) => {
     navigation.navigate('HelpScreen', { mapNumber: mapNumber});
   }
-
   const handleNotification = () =>{
     navigation.navigate('Notification');
   }
-
   const handleContactList = () => {
       navigation.navigate('EmergencyContactList');
   }
 
+
+
  
  
-
-  
-
 
   return (
     <View style={style.homeMain}>
@@ -173,7 +335,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
             {
                selectedContacts.length > 0 &&
-               selectedContacts.map((item) => {
+               selectedContacts.map((item , key) => {
                 return(
                   <TouchableOpacity style={style.contactSelectedView}>
                   <Text style={style.contactText}>{item.givenName[0]}</Text>

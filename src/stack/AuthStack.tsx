@@ -13,6 +13,7 @@ import LocationHistory from "../screen/location/LocationHistory";
 import EmergencyContactListScreen from "../screen/emergencyContactList/EmergencyContactListScreen";
 import SubscriptionScreen from "../screen/subscription/SubscriptionScreen";
 import HelpScreen from "../screen/helpScreen/HelpScreen";
+import NavigationStack from "./NavigationStack";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,15 +25,7 @@ const AuthStack: React.FC = () => {
           <Stack.Screen name="PhoneNumber" component={PhoneNumberScreen} options={{ headerShown: false }} />
           <Stack.Screen name="OtpNumber" component={OtpNumberScreen} options={{ headerShown: false }} />
           <Stack.Screen name="EditProfile" component={EditProfile} options={{headerShown: false}}/>
-          <Stack.Screen name="TabNavigator" component={TabNavigator} options={{headerShown: false}}/>
-          <Stack.Screen name="HelpScreen" component={HelpScreen} options={{headerShown:false}} />
-          <Stack.Screen name="HelpDescription" component={HelpDescriptionScreen} options={{headerShown:false}}/>
-          <Stack.Screen name="HelpConfirmation" component={HelpConfirmationScreen} options={{headerShown:false}}/>
-          <Stack.Screen name="LocationRouting" component={LocationRouteScreen} options={{headerShown:false}} />
-          <Stack.Screen name="Notification" component={NotificationHistory} options={{headerShown:false}} />
-          <Stack.Screen name="Location" component={LocationHistory} options={{headerShown:false}} />
-          <Stack.Screen name="EmergencyContactList" component={EmergencyContactListScreen} options={{headerShown:false}}/>
-          <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{headerShown:false}}/>
+          <Stack.Screen name="Home" component={NavigationStack}  options={{headerShown:false}}/>
         </Stack.Navigator>
     
     );

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Pressable, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Pressable, TouchableOpacity , StatusBar} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HelpIcon from '../../component/HelpIcon';
 
@@ -12,7 +12,7 @@ interface HelpConfirmationScreenProps {
 const HelpConfirmationScreen: React.FC<HelpConfirmationScreenProps> = ({navigation}) => {
   return (
     <SafeAreaView style={styles.main}>
-     
+        <StatusBar backgroundColor={'#3ebb6e'}/>
         <View style={styles.helpIconView}>
           <HelpIcon/>
           <Text style={styles.helpIconText}> Help is on the way</Text>

@@ -1,20 +1,25 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, Button, ScrollView} from 'react-native';
+import {Text, View, StyleSheet, Button, ScrollView, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import CustomHeader from '../../component/CustomHeader';
 import {Searchbar} from 'react-native-paper';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import {retroMap, nightMap, standardMap} from '../../utils/mapstyle/map';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { firebase } from '@react-native-firebase/auth';
+import { useSelector } from 'react-redux';
+
+
+
 
 
 interface Place {
-  name: string;
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
+  place_name : string;
+  place_id : string;
 }
+
 
 interface UserDestinationProps {
    navigation:any;
@@ -24,91 +29,165 @@ interface UserDestinationProps {
 const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [desiredLocation , setDesiredLocation] = useState<Place[]>([]);
-  const places = [
-    {
-      name: 'surat',
-      coordinates: {
-        latitude: 21.1702,
-        longitude: 72.8311,
-      },
-    },
-    {
-      name: 'ahmedabad',
-      coordinates: {
-        latitude: 23.0225,
-        longitude: 72.5714,
-      },
-    },
-    {
-      name: 'mahesana',
-      coordinates: {
-        latitude: 23.588,
-        longitude: 72.3693,
-      },
-    },
-    { 
-      name: 'New York City', 
-      coordinates: 
-      {
-        latitude: 40.7128, 
-        longitude: -74.006
-      }
-    },
-    {
-      name: 'Los Angeles', 
-      coordinates: 
-      {
-        latitude: 34.0522, 
-        longitude: -118.2437
-      }
-    },
-  ];
+  const [suggestion , setSuggestion] = useState([]);
+  const [isVisble , setVisible] = useState(false);
+  const [isSetDestinationLocation , setDestinationLocation] = useState(false);
+  const [destination , setDestination] = useState({ latitude: 0, longitude: 0 });
+  const token = useSelector((state : any) => state.userProfile.token);
+  const userId = firebase.auth().currentUser?.uid;
+
+
+  useEffect(() => {
+    placeAutoComplete();       
+  } , [searchQuery]);
   
 
-  const handleSearch = () => {
-    const filteredData = places.filter(data => 
-         data.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    console.log("Filtered Data:", filteredData); 
-    setDesiredLocation(filteredData);
+  // Place AutoComplete
+  const placeAutoComplete = async() => {
+    setDestinationLocation(false);
+    const options = {
+      method: 'GET',
+      url: 'https://place-autocomplete1.p.rapidapi.com/autocomplete/json',
+      params: {
+        input: searchQuery,
+        radius: '50000'
+      },
+      headers: {
+        'X-RapidAPI-Key': '80d5459a70msh8bd6e06f4f88c16p1ceddbjsn78651e30baf8',
+        'X-RapidAPI-Host': 'place-autocomplete1.p.rapidapi.com'
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      setSuggestion([]);
+      let place = [];
+      for(let i=0; i < response.data.predictions.length; i++){
+         
+         place.push(response.data.predictions[i].description);
+          
+      }
+
+      setSuggestion(place);
+      setVisible(true);
+      
+      
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 
+ 
+
+  // Find Latitude and Longtitude Using Place 
+  const searchLocation = async(place:any) => {
+    setSearchQuery(place);
+    const options = {
+      method: 'GET',
+      url: 'https://map-geocoding.p.rapidapi.com/json',
+      params: {
+        address: place
+      },
+      headers: {
+        'X-RapidAPI-Key': '80d5459a70msh8bd6e06f4f88c16p1ceddbjsn78651e30baf8',
+        'X-RapidAPI-Host': 'map-geocoding.p.rapidapi.com'
+      }
+    };
+    
+    try {
+      const response = await axios.request(options);
+      setDestination({latitude : response.data.results[0].geometry.location.lat , longitude:response.data.results[0].geometry.location.lng});
+      setDestinationLocation(true);
+      setVisible(false);
+     
+    } catch (error) {
+      console.error(error);
+    }
+    
+
+  } 
+
+  
+  // Navigate to Location Screen
   const handleLocation = () =>{
     navigation.navigate('Location');
   }
 
-  useEffect(() => {
-    console.log("Updated desiredLocation:", desiredLocation);
-  }, [desiredLocation]);
+  const handleSetLocation = async() => {
+
+    let travellingLocation = {
+       latitude : destination.latitude,
+       longtitude: destination.longitude
+    }
+    let placeName = searchQuery;
+    const response = await axios.post('http://10.0.2.2:3000/addTravelLocation', {
+      userId, travellingLocation, placeName
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if(response.status === 200){
+      setSearchQuery('');
+      setDestinationLocation(false);
+    }
+    else{
+       console.log("Something occured");
+    }
+  
+
+       
+  }
+
+
 
   return (
     <View style={styles.mainContainer}>
       <CustomHeader name="Add location" icon="map" call={handleLocation} />
+
+    
       <Searchbar
         placeholder="Search"
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
         elevation={1}
-        onSubmitEditing={()=> handleSearch()}
       />
+      {
+        suggestion.length > 0  && isVisble && <View style={styles.autoSuggestion}>
+      {
+         suggestion && isVisble && suggestion.map((item , Key) => (
+             <View>
+                  <TouchableOpacity onPress={() => searchLocation(item)} style={{backgroundColor:'#F5F5F5' , borderRadius:15, padding:10, elevation:3,}}>
+                  <Text style={styles.autoSuggestionText}>{item}</Text>
+                  </TouchableOpacity>
+
+
+             </View>            
+         ))
+      }
+      </View>
+     }
       
 
       <View style={styles.mapContainer}>
         {
-            desiredLocation.length > 0 ?
+            destination.latitude  ?
             <MapView
             style={styles.mapView}
             provider={PROVIDER_GOOGLE}
             customMapStyle={nightMap}
             region={{
-              latitude: desiredLocation[0].coordinates.latitude,
-              longitude: desiredLocation[0].coordinates.longitude,
+              latitude: destination.latitude,
+              longitude: destination.longitude,
               latitudeDelta: 0.015,
               longitudeDelta: 0.0121,
             }}>
            
-                   <Marker coordinate={{latitude: desiredLocation[0].coordinates.latitude, longitude: desiredLocation[0].coordinates.longitude}}>
+                   <Marker coordinate={{latitude: destination.latitude, longitude: destination.longitude}}>
                       
                    </Marker>    
             </MapView>
@@ -133,12 +212,19 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
 
 
 
-        }
-       
-          
-        
-          
+        }  
       </View>
+      {
+         isSetDestinationLocation &&
+          <TouchableOpacity
+          style={styles.setLocationBtnView}  
+          onPress={() => handleSetLocation()}>
+          <View style={styles.setLocationBtn}>
+            <Text style={styles.btnText}> Set Location</Text>
+            <Icon name="add-location-alt" size={28} color={'white'} />
+          </View>
+        </TouchableOpacity>
+      }
       
     </View>
   );
@@ -168,6 +254,39 @@ const styles = StyleSheet.create({
   },
   mapView: {
     flex: 1,
+  },
+  autoSuggestion: {
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 10,
+    gap:5,
+  },
+  autoSuggestionText: {
+    fontSize: 17,
+    color: 'black',
+    fontWeight: '400',
+  },
+  setLocationBtnView: {
+    marginBottom: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  setLocationBtn:{
+    backgroundColor:'#3ebb6e',
+    padding:10,
+    alignItems:'center',
+    justifyContent:'center',
+    borderRadius:25,
+    flexDirection:'row',
+    gap:5,
+  },
+  btnText:{
+    color:'white',
+    fontSize:20,
   },
 });
 

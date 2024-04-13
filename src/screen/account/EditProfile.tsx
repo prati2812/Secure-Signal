@@ -9,18 +9,18 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Pressable,
-  PermissionsAndroid,
+  ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import HandleError from '../../hook/useError';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ImagePickerSheet from '../../component/ImagePickerSheet';
 import { useSelector , useDispatch} from 'react-redux';
-import { changeUserName } from '../../redux/action';
-
-
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { changeUserName } from '../../redux/userprofile/action';
 
 
 interface EditProfileProps {
@@ -33,10 +33,21 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const [userName , setUserName] = useState('');
   const [isError , setIsError] = useState(false);
   const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
+  const [isIndicatorVisible, setIndicatorVisible] = useState(false);
   const dispatch = useDispatch();
 
 
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
+  const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
+  const phoneNumber = useSelector((state: any) => state.userProfile.phoneNumber);
+  const userId = useSelector((state: any) => state.userProfile.userId);
+  const notificationToken = AsyncStorage.getItem('fcm_token');
+
+
+ 
+  useEffect(() => {
+     setIsError(false);   
+  },[userName]);
 
   
 
@@ -45,9 +56,54 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
   }
 
-  const handleSaveProfile = () => {
-      dispatch(changeUserName(userName));
-      navigation.navigate('TabNavigator');  
+  const handleSaveProfile = async() => {
+       
+       if(userName.length === 0 || !userName){
+           setIsError(true);
+           return false;
+       } 
+       setIsError(false);
+    
+       dispatch(changeUserName(userName));
+       
+       
+      
+        const formData = new FormData();
+        formData.append('image', {
+          uri: imageResponse.assets[0].uri,
+          type: imageResponse.assets[0].type,
+          name: imageResponse.assets[0].fileName,
+        });
+
+        formData.append('phoneNumber', phoneNumber); 
+        formData.append('userName', userName);
+        formData.append('userId', userId.user.uid);
+        formData.append("notificationToken" , notificationToken._j);
+        
+      
+        setIndicatorVisible(true); 
+      
+        const response = await axios.post('http://10.0.2.2:3000/uploadImage', formData, {
+          headers: {
+            "Content-Type": 'multipart/form-data',
+          },
+        });
+
+  
+          const responseData = await response.data;
+          const {token , imageUrl} = responseData;
+          AsyncStorage.setItem('token' , token);
+          
+          setIndicatorVisible(false);
+          
+            
+        
+  
+        
+        
+       navigation.navigate('Home');  
+     
+     
   }
 
 
@@ -106,9 +162,13 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
           style={style.SaveProfileBtn}
           onPress={() => handleSaveProfile()}>
           <View style={style.btnView}>
-            <Text style={style.saveProfile}>
-              Save Profile
-            </Text>
+            {
+               isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>  
+               :    <Text style={style.saveProfile}>
+               Save Profile
+             </Text>
+            }
+          
           </View>
         </TouchableOpacity>
       </View>

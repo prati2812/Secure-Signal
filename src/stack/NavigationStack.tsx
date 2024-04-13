@@ -16,7 +16,6 @@ const NavigationStack: React.FC = () => {
     return (
       
         <Stack.Navigator>
-          <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
           <Stack.Screen name="TabNavigator" component={TabNavigator} options={{headerShown: false}}/>
           <Stack.Screen name="HelpScreen" component={HelpScreen} options={{headerShown:false}} />
           <Stack.Screen name="HelpDescription" component={HelpDescriptionScreen} options={{headerShown:false}}/>

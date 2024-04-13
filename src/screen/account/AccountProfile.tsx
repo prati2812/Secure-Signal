@@ -21,6 +21,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const [isDeleteAccountSheetVisible, setDeleteAccountSheetVisible] = useState(false);
 
   const userProfile = useSelector((state: { userProfile: UserProfile }) => state.userProfile);
+  const userPhoneNumber = useSelector((state:any) => state.userProfile.phoneNumber);
 
   const { imageUri, userName } = userProfile;
 
@@ -48,7 +49,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           </View>
 
           <Text style={styles.profileName}>{userName}</Text>
-          <Text style={styles.phoneNumber}>+91123456789</Text>
+          <Text style={styles.phoneNumber}>{userPhoneNumber}</Text>
 
           <TouchableOpacity style={styles.editProfileButton} onPress={openBottomSheet}>
             <View style={styles.editProfileButtonContent}>
@@ -63,7 +64,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           {/* Replace CustomProfileOption with your component */}
           
           <CustomProfileOption optionName='Name' data={userName} icon='person' />
-          <CustomProfileOption optionName='PhoneNumber' data='+911234567890' icon='call' />
+          <CustomProfileOption optionName='PhoneNumber' data={userPhoneNumber} icon='call' />
 
           <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Subscription')}>
             <CustomProfileOption optionName='subscription' icon='bolt' />

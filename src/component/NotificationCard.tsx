@@ -51,6 +51,8 @@ const styles = StyleSheet.create({
   },
   notificationData: {
     padding: 5,
+    flexShrink:1,
+    gap:5,
   },
   notificationMessage: {
     fontSize: 20,

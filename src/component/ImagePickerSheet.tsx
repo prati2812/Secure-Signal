@@ -3,7 +3,9 @@ import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform,
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CameraOptions, ImageLibraryOptions, MediaType, launchCamera , launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch } from 'react-redux';
-import { addImageUri } from '../redux/action';
+import { addImageResponse, addImageUri } from '../redux/userprofile/action';
+
+
 
 interface ImagePickerSheetProps {
   setImageSelectionSheetVisible:any;
@@ -82,9 +84,11 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
             quality: 1,
           };
           const res = await launchCamera(options);
+          
           if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
             setImageUri(res.assets[0].uri);
             dispatch(addImageUri(res.assets[0].uri));
+            dispatch(addImageResponse(res));
           }
           closeModal();
         
@@ -100,6 +104,7 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
           if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
             setImageUri(res.assets[0].uri);
             dispatch(addImageUri(res.assets[0].uri));
+            dispatch(addImageResponse(res));
           }
           closeModal();
         

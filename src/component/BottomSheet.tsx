@@ -1,9 +1,13 @@
 import React, {useEffect, useRef , useState} from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable } from 'react-native';
+import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePickerSheet from './ImagePickerSheet';
 import { useSelector , useDispatch } from 'react-redux';
-import { changeUserName } from '../redux/action';
+import { firebase } from '@react-native-firebase/auth';
+import { changeUserName } from '../redux/userprofile/action';
+import axios from 'axios';
+
+
 
 
 interface BottomSheetProps {
@@ -14,14 +18,20 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
 
   const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
   const [edittedUsername , setedittedUserName] = useState('');
+  const [isIndicatorVisible, setIndicatorVisible] = useState(false);
+
   const slide = React.useRef(new Animated.Value(300)).current;
   const dispatch = useDispatch();
 
 
   const imageUri = useSelector((state : any) => state.userProfile.imageUri);
   const userName = useSelector((state : any) => state.userProfile.userName);
+  const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
+  const token = useSelector((state : any) => state.userProfile.token);
+  const userId = firebase.auth().currentUser?.uid;
 
 
+  // BottomSheet Slide Up Animatiom
   const slideUp = () => {
       Animated.timing(slide, {
         toValue: 0,
@@ -30,6 +40,8 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
       }).start();
     };
   
+
+    // BottomSheet Slide Down Animation
     const slideDown = () => {
      
       Animated.timing(slide, {
@@ -43,9 +55,16 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
       if(userName){
         setedittedUserName(userName);
       }  
+      
+      
+      
       slideUp()
     },[])
 
+
+
+
+   // Close BottomSheet
     const closeModal = () => {
       
        slideDown();
@@ -54,9 +73,57 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
        },800);
     }
 
-    const handleUpdateData = () => {
-       dispatch(changeUserName(edittedUsername)); 
-       closeModal();
+
+
+    // Update the data
+    const handleUpdateData = async() => {
+      console.log(imageResponse);
+      
+      const formData = new FormData();
+      if (imageResponse && imageResponse.assets && imageResponse.assets.length > 0) {
+        // Append image data
+        formData.append('image', {
+          uri: imageResponse.assets[0].uri,
+          type: imageResponse.assets[0].type,
+          name: imageResponse.assets[0].fileName,
+        });
+      }
+      
+      // Append edittedUsername and userId in both cases
+      formData.append('edittedUsername', edittedUsername);
+      formData.append('userId', userId);
+      setIndicatorVisible(true); 
+      
+      
+      try{
+   
+     
+         const response = await axios.post('http://10.0.2.2:3000/updateUserProfile', formData, {
+           headers: {
+             'Content-Type': 'multipart/form-data',
+             Authorization: `Bearer ${token}`,
+           },
+         });
+  
+         if (response.data) {
+          setIndicatorVisible(false);
+          dispatch(changeUserName(edittedUsername)); 
+          closeModal();
+         } else {
+          setIndicatorVisible(false);
+          console.log("Some Problem Occurred");
+         }
+      }
+      catch(err){
+        console.log(err);
+        
+      }   
+     
+  
+ 
+     
+
+       
     }
 
   return (
@@ -108,7 +175,10 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.updateButton} onPress={() => handleUpdateData()}>
-                <Text style={styles.btnText}>Update</Text>
+                {
+                   isIndicatorVisible ? <ActivityIndicator size={25} color={'green'}/>  
+                      : <Text style={styles.btnText}>Update</Text>
+                }                                                          
               </TouchableOpacity>
             </View>
           </Animated.View>

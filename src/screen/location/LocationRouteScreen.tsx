@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Text, View, StyleSheet ,StatusBar} from 'react-native';
+import { Text, View, StyleSheet ,StatusBar , ActivityIndicator} from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import  poyline from 'google-polyline';
 import { useRoute } from '@react-navigation/native';
@@ -14,13 +14,14 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
   const [destination, setDestination] = useState({ latitude: 22.3072, longitude: 73.1812 });
   const [routeData, setRouteData] = useState<{ routes: any[] } | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number][]>([]);
-
+  const [isVisible, setVisible] = useState(false);
   
 
   const route  = useRoute();
   const mapNumber = (route.params as { mapNumber?: number })?.mapNumber;
 
   useEffect(() => {
+    setVisible(true);
     const currentLocation = () => {
       Geolocation.getCurrentPosition(
         position => {
@@ -75,6 +76,7 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
       
       const data = poyline.decode(routeGeometry);
       setCoordinates(data);
+      setVisible(false);
     }
   }, [routeData]);
 
@@ -142,7 +144,10 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
         
         </MapView>
       ) : (
-        <Text>Loading...</Text>
+             <View style={{flex:1, alignItems:'center' , justifyContent:'center'}}>
+               <ActivityIndicator size={45} color={'green'} />
+             </View>  
+        
       )}
     </View>
   );

@@ -1,11 +1,16 @@
+import { firebase } from '@react-native-firebase/auth';
 import { useRoute } from '@react-navigation/native';
+import axios from 'axios';
 import * as React from 'react';
-import { useState } from 'react';
-import { Text, View, StyleSheet , Pressable , Image, ScrollView, TouchableOpacity, ImageBackground} from 'react-native';
+import { useEffect, useState } from 'react';
+import { Text, View, StyleSheet , Pressable , Image, ScrollView, TouchableOpacity, ActivityIndicator} from 'react-native';
 import ImagePicker, { openPicker } from 'react-native-image-crop-picker';
 import { TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSelector } from 'react-redux';
+import Geolocation from 'react-native-geolocation-service';
+
 
 
 interface ImageInfo {
@@ -29,16 +34,46 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
     const [isYes , setYesButton] = useState(false);
     const [isNo , setNoButton] = useState(true);
+    const [isInjured , setInjured] = useState('No');
+    const [complaint, setComplaint] = useState('');
     const [uri , setUri] = useState<ImageInfo[]>([]);
+    const [complaint_location, setComplaintLocation] = useState({ latitude: 0, longitude: 0 });
+    const [isIndicatorVisible, setIndicatorVisible] = useState(false);
+
+
+    const token = useSelector((state : any) => state.userProfile.token);
+    const complaintBy = route.params?.query;
+    const userId = firebase.auth().currentUser?.uid;
+
+
+    useEffect(() => {
+      currentLocation();  
+    },[complaint_location]);
+
+
+    const currentLocation = () => {
+      Geolocation.getCurrentPosition(
+        position => {
+          setComplaintLocation({latitude:position.coords.latitude , longitude:position.coords.longitude});
+        },
+        error => {
+          console.log(error.code, error.message);
+        },
+        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      );
+    };  
+
 
     const handleYes = () => {
         setYesButton(true);
         setNoButton(false);
+        setInjured('Yes');
     }
 
     const handleNo = () => {
         setYesButton(false);
         setNoButton(true);
+        setInjured('No');
     }
 
     const handleUploadPhotos = () => {
@@ -55,7 +90,68 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
          setUri(newDataList);      
     }
 
-    const data = route.params?.query;
+    const handleHelpConfirmation = async() => {
+   
+        setIndicatorVisible(true);
+        
+        const complaintData = new FormData();
+        if(uri){
+          for(const image of uri){
+            const fileName = image.path.replace('file:///data/user/0/com.reactdemo/cache/react-native-image-crop-picker/' , '');
+            complaintData.append('image' , {
+              uri: image.path,
+              type: image.mime,
+              name: fileName,
+            });
+              
+          }      
+        } 
+
+        complaintData.append('userId', userId);
+        complaintData.append('complaintBy', complaintBy);
+        complaintData.append('complaint', complaint);
+        complaintData.append('isInjured', isInjured);
+        complaintData.append(
+          'complaint_location',
+          JSON.stringify({"latitude": complaint_location.latitude , "longtitude": complaint_location.longitude}),
+        );
+        
+
+      try{
+
+        const response = await axios.post('http://10.0.2.2:3000/uploadComplaints', complaintData, {
+          headers: {
+            "Content-Type": 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if(response.status === 200){
+           setIndicatorVisible(false);
+           navigation.navigate('HelpConfirmation');
+        }
+        else{
+            setIndicatorVisible(false);
+            console.log("Some problem occured");
+            
+        }
+
+      }
+      catch(err){
+        setIndicatorVisible(false);
+        console.log(err);
+        
+      }
+
+        
+        
+
+        
+    }
+
+  
+
+
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>
 
@@ -68,7 +164,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
             </Text>
         </View>
       </Pressable>  
-        <Text style={styles.queryText}>{data}</Text>
+        <Text style={styles.queryText}>{complaintBy}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -87,6 +183,8 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
                 activeUnderlineColor='transparent'
                 underlineColor='transparent'
                 style={styles.multiLineTextInput}
+                onChangeText={(text) => setComplaint(text)}
+                value={complaint}
               />
         </View>
 
@@ -125,22 +223,17 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
           </>
         </ScrollView> 
 
-         {/* Upload a photo or recording */}
-        <View style={styles.uploadDataView}>
-             <TouchableOpacity 
+         {/* Upload a photos */}
+        <TouchableOpacity style={styles.uploadDataView}
+            onPress={()=> handleUploadPhotos()}>
+             <TouchableOpacity
                 style={styles.uploadPhotoView} 
-                onPress={()=> handleUploadPhotos()}>
+                onPress={() => handleUploadPhotos()}>
                   <Text style={styles.uploadPhotoText}>
                        Upload a photo
                   </Text>
              </TouchableOpacity>
-
-             <View style={styles.uploadRecordingView}>
-                   <Text>
-                        <Icon name='mic' size={50} color={'white'}/>
-                   </Text>
-             </View>
-        </View>
+        </TouchableOpacity>
 
          {/* Divider  */}
         <View style={styles.divder}></View>
@@ -172,11 +265,15 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         </View>
 
         <View style={styles.helpSubmitBtnView}>
-              <Pressable onPress={()=> navigation.navigate('HelpConfirmation')}>
+              <Pressable onPress={()=> handleHelpConfirmation()}>
               <View style={styles.helpSubmitBtn}>
-                     <Text style={styles.helpSubmitText}>
-                            I need help
-                     </Text>
+                 {
+                    isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>
+                    :   <Text style={styles.helpSubmitText}>
+                           I need help
+                        </Text>                  
+                 }  
+                     
               </View>
               </Pressable>    
         </View>
@@ -282,15 +379,6 @@ const styles = StyleSheet.create({
          fontSize:20,
          color:'black',
          fontWeight:'500',
-      },
-      uploadRecordingView:{
-         flex:1,
-         height:70,
-         backgroundColor:'#3ebb6e',
-         borderRadius:20,
-         elevation:5,
-         alignItems:'center',
-         justifyContent:'center',
       },
       dataScrollView:{
         marginTop:20, 

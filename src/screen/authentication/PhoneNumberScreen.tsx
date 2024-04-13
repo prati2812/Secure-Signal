@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Text, TextInput, View, TouchableOpacity, StyleSheet} from "react-native";
+import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator} from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from "../../hook/useError";
+import auth from '@react-native-firebase/auth';
+import { useDispatch } from "react-redux";
+import { addVerificationId } from "../../redux/credential/action";
+import { addUserPhoneNumber } from "../../redux/userprofile/action";
+
+
+
 
 
 
@@ -13,33 +20,55 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [isError, setIsError] = useState(false);
+  const [isIndicatorVisible, setIndicatorVisible] = useState(false);
+  const dispatch = useDispatch();
 
+
+  useEffect(() =>{
+     setIsError(false);
+  },[phoneNumber]);
  
 
+  // Phone Number Verification
   const handlePhoneNumber = async() => {
     try {
-      if (!phoneNumber) {
-        return setIsError(true);
-      } else {
-        setIsError(false);
-      }
+        if (!phoneNumber) {
+          return setIsError(true);
+        } else {
+          setIsError(false);
+        }
 
-      if (phoneNumber.length < 10) {
-        return setIsError(true);
-      } else {
-        setIsError(false);
-      }
+        if (phoneNumber.length < 10) {
+          return setIsError(true);
+        } else {
+          setIsError(false);
+        }
+     
+        let phoneNo = '+91'+phoneNumber;
+        dispatch(addUserPhoneNumber(phoneNo));
 
-      navigation.navigate('OtpNumber');
-    } catch (error) 
-    {
-      
+        setIndicatorVisible(true);
+        const confirmation = await auth().signInWithPhoneNumber(phoneNo);
+        console.log(confirmation.verificationId);
+
+        dispatch(addVerificationId(confirmation.verificationId));
+        
+        setIndicatorVisible(false);
+        navigation.navigate('OtpNumber');
+
+    } catch (error) {
+      console.log(error);
+       
     }
   
   }
 
+
+
+
   return (
     <View style={style.phoneNumberMain}>
+      <StatusBar backgroundColor={'white'}/>
       <View style={style.iconArrowBackView}>
         <Text style={style.iconArrowBack}>
           <Icon name="keyboard-backspace" size={40} />
@@ -75,11 +104,15 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
       <View style={style.sendCodeBtnView}>
         <TouchableOpacity
           style={style.sendBtnCode}
-          onPress={() => handlePhoneNumber()}>
+          onPress={async() => await handlePhoneNumber()}>
           <View style={style.btnView}>
-            <Text style={style.sendCode}>
-              Send Code
-            </Text>
+            {
+               isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/> 
+               :   <Text style={style.sendCode}>
+                      Send Code
+                  </Text>
+            }
+           
           </View>
         </TouchableOpacity>
       </View>

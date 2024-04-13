@@ -3,7 +3,7 @@ import { Text, View, StyleSheet , StatusBar, Pressable, ScrollView } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../../component/CustomHeader';
-import NotificationCard from '../../component/HistoryCard';
+import NotificationCard from '../../component/NotificationCard';
 import NotificationBottomSheet from '../../component/NotificationBottomSheet';
 
 interface NotificationHistoryProps {}
