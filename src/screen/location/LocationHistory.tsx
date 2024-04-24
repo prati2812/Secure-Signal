@@ -7,7 +7,8 @@ import NotificationBottomSheet from '../../component/NotificationBottomSheet';
 import LocationBottomSheet from '../../component/LocationBottomSheet';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchLocation } from '../../redux/location/action';
 
 
 interface LocationHistoryProps {}
@@ -15,9 +16,18 @@ interface LocationHistoryProps {}
 const LocationHistory = (props: LocationHistoryProps) => {
     const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
     const [isVisble , setVisible] = useState(false);
-    const [locationData , setLocationData] = useState([]);
     const userId = firebase.auth().currentUser?.uid;
     const token = useSelector((state : any) => state.userProfile.token);
+    const locationData = useSelector((state: any) => state.location.locations);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      // fetchTravellingLocation();
+      dispatch(fetchLocation(userId,token));
+    },[]); 
+
+
+
 
     const dateConvert = (timeStamp : string) => {
       const date = new Date(timeStamp);
@@ -32,33 +42,13 @@ const LocationHistory = (props: LocationHistoryProps) => {
       return formattedDate;
     }
 
-    const fetchTravellingLocation = async() => {
-      const response = await axios.post('http://10.0.2.2:3000/fetchTravellingLocations', {
-        userId,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, 
-        },
-      });
-
-      if(response.status === 200){
-         setLocationData(response.data);
-      }
-      else{
-        console.log("something occured");
-         
-      }
-    }
-
-    useEffect(() => {
-       fetchTravellingLocation();
-    },[]);
 
 
     const handleSetting = () => {
         setBottomSheetVisible(true);
     }  
+
+
   return (
     <>
     <View style={styles.container}>
@@ -71,14 +61,17 @@ const LocationHistory = (props: LocationHistoryProps) => {
              showsVerticalScrollIndicator={false}>
 
          {
-             locationData.length > 0 &&   locationData.map((item , key) => {
+             locationData.length > 0 &&   locationData.map((item: { createdAt: string; placeName: string; } , key: React.Key | null | undefined) => {
                 let date = dateConvert(item.createdAt);
                 return (
                   <NotificationCard 
-                  icon={'pin-drop'} 
-                  message={item.placeName} 
-                  time={date} 
-                  color={'green'}/>     
+                    key={key}
+                    icon={'pin-drop'}
+                    message={item.placeName}
+                    time={date}
+                    color={'green'} 
+                    isRead={true} 
+                    handleIsRead={() => {}}/>     
                 )
              })
            

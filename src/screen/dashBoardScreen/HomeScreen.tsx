@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState} from 'react-native';
-import CustomHeader from '../../component/CustomHeader';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch, useSelector } from 'react-redux';
@@ -11,75 +10,18 @@ import { firebase } from '@react-native-firebase/auth';
 import { addImageUri, addToken, addUserPhoneNumber, changeUserName } from '../../redux/userprofile/action';
 import RNFetchBlob from 'rn-fetch-blob';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addSelectedContact } from '../../redux/contacts/action';
+import { addMatchingContacts, addSelectedContact, updateContactList} from '../../redux/contacts/action';
 import axios from 'axios';
-import { requestUserPermission } from '../../utils/NotificationService';
+import Contact from '../../component/Contact';
+import HomeCustomHeader from '../../component/HomeCustomHeader';
+import { allNotificationReadOrNot, deleteAllNotificationOrNot } from '../../redux/notifications/action';
+import Geolocation from 'react-native-geolocation-service';
+
 
 
 const sleep = (time: number | undefined) => new Promise<void>((resolve) => setTimeout(() => resolve(), time));
 const width =  Dimensions.get('window').width;
 
-
-
-
-const veryIntensiveTask = async (taskDataArguments: { delay: any; }) => {
-  const { delay } = taskDataArguments;
-  await new Promise( async (resolve) => {
-      for (let i = 0; BackgroundService.isRunning(); i++) {
-      
-    
-        VolumeManager.showNativeVolumeUI({ enabled: true });    
-        const { volume } = await VolumeManager.getVolume();
-        //console.log("Current", volume);
-        // tempValue = volume;
-        // flag = true;
-       
-      
-        
-        // Listen to volume changes
-        // const volumeListener = VolumeManager.addVolumeListener((result) => {
-        //   console.log("change volume" , result.volume);
-        // });
-        
-        
-        
-          await sleep(delay);
-      }
-  });
-};
-
-const volumeLevel = async() => {
-  VolumeManager.showNativeVolumeUI({ enabled: true });
-
-  await VolumeManager.setVolume(0.5);
-  
-  const { volume } = await VolumeManager.getVolume();
-
- 
-  const volumeListener = VolumeManager.addVolumeListener((result) => {
-    console.log("change volume" , result.volume);
-  });
-
-  console.log("volume Listener" , volumeListener);
-  
-  
-}
-
-
-// Create Notification
-const options = {
-  taskName: 'Location',
-  taskTitle: 'Location Sharing',
-  taskDesc: 'Location Share',
-  taskIcon: {
-      name: 'ic_launcher',
-      type: 'mipmap',
-  },
-  color: '#ff00ff',
-  parameters: {
-      delay: 5000,
-  },
-};
 
 
 
@@ -102,139 +44,259 @@ interface HomeScreenProps {
 
 
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
+  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : RootState) => state.selectedContacts);
-  const imageResponse = useSelector((state) => state.userProfile.imageResponse);
+  const matchedContacts = useSelector((state : any) => state.contacts.matchingContacts);
+  const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
   const [appState,setAppState] = useState(AppState.currentState);
   const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
   const [volume , setVolume] = useState(-1);  
   const [token , setToken] = useState(null);
+  const [volumUp, setVolumeUp] = useState(0);
   
-  const getToken = async() => {
-    const value = await AsyncStorage.getItem('token');
-    setToken(value);
-    dispatch(addToken(value));
-  }
+   
+
+ 
+
+  useEffect(() => {
+    if(volumUp === 3){
+       sendSMS();
+    }
+    dispatch(allNotificationReadOrNot(userId,token));
+    if(notificationReadStatus === null){
+      dispatch(allNotificationReadOrNot(userId,token));
+    }
+    else{
+       console.log(notificationReadStatus);
+    }
+  });
   
 
-  // Fetch Selected Contact From Database
-  const fetchContacts  = async() => {
+  useEffect(() => {
+    getToken();
+    dispatch(addImageUri(userId,token));
+    dispatch(addSelectedContact(userId,token));
+    dispatch(changeUserName(userId,token));
+  },[token]);
+
+  
+
+  useEffect(() => {
+    volumeLevel();    
+    //getNotificationToken(); 
+  },[volume]);
+
+
+  useEffect(() =>{     
+     requestLocationSMSPermission();
+  },[]);
+
+
+  useEffect(() => {
+  
+      const eventEmitter = new NativeEventEmitter(NativeModules.MyService);
+    
+      const subscription = eventEmitter.addListener('onKeyMessage', event => {
+      const keyMessage = event.keyMessage;
+         console.log(keyMessage);
+         if(keyMessage === 'VOLUME_UP_KEY'){
+            setVolumeUp(volumUp+1);
+         }
+       });
       
-      const response = await axios.post('http://10.0.2.2:3000/fetchContacts', {
-        userId,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    
+      return () => subscription.remove();    
+  
+  });
 
-       if(response.status === 200){
+  
 
-        const responseData = await response.data;
-        const {contacts} = responseData;
-        
-        for(let i=0; i < contacts[0].length; i++){
-             dispatch(addSelectedContact(contacts[0][i]));
+
+
+  // Start Background Service
+  const backgroundService = async() => {
+    await BackgroundService.start(veryIntensiveTask, options  );
+    await BackgroundService.updateNotification({taskDesc: 'New ExampleTask description'});
+  }
+
+  const stop = async() => {
+     await BackgroundService.stop();
+  }
+
+  
+  const veryIntensiveTask = async (taskDataArguments: { delay: any; } ) => {
+    const { delay } = taskDataArguments;
+    await new Promise( async (resolve) => {
+        for (let i = 0; BackgroundService.isRunning(); i++) {
+         //   getCurrentLocation();
+            sendLiveLocation(); 
+            await sleep(delay);
         }
+    });
+  };
 
-       }
-       else{
-          console.log("something occured");
-           
-       }
-      
-       
 
-  }
+  const options = {
+    taskName: 'Location',
+    taskTitle: 'Location Sharing',
+    taskDesc: 'Location Share',
+    taskIcon: {
+        name: 'ic_launcher',
+        type: 'mipmap',
+    },
+    color: '#ff00ff',
+    parameters: {
+        delay: 5000,
+    },
+  };
+ 
+  const sendLiveLocation = async() => {
+    let selectedUser = [];
+    for(const contact of selectedContacts){ 
+        if(contact.notificationToken){
+           selectedUser.push(contact.notificationToken);
+        }
+    }
 
-  // Fetch User Details From Database
-  const fetchUserDetails = async() =>{
-      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-      userId,},{
+    await getCurrentLocation();
+    
+    for(let i=0; i < selectedUser.length; i++){
+      const selectedUserId = selectedUser[i];
+      const response = await axios.post('http://10.0.2.2:3000/addLiveLocation' , {
+        userId, selectedUserId , location},{
         headers:{
           'Content-Type':'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
 
+    }
 
-      if(response.status === 200){
-        const responseData = await response.data;
-        const{phoneNumber , userName} = responseData;
-        dispatch(changeUserName(userName));
-        dispatch(addUserPhoneNumber(phoneNumber));
+  }
+
+  const getCurrentLocation = async() => {
+    Geolocation.watchPosition(
+      position => {
+        console.log(position.coords.latitude , position.coords.longitude);
+        setLocation({latitude:position.coords.latitude , longitude:position.coords.longitude});
+      },
+      error => {
+        console.log(error.code, error.message);
+        console.log("error");
+        
+      },
+    );
+  }
+  
+
+
+  const requestLocationSMSPermission = async() => {
+    if(Platform.OS === 'android'){
+      const granted = await PermissionsAndroid.requestMultiple(['android.permission.ACCESS_FINE_LOCATION' , 
+                      'android.permission.SEND_SMS', 'android.permission.POST_NOTIFICATIONS']);
+      if(granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED &&
+         granted[PermissionsAndroid.PERMISSIONS.SEND_SMS] === PermissionsAndroid.RESULTS.GRANTED &&  
+         granted[PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS] === PermissionsAndroid.RESULTS.GRANTED)
+      {    
       }
       else{
-        console.log("Something occured");
-        
+          requestLocationSMSPermission();
       }
-      
-      
-
-      
-      
+   }
   }
 
-  // Fetch User Image From Database
-  const fetchUserProfile = async() => {
-    const response = await RNFetchBlob.fetch(
-                'POST' , 
-                'http://10.0.2.2:3000/fetchUserProfile',
-                {
-                  'Content-Type' : 'application/json' , 
-                  'Authorization': `Bearer ${token}`,
-                },
-                JSON.stringify({userId})
-              );
 
+  const getToken = async() => {
+    const value = await AsyncStorage.getItem('token');
+    if(value !== null){
+      setToken(value);
+      dispatch(addToken(value));
+    }
     
-    if(response.data){
-      const imageData = response.data;
-      const image = `data:image/jpeg;base64,${imageData.toString('base64')}`;
-      dispatch(addImageUri(image));  
-      
-    }
-    else{
-      console.log("Something occured");
-      
-    }
-
   }
-
+  
+  
  
 
-  useEffect(() => {
-
-    getToken();
-    fetchContacts();  
-    fetchUserDetails();
-    fetchUserProfile();
-  
-  },[token]);
-  
-  useEffect(() => {
-    volumeLevel();     
-  },[volume]);
+  const getNotificationToken = async() => {
+    console.log("hello");
+        
+    let selectedUserId = [];
+    let tokenMapping = [];
+    for(const contact of selectedContacts){ 
+        if(contact.notificationToken){
+           selectedUserId.push(contact.notificationToken);
+        }
+    }
 
 
-  useEffect(() =>{
-     requestLocationPermission(); 
-     requestSMSPermission();
-     //backgroundService();  
-  },[]);
+    for(let i=0; i < selectedUserId.length; i++){
+      const userId = selectedUserId[i];
+      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
+          userId,},{
+          headers:{
+            'Content-Type':'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
+      const data  = await response.data;
+      tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
+    }
+    
+
+
+    for(let i=0; i < tokenMapping.length; i++){
+      let  notifyToken = tokenMapping[i].notificationToken;
+      console.log(notifyToken);
+      
+      const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
+        notifyToken , userName},{
+        headers:{
+          'Content-Type':'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if(response.status === 200){
+      
+    
+         let userId = tokenMapping[i].userId;
+         let senderName = userName; 
+         const response = await axios.post('http://10.0.2.2:3000/saveEmergencyContactNotification' , {
+          userId , senderName},{
+          headers:{
+            'Content-Type':'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if(response.status === 200){
+          console.log("notifcation saved successfully");
+          
+        }
+
+          console.log("notification send successfully");
+      
+      }   
+         
+    }
+        
+           
+  }
+
+   
 
   const volumeLevel = async() => {
+    
     VolumeManager.showNativeVolumeUI({ enabled: true });
-
-    await VolumeManager.setVolume(0.5);
     
     const { volume } = await VolumeManager.getVolume();
   
    
-    const volumeListener = VolumeManager.addVolumeListener((result) => {
+    VolumeManager.addVolumeListener((result) => {
       console.log("change volume" , result.volume);
       setVolume(result.volume);
 
@@ -244,11 +306,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
 
-  // Start Background Service
-  const backgroundService = async() => {
-    await BackgroundService.start(veryIntensiveTask, options);
-    await BackgroundService.updateNotification({taskDesc: 'New ExampleTask description'});
-  }
+  
 
   // Send SMS
   const sendSMS = () => {
@@ -257,42 +315,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     .catch((err) => console.log("catch", err))
   }
 
-  // Request Location Permission
-  const requestLocationPermission = async() => {
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      } else {
-                   
-      }
-    }
-  }
-
-  // Request SMS Permission
-  const requestSMSPermission = async() => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.SEND_SMS,
-        {
-          title: 'SMS Permission',
-          message: 'This app needs permission to send SMS.',
-          buttonPositive: 'OK',
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          //sendSMS();
-      } else {
-        console.log('SMS permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  }
   
 
-  // Navigation to HelpScreen
+  
   const handleLocationMap = (mapNumber:number) => {
     navigation.navigate('HelpScreen', { mapNumber: mapNumber});
   }
@@ -305,15 +330,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
 
 
- 
- 
 
   return (
     <View style={style.homeMain}>
       <StatusBar backgroundColor={'#3ebb6e'} />
 
       {/* custom header */}
-      <CustomHeader name="Secure Signal" icon="bell" call={handleNotification}/>
+      <HomeCustomHeader name="Secure Signal" icon="bell" call={handleNotification} isRead={notificationReadStatus}/>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={style.usernameText}>
@@ -334,10 +357,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             </TouchableOpacity>
 
             {
-               selectedContacts.length > 0 &&
+               selectedContacts && selectedContacts.length > 0 &&
                selectedContacts.map((item , key) => {
                 return(
-                  <TouchableOpacity style={style.contactSelectedView}>
+                  <TouchableOpacity key={key} style={style.contactSelectedView}>
                   <Text style={style.contactText}>{item.givenName[0]}</Text>
                 </TouchableOpacity>
     

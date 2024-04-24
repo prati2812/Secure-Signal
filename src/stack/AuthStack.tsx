@@ -4,15 +4,6 @@ import SplashScreen from "../screen/SplashScreen";
 import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
 import OtpNumberScreen from "../screen/authentication/OtpNumberScreen";
 import EditProfile from "../screen/account/EditProfile";
-import TabNavigator from "../navigator/TabNavigator";
-import HelpDescriptionScreen from "../screen/helpScreen/HelpDescriptionScreen";
-import HelpConfirmationScreen from "../screen/helpScreen/HelpConfirmationScreen";
-import LocationRouteScreen from "../screen/location/LocationRouteScreen";
-import NotificationHistory from "../screen/notification/NotificationHistory";
-import LocationHistory from "../screen/location/LocationHistory";
-import EmergencyContactListScreen from "../screen/emergencyContactList/EmergencyContactListScreen";
-import SubscriptionScreen from "../screen/subscription/SubscriptionScreen";
-import HelpScreen from "../screen/helpScreen/HelpScreen";
 import NavigationStack from "./NavigationStack";
 
 const Stack = createNativeStackNavigator();
@@ -29,6 +20,6 @@ const AuthStack: React.FC = () => {
         </Stack.Navigator>
     
     );
-  }
+}
   
   export default AuthStack;

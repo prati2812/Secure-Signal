@@ -9,7 +9,6 @@ import axios from 'axios';
 
 
 
-
 interface BottomSheetProps {
   setBottomSheetVisible:any;
 }

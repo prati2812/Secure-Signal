@@ -11,8 +11,8 @@ const initialState = {
 
 const userProfileReducer = (state = initialState , action: { type: any; payload: any; }) => {
     switch(action.type){
-        case ADD_IMAGE_URI:
-            return {
+        case ADD_IMAGE_URI: 
+            return {                
                ...state,
                imageUri: action.payload,
             }
@@ -25,11 +25,6 @@ const userProfileReducer = (state = initialState , action: { type: any; payload:
             return{
                ...state,
                imageResponse:action.payload, 
-            }
-        case ADD_USER_ID:
-            return{
-                ...state,
-                userId:action.payload,
             }
         case ADD_USER_PHONE_NUMBER:
             return{

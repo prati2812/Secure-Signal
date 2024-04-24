@@ -1,8 +1,9 @@
-import { ADD_CONTACTS, ADD_MATCHING_CONTACTS } from "./action";
+import { ADD_CONTACTS, ADD_MATCHING_CONTACTS , UPDATED_CONTACT_LIST } from "./action";
 
 const initialState = {
     contacts: [],
     matchingContacts: [],
+    updatedContactList : [],
   };
   
   const contactReducer = (state = initialState, action: { type: any; payload: any; }) => {
@@ -16,7 +17,12 @@ const initialState = {
         return{
           ...state,
           matchingContacts: action.payload,
-        };  
+        };
+      case UPDATED_CONTACT_LIST:
+        return{
+          ...state,
+          updatedContactList: [],
+        };    
       default:
         return state;
     }

@@ -2,11 +2,8 @@ import React, {useState, useRef, useMemo, useEffect} from 'react';
 import {View, Text, TextInput, TouchableOpacity , StyleSheet , ActivityIndicator} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from '../../hook/useError';
-import { useRoute } from '@react-navigation/native';
-import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
-import { addUserId } from '../../redux/userprofile/action';
 import { requestUserPermission } from '../../utils/NotificationService';
 
 
@@ -60,10 +57,8 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
       setIsError(false);
       setIndicatorVisible(true);
       const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
-      const response = await auth().signInWithCredential(credential);
-      dispatch(addUserId(response));
-      
-      setIndicatorVisible(false);
+      await auth().signInWithCredential(credential);
+      setIndicatorVisible(false); 
       navigation.navigate('EditProfile');
     }
     catch(error)

@@ -72,7 +72,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile */}
         <View style={styles.backPressBtnContainer}>
-        <Pressable onPress={() => navigation.navigate('Home')}>
+          <Pressable onPress={() => navigation.navigate('Home')}>
           <View style={styles.backPressBtnView}>
            
               <Text>

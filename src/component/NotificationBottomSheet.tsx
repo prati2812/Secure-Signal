@@ -1,8 +1,14 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, Pressable, Animated} from 'react-native';
+import {Text, View, StyleSheet, Pressable, Animated, StatusBar, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import NotificationFilter from './NotificationFilter';
 import { useEffect } from 'react';
+import axios from 'axios';
+import { firebase } from '@react-native-firebase/auth';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteAllNotificationOrNot } from '../redux/notifications/action';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 interface NotificationBottomSheetProps {
   setBottomSheetVisible: any;
@@ -11,6 +17,13 @@ interface NotificationBottomSheetProps {
 const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setBottomSheetVisible,}) =>{
 
     const slide = React.useRef(new Animated.Value(300)).current;
+    const userId = firebase.auth().currentUser?.uid; 
+    const token = useSelector((state : any) => state.userProfile.token);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      slideUp()
+    })
 
 
     const slideUp = () => {
@@ -19,42 +32,87 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
           duration: 800,
           useNativeDriver: true,
         }).start();
-      };
+    };
     
-      const slideDown = () => {
+    const slideDown = () => {
        
         Animated.timing(slide, {
           toValue: 300,
           duration: 800,
           useNativeDriver: true,
         }).start();
-      };
+    };
   
-      useEffect(() => {
-        slideUp()
-      })
-
-
+    
     const closeModal = () => {
         slideDown();
         setTimeout(() => {
          setBottomSheetVisible(false);
         },800);
+    }
+
+    const handleAllMarkAsNotification = async() => {
+      const response = await axios.post('http://10.0.2.2:3000/markAllAsRead' , {
+         userId,
+      },{
+         headers:{
+           'Content-Type' : 'application/json',
+           Authorization: `Bearer ${token}` ,
+         },
+      });
+
+      if(response.status === 200){
+        console.log("successfully Read All Notification");
+        dispatch({
+           type:'ALL_NOTIFICATION_READ',
+           payload:true,
+
+        })
+        closeModal();
+        
      }
 
+
+
+    } 
+
+    const handleDeleteAllNotificaion = async() => {
+      const response = await axios.post('http://10.0.2.2:3000/deleteAllNotification', {
+        userId
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if(response.status === 200){
+         console.log("successfully Delete All Notification");
+         dispatch(deleteAllNotificationOrNot(true));
+         closeModal();
+         
+      }
+    }
+
     return (
+
     <Pressable style={styles.container} onPress={closeModal}>
       <Pressable style={{ width: '100%', height: '20%'}}>
         <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
         <View style={styles.notificationBottomSheet}>
+
+         <TouchableOpacity onPress={() => handleAllMarkAsNotification()}> 
           <NotificationFilter
             icon={'done-all'}
             color={'black'}
             message={'Mark all as read'}
             iconBackgroundColor={'lightgray'}
-            textColor={''}
+            textColor={'black'}
           />
 
+         </TouchableOpacity>
+         
+         <TouchableOpacity onPress={() => handleDeleteAllNotificaion()}>
           <NotificationFilter
             icon={'delete'}
             color={'red'}
@@ -62,6 +120,8 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
             iconBackgroundColor={'#FFD6D7'}
             textColor={'red'}
           />
+         </TouchableOpacity> 
+          
         </View>
         </Animated.View>
       </Pressable>  

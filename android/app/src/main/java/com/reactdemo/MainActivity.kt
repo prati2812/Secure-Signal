@@ -45,25 +45,23 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
-//  override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean{
-//    var KeyMessage: String = ""
-//    when (keyCode) {
-//      KeyEvent.KEYCODE_VOLUME_DOWN -> {
-//        Toast.makeText(applicationContext, "Volume Down Key Pressed", Toast.LENGTH_SHORT).show()
-//        KeyMessage = "Volume Down Key";
-//
-//      }
-//      KeyEvent.KEYCODE_VOLUME_UP -> {
-//        Toast.makeText(applicationContext, "Volume Up Key Pressed", Toast.LENGTH_SHORT).show()
-//        KeyMessage = "Volume Up Key";
-//
-//      }
-//
-//    }
-//    KeyMessage?.let { sendEventToReactNative(it) }
-//
-//    return true;
-//  }
+  override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean{
+    var KeyMessage: String = ""
+    when (keyCode) {
+      KeyEvent.KEYCODE_VOLUME_DOWN -> {
+        KeyMessage = "VOLUME_DOWN_KEY";
+
+      }
+      KeyEvent.KEYCODE_VOLUME_UP -> {
+        KeyMessage = "VOLUME_UP_KEY";
+
+      }
+
+    }
+    KeyMessage?.let { sendEventToReactNative(it) }
+
+    return true;
+  }
 //
 //  private fun handleKeyEvent(keyCode: Int) {
 //    when (keyCode) {
@@ -82,17 +80,17 @@ class MainActivity : ReactActivity() {
 //    }
 //  }
 //
-//   private fun sendEventToReactNative(keyMessage: String) {
-//    val reactContext: ReactContext? = reactInstanceManager?.currentReactContext
-//    reactContext?.let {
-//      val params = Arguments.createMap().apply {
-//        putString("keyMessage", keyMessage)
-//      }
-//      reactContext
-//              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-//              .emit("onKeyMessage", params)
-//    }
-//  }
+   private fun sendEventToReactNative(keyMessage: String) {
+    val reactContext: ReactContext? = reactInstanceManager?.currentReactContext
+    reactContext?.let {
+      val params = Arguments.createMap().apply {
+        putString("keyMessage", keyMessage)
+      }
+      reactContext
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+              .emit("onKeyMessage", params)
+    }
+  }
 //
 //
 //  fun foregroundServiceRunning(): Boolean {

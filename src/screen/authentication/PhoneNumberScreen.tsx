@@ -8,10 +8,6 @@ import { addVerificationId } from "../../redux/credential/action";
 import { addUserPhoneNumber } from "../../redux/userprofile/action";
 
 
-
-
-
-
 interface PhoneNumberScreenProps {
   navigation: any; 
 }
@@ -45,7 +41,10 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
         }
      
         let phoneNo = '+91'+phoneNumber;
-        dispatch(addUserPhoneNumber(phoneNo));
+        dispatch({
+          type: 'ADD_USER_PHONE_NUMBER',
+          payload: phoneNo
+     })
 
         setIndicatorVisible(true);
         const confirmation = await auth().signInWithPhoneNumber(phoneNo);

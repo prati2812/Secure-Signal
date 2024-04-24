@@ -156,15 +156,15 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     <SafeAreaView style={styles.helpDescriptionMain}>
 
       <View style={styles.backPressBtnContainer}>
-      <Pressable onPress={() => navigation.goBack()}>
-        <View style={styles.backPressBtnView}>
+          <Pressable onPress={() => navigation.goBack()}>
+              <View style={styles.backPressBtnView}>
           
-            <Text>
-              <Icon name="arrow-back" size={35} color={'black'} />
-            </Text>
-        </View>
-      </Pressable>  
-        <Text style={styles.queryText}>{complaintBy}</Text>
+                <Text>
+                  <Icon name="arrow-back" size={35} color={'black'} />
+                </Text>
+              </View>
+          </Pressable>  
+          <Text style={styles.queryText}>{complaintBy}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>

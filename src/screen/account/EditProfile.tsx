@@ -9,7 +9,10 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Pressable,
-  ActivityIndicator
+  ActivityIndicator,
+  BackHandler,
+  Alert,
+  AppState
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,6 +24,7 @@ import { useSelector , useDispatch} from 'react-redux';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeUserName } from '../../redux/userprofile/action';
+import { firebase } from '@react-native-firebase/auth';
 
 
 interface EditProfileProps {
@@ -34,37 +38,88 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const [isError , setIsError] = useState(false);
   const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
+  const [isExit , setExit] = useState(false);
+  const [notificationToken , setNotificationToken] = useState<string | null>('');
   const dispatch = useDispatch();
 
 
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
   const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
   const phoneNumber = useSelector((state: any) => state.userProfile.phoneNumber);
-  const userId = useSelector((state: any) => state.userProfile.userId);
-  const notificationToken = AsyncStorage.getItem('fcm_token');
+  const userId = firebase.auth().currentUser?.uid;
+  
 
+  const [appState, setAppState] = useState(AppState.currentState);
 
- 
   useEffect(() => {
-     setIsError(false);   
-  },[userName]);
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
+  });
 
   
+  
+  useEffect(() => {
+     getToken();   
+  },[userName]);
+
+
+   const getToken = async() => {
+    const notificationToken = await AsyncStorage.getItem('fcm_token');
+    setNotificationToken(notificationToken);
+    
+   }
+
+  const handleAppStateChange = (nextAppState: any) => {
+    setAppState(nextAppState);
+    if (appState.match(/inactive|background/) && nextAppState === 'active') {
+       if(isExit === true){
+          navigation.navigate('Splash');
+       }
+    }
+  };
+
+
+
+  
+  const handleCloseApp = async() => {
+    Alert.alert(
+      'Exit App',
+      'If you proceed, You will need to register your phone number again when you use the app next time.',
+      [
+        {
+          text: 'No',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'Yes', onPress: () => {setExit(true), BackHandler.exitApp()} , },
+      ],
+      {
+        cancelable: false,
+      },
+    );
+  }
 
   const handleUserImage = async () =>{
       setImageSelectionSheetVisible(true);
-
   }
+
 
   const handleSaveProfile = async() => {
        
-       if(userName.length === 0 || !userName){
-           setIsError(true);
-           return false;
-       } 
-       setIsError(false);
-    
+    console.log(userId);
+    console.log(notificationToken);
+    console.log(phoneNumber);
+    console.log(userName);
+    console.log(imageResponse);
+
+        
+
        dispatch(changeUserName(userName));
+       
+     
        
        
       
@@ -77,8 +132,10 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
         formData.append('phoneNumber', phoneNumber); 
         formData.append('userName', userName);
-        formData.append('userId', userId.user.uid);
+        formData.append('userId', userId);
         formData.append("notificationToken" , notificationToken._j);
+        
+        console.log(formData);
         
       
         setIndicatorVisible(true); 
@@ -89,21 +146,26 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
           },
         });
 
-  
+
           const responseData = await response.data;
           const {token , imageUrl} = responseData;
           AsyncStorage.setItem('token' , token);
           
-          setIndicatorVisible(false);
-          
-            
-        
-  
-        
-        
-       navigation.navigate('Home');  
+        setIndicatorVisible(false);
+        navigation.navigate('Home');  
      
      
+  }
+
+
+  const userNamevalidation = (text : string) => {
+    if(text.length !<= 2){
+      setIsError(true);
+      setUserName(text);
+      return false;
+    } 
+    setUserName(text);
+    setIsError(false);
   }
 
 
@@ -122,7 +184,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
       <View 
         style={style.editProfileIconView}>
         <TouchableOpacity 
-          style={style.closeIcon}>
+          style={style.closeIcon} onPress={() => handleCloseApp()}>
             <Icon name="close" size={30} color={'black'} />
         </TouchableOpacity>
       </View>
@@ -150,7 +212,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
             style={style.editUsername}
             placeholder="Enter your name" 
             value={userName}
-            onChangeText={(text) => setUserName(text)}/>
+            onChangeText={userNamevalidation}/>
         </View>
       </View>
       {
@@ -159,7 +221,8 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
       <View style={style.saveProfileBtnView}>
         <TouchableOpacity
-          style={style.SaveProfileBtn}
+          style={[style.SaveProfileBtn , isError && style.SaveProfileBtnDisable]}
+          disabled={isError === true}
           onPress={() => handleSaveProfile()}>
           <View style={style.btnView}>
             {
@@ -251,6 +314,9 @@ const style = StyleSheet.create({
       padding:13,
       borderRadius:10,
       elevation:3,
+  },
+  SaveProfileBtnDisable:{
+      backgroundColor:'#93dbb5'
   },
   btnView:{
       alignItems:'center',

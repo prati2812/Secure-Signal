@@ -1,15 +1,19 @@
 import React,{useEffect , useState} from 'react';
-import { Text, View, StyleSheet, Platform, PermissionsAndroid, FlatList, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Platform, PermissionsAndroid, FlatList, ScrollView, TouchableOpacity ,ActivityIndicator} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import { Searchbar } from 'react-native-paper';
 import Contacts  from 'react-native-contacts';
 import Contact from '../../component/Contact';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch , useSelector } from 'react-redux';
-import { addSelectedContact,  removeSelectedContact , addContact, addMatchingContacts} from '../../redux/contacts/action';
+import { removeSelectedContact , addContact, addMatchingContacts} from '../../redux/contacts/action';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import SectionList from '../../component/SectionList';
+import MatchingContact from '../../component/MatchingContact';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+
+
 
 
 
@@ -21,6 +25,7 @@ interface Contact {
 }
 
 interface RootState {
+  userProfile: any;
   matchingContacts: Contact[];
   contacts:Contact[];
 }
@@ -38,8 +43,15 @@ interface EmergencyContactListScreenProps {
 const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<Contact[]>([]);
+  const [filteredMatchingContactData , setFilteredMatchingContactData] = useState([]);
+  const [updatedContact , setUpdatedContact] = useState<Contact[]>([]);
+  const [matchingUpdatedContact , setMatchingUpdatedContact] = useState<Contact[]>([]);
   const [isVisible, setVisible] = useState(false);
   const [isSelectedContact , setSelectedContact] = useState(false);
+  const [isUpdated , setUpdated] = useState(false);
+  const [isSelected , setSelected] = useState(Number);
+  const [indicatorValue , setIndicatorValue] = useState(Number);
+
   const dispatch = useDispatch();
 
   
@@ -49,6 +61,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
   const selectedContacts = useSelector((state : EmergencyContactListScreenProps) => state.selectedContacts);
   const contacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.contacts);
   const matchedContacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.matchingContacts);
+  const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const token = useSelector((state : any) => state.userProfile.token);
   
 
@@ -60,32 +73,51 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
        }
   });
 
-  useEffect(() => {
-     findMatchingContacts();
-     console.log(matchedContacts);
-     
-  } , [contacts]);
-
 
  
 
+  useEffect(() => {  
+    handleUpdateContactList();
+    handleMatchingUpdatedContactList();
+  },[!isUpdated]);
+ 
+  useEffect(() => {
+     dispatch(addMatchingContacts(userId,contacts,token)); 
+  } , [contacts]);
 
-  const findMatchingContacts = async() => {
-       
-       const response = await axios.post('http://10.0.2.2:3000/findMatchingContacts',{
-         userId , contacts},
-         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
 
-        if(response.status === 200){
-           const matchingUsers = await response.data;
-           dispatch(addMatchingContacts(matchedContacts));
-        }
-     
+
+  const handleUpdateContactList = () => {
+    const filteredContacts = contacts.filter((contactItem) =>
+    !matchedContacts.some(removeItem => removeItem.recordID === contactItem.recordID) &&
+    !selectedContacts.some(removeItem => removeItem.recordID === contactItem.recordID)
+    );
+
+    
+    if(filteredContacts.length > 0){
+      setIndicatorValue(indicatorValue+1);
+      setUpdatedContact(filteredContacts);  
+    }
+  
   }
+
+  const handleMatchingUpdatedContactList = () => {
+    console.log(matchedContacts);
+    
+    const filteredContacts = matchedContacts.filter((contactItem) =>
+       !selectedContacts.some(removeItem => removeItem.recordID === contactItem.recordID)
+    );
+
+    
+    if(filteredContacts.length > 0){
+       setIndicatorValue(indicatorValue+1);
+       setMatchingUpdatedContact(filteredContacts);   
+    }
+    
+    
+  
+  }
+
 
   // Ask Permission for Accessing Contact List
   const handleContactList = async() => {
@@ -114,7 +146,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
   // Search Contact 
   const handleSearch = (text: string) =>{
     if(text){
-       const newData = contacts.filter((item : Contact)=>{
+       const newData = updatedContact.filter((item : Contact)=>{
 
            const Name = item.givenName ? item.givenName.toUpperCase() : ''.toUpperCase();
            const itemName = Name.replace(/\s/g,'');
@@ -125,24 +157,80 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
          return itemName.indexOf(textData) > -1 || itemPhoneNo.indexOf(textData) > -1;
        })
 
-       setFilteredData(newData);
-       setSearchQuery(text);
+             
+        setFilteredData(newData);
+        setSearchQuery(text);  
     }
     else{
-      setFilteredData(contacts);
+      setFilteredData(updatedContact);
+      setSearchQuery(text);
+    }
+    
+    
+
+    if(text){
+      const newData = matchingUpdatedContact.filter((item) => {
+          const Name = item.givenName ? item.givenName.toUpperCase() : ''.toUpperCase();
+          const itemName = Name.replace(/\s/g,'');
+
+          const PhoneNo = item.phoneNumbers[0]?.number ? item.phoneNumbers[0]?.number : ''.toUpperCase();
+          const itemPhoneNo = PhoneNo.replace(/[()-\s]/g,'');
+
+          const textData = text.replace(/\s/g,'').toUpperCase();
+          return itemName.indexOf(textData) > -1 || itemPhoneNo.indexOf(textData) > -1;
+      })
+      
+      setFilteredMatchingContactData(newData);
+      setSearchQuery(text);
+    }
+    else{
+       setFilteredMatchingContactData(matchingUpdatedContact);
        setSearchQuery(text);
-    }   
+    }
+
 
   };
 
 
   // Select Contact From Contact List
-  const handleSelectedContact = (item : Contact) => {
-    const isSelected = selectedContacts.some((contact) => contact.recordID === item.recordID);
-    if (isSelected) {
-      dispatch(removeSelectedContact(item.recordID));  
+  const handleSelectedContact = (item : Contact) => { 
+   
+      if (selectedContacts.some((selectedItem) => selectedItem.recordID === item.recordID)) {
+         setSelected(isSelected-1);
+         dispatch({
+          type:'REMOVE_SELECTED_CONTACTS',
+          payload:item.recordID
+        });
+      } else {
+        setSelected(isSelected+1);
+       dispatch({
+          type: 'ADD_SELECTED_CONTACTS',
+          payload:item,
+        });
+      }
+    
+  
+    
+    setVisible(true);
+    setSelectedContact(true); 
+  
+       
+  }
+
+  // Select Contact From Matching Contact List
+  const handleMatchingContactSelect = (item : Contact) => {
+    if (selectedContacts.some((contact) => contact.recordID === item.recordID)) {
+      setSelected(isSelected-1);
+      dispatch({
+        type:'REMOVE_SELECTED_CONTACTS',
+        payload:item.recordID
+      });
     } else {
-      dispatch(addSelectedContact(item));
+      setSelected(isSelected+1);
+      dispatch({
+        type: 'ADD_SELECTED_CONTACTS',
+        payload:item,
+      });
     }
     setVisible(true);
     setSelectedContact(true);   
@@ -150,7 +238,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
 
   // Set Selected Contact as Guardian
   const handleSetasGuardian = async() =>{
-    setVisible(!isVisible); 
+    setUpdated(!isUpdated);
+    setVisible(false); 
     setSelectedContact(false);
     const updatedContact = contacts.filter((contact: { recordID: string; }) => 
                           !selectedContacts.some(selectedContact => 
@@ -158,6 +247,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
                           
                           
     dispatch(addContact(updatedContact));
+  
     
     let emergencyContactList: Contact[] = [];
 
@@ -175,22 +265,91 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
       }
     });
 
+    if(response){
+        sendNotification();
+    }
+
      
     
     
   }
 
 
+  // Send Notification When User Set Selected Contact as Guardian
+  const sendNotification = async() => {
+  
+  
+    let selectedUserId = [];
+    let tokenMapping = [];
+    for(const contact of selectedContacts){ 
+        if(contact.notificationToken){
+           selectedUserId.push(contact.notificationToken);
+        }
+    }
 
-  // Delete Selected Contact
-  const handleDeleteSelectedContact = (item: Contact) => {
-    console.log("ITEEEEEM" , item); 
-    dispatch(removeSelectedContact(item.recordID));   
-    const unselectedContacts = contacts.filter((contact: { recordID: string; }) => contact.recordID !== item.recordID);
-    dispatch(addContact([...unselectedContacts, item]));
+    
+    for(let i=0; i < selectedUserId.length; i++){
+      const userId = selectedUserId[i];
+      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
+          userId,},{
+          headers:{
+            'Content-Type':'application/json',
+             Authorization: `Bearer ${token}`,
+          },
+      });
+
+      const data  = await response.data;
+      tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
+    }
+
+    for(let i=0; i < tokenMapping.length; i++){
+        let  notifyToken = tokenMapping[i].notificationToken;
+        console.log(notifyToken);
+      
+        const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
+              notifyToken},{
+                    headers:{
+                      'Content-Type':'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+              });
+
+              if(response.status === 200){  
+                    let userId = tokenMapping[i].userId;
+                    let senderName = userName;
+                    const response = await axios.post('http://10.0.2.2:3000/saveEmergencyContactNotification' , {
+                    userId , senderName},{
+                          headers:{
+                            'Content-Type':'application/json',
+                            Authorization: `Bearer ${token}`,
+                          },
+                    });
+
+                    if(response.status === 200){
+                        console.log("notifcation saved successfully");
+                    }
+
+                    console.log("notification send successfully");
+      
+              }
+
+
+    }
   }
 
-  
+  // Delete Selected Contact
+  const handleDeleteSelectedContact = async(contact: Contact) => {
+      
+    dispatch(removeSelectedContact(userId, contact, token));
+    const unselectedContacts = contacts.filter(
+      (item: { recordID: string }) => item.recordID !== contact.recordID
+    );
+    dispatch(addContact(unselectedContacts));
+    setUpdated(!isUpdated);
+    
+  }
+
+
  
   return (
     <View style={styles.mainContainer}>
@@ -245,33 +404,75 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
         )}
       </View>
 
+
+     <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{marginTop:10}}> 
       
       {
-          matchedContacts.length > 0 && <>
+          matchedContacts.length > 0 &&  <>
           <SectionList title={'Matched Contacts'} borderColor={'lightpink'} />
           <ScrollView
              showsVerticalScrollIndicator={false}
              style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
              {
-                 
+                
+                filteredMatchingContactData.length > 0 ? filteredMatchingContactData.map((item,key) => {
+                  return (
+                    <MatchingContact
+                      contact={item}
+                      key={key}
+                      isSelected={(isSelectedContact === true && selectedContacts.some(
+                        contact => contact.recordID === item.recordID,
+                      ))}
+                      handleMatchingSelected={() => {handleMatchingContactSelect(item)}}
+                    />
+                  );
+                })
+              
+                :
+                 matchingUpdatedContact.length > 0  && matchingUpdatedContact.map((item , key) => {
+                   return (
+                     <MatchingContact
+                       contact={item}
+                       key={key}
+                       isSelected={
+                         isSelectedContact === true &&
+                         selectedContacts.some(
+                           contact => contact.recordID === item.recordID,
+                         )
+                       }
+                       handleMatchingSelected={() => {handleMatchingContactSelect(item)}}
+                     />
+                   );
+                 })
              }  
                      
           </ScrollView>
           </>  
       }  
 
-     {/* Contact List
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 30}}
-        style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
-        {  
+
+      <View>
+         
+     {/* Contact List */}
+     {
+         contacts.length > 0 && 
+         <>
+          
+          <SectionList title={'No App Contacts'} borderColor={'lightpink'} />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{paddingBottom: 30}}
+            style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
+           {  
         
-          // Select Contact through searchbar  
-          filteredData.length > 0 ? filteredData.map((item,key) => {
+            // Select Contact through searchbar  
+            filteredData.length > 0 ? filteredData.map((item,key) => {
               return (
                 <Contact
                   contact={item}
+                  key={key}
                   isSelected={(isSelectedContact === true && selectedContacts.some(
                     contact => contact.recordID === item.recordID,
                   ))}
@@ -280,29 +481,43 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
               );
             })
             :
-            
-            // Select Contact through Contact List.
-            contacts.filter((contact: { recordID: string; }) => 
-            !selectedContacts.some(selectedContact => 
-            selectedContact.recordID === contact.recordID)) && Array.isArray(contacts) ? contacts.map((item,key) => {
-              return (
-                <Contact
-                  contact={item}
-                  isSelected={(isSelectedContact === true && selectedContacts.some(
-                    contact => contact.recordID === item.recordID,
-                  ))}
-                  handleSelected={() => handleSelectedContact(item)}
-                />
-              ); 
+
+
+            updatedContact.map((item , key) => {
+               return(
+                 <Contact 
+                   key={key} 
+                   contact={item} 
+                   isSelected={selectedContacts.some((selectedItem) => selectedItem.recordID === item.recordID)} 
+                   handleSelected={() => handleSelectedContact(item)}     
+                 />           
+               );
             })
-             : null
+
+            
+
+
+
+
+
+           
              
         }
-      </ScrollView> */}
+      </ScrollView>
+         
+         </>
+     }
+     
 
+       
+
+      </View>
+
+      </ScrollView> 
+     
 
      {/* Selected Contact List */}
-      { (selectedContacts.length > 0 && isVisible) && (
+      { (selectedContacts.length > 0 && isVisible && isSelected > 0) && (
         <TouchableOpacity
           style={styles.guardiansBtnView} onPress={() => handleSetasGuardian()}>
           <View style={styles.guardiansBtn}>

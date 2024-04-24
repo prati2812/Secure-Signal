@@ -29,11 +29,15 @@ const SubscriptionCard:React.FC<SubscriptionCardProps> = ({subscriptionType , pr
                 <Text style={styles.subscriptionCardDetailsMessage}>{details}</Text>
          </View>
 
+       {
+         selected && 
          <TouchableOpacity
-           onPress={onPress} 
-           style={[styles.subscriptionCardBtnView , selected === false && styles.isNotSelected]}>
-                <Text style={styles.subscriptionCardBtnText}>Subscribe Now</Text>
+         onPress={onPress} 
+         style={[styles.subscriptionCardBtnView]}>
+              <Text style={styles.subscriptionCardBtnText}>Subscribe Now</Text>
          </TouchableOpacity>
+       }
+         
                 
     </Pressable>
   );

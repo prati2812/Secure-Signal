@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface NotificationCardProps {
@@ -7,10 +8,15 @@ interface NotificationCardProps {
    message:string;
    time:string;
    color:string;
+   isRead:boolean;
+   handleIsRead : Function
 }
 
-const NotificationCard:React.FC<NotificationCardProps> = ({icon,message , time , color}) => {
+const NotificationCard:React.FC<NotificationCardProps> = ({icon,message , time , color, isRead , handleIsRead}) => {
+
+  
   return (
+    <TouchableOpacity onPress={() => handleIsRead()}>
     <View style={styles.notificationView}>
                  <View style={styles.notificationIcon}>
                         <Icon name={icon} size={45} color={color} />
@@ -23,7 +29,13 @@ const NotificationCard:React.FC<NotificationCardProps> = ({icon,message , time ,
                               {time}
                        </Text>
                  </View>
+
+                 {
+                    isRead === false && <View style={{borderWidth:7, borderColor:'green' , borderRadius:10,}}></View>
+                 }
+                
     </View>
+    </TouchableOpacity>
   );
 };
 
@@ -53,6 +65,7 @@ const styles = StyleSheet.create({
     padding: 5,
     flexShrink:1,
     gap:5,
+    flex:1,
   },
   notificationMessage: {
     fontSize: 20,

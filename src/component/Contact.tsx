@@ -15,6 +15,10 @@ interface ContactProps{
      handleSelected:Function;
 }
 const Contact:React.FC<ContactProps> = ({contact , isSelected , handleSelected}) => {
+
+
+  
+  
   return (
      
     <Pressable onLongPress={() => handleSelected(contact)}>

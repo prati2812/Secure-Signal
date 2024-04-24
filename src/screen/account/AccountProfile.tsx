@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BottomSheet from '../../component/BottomSheet';
 import DeleteAccountSheet from '../../component/DeleteAccountSheet';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import CustomProfileOption from '../../component/CustomProfileOption';
+import { addUserPhoneNumber } from '../../redux/userprofile/action';
+import { firebase } from '@react-native-firebase/auth';
 
 interface UserProfile {
   imageUri: string | null;
@@ -19,11 +21,18 @@ interface AccountProfileProps {
 const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [isDeleteAccountSheetVisible, setDeleteAccountSheetVisible] = useState(false);
-
   const userProfile = useSelector((state: { userProfile: UserProfile }) => state.userProfile);
   const userPhoneNumber = useSelector((state:any) => state.userProfile.phoneNumber);
+  const token = useSelector((state : any) => state.userProfile.token);
+  const userId = firebase.auth().currentUser?.uid; 
+  const dispatch = useDispatch();
 
   const { imageUri, userName } = userProfile;
+
+
+  useEffect(() => {
+    dispatch(addUserPhoneNumber(userId,token));
+  },[]);
 
   const openBottomSheet = () => {
     setBottomSheetVisible(true);

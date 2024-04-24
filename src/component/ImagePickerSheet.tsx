@@ -1,10 +1,9 @@
 import React,{useEffect} from 'react';
-import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid } from 'react-native';
+import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid, StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CameraOptions, ImageLibraryOptions, MediaType, launchCamera , launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch } from 'react-redux';
-import { addImageResponse, addImageUri } from '../redux/userprofile/action';
-
+import { ADD_IMAGE_URI, addImageResponse, addImageUri } from '../redux/userprofile/action';
 
 
 interface ImagePickerSheetProps {
@@ -40,8 +39,7 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
       })
 
       useEffect(() => {
-          requestCameraPermission();
-          requestGalleryPermission();
+          requestImageSelectionPermission();
       },[]);
 
       const closeModal = () => {
@@ -49,33 +47,25 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
          setTimeout(() => {
           setImageSelectionSheetVisible(false);
          },800);
-      }  
-
-      const requestCameraPermission = async() => {
-        if (Platform.OS === 'android') {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.CAMERA
-          );
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                 
-          } else {
-                 requestCameraPermission();      
-          }
-        }
+      }
+      
+      
+      const requestImageSelectionPermission = async() => {
+         if(Platform.OS === 'android'){
+            const granted = await PermissionsAndroid.requestMultiple(['android.permission.CAMERA' , 
+                            'android.permission.READ_EXTERNAL_STORAGE']);
+            if(granted[PermissionsAndroid.PERMISSIONS.CAMERA] === PermissionsAndroid.RESULTS.GRANTED &&
+               granted[PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE] === PermissionsAndroid.RESULTS.GRANTED)
+            {    
+            }
+            else{
+                requestImageSelectionPermission();
+            }
+         }
       }
 
-      const requestGalleryPermission = async() => {
-        if (Platform.OS === 'android') {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-          );
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-               
-          } else {
-                 requestGalleryPermission();      
-          }
-        }
-      }
+     
+
 
       const handleCamera = async() => {
        
@@ -87,7 +77,12 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
           
           if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
             setImageUri(res.assets[0].uri);
-            dispatch(addImageUri(res.assets[0].uri));
+            dispatch({
+              type: ADD_IMAGE_URI,
+              payload: res.assets[0].uri,
+            });
+            
+
             dispatch(addImageResponse(res));
           }
           closeModal();
@@ -103,7 +98,11 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
           const res = await launchImageLibrary(options);
           if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
             setImageUri(res.assets[0].uri);
-            dispatch(addImageUri(res.assets[0].uri));
+            dispatch({
+              type: ADD_IMAGE_URI,
+              payload: res.assets[0].uri,
+            });
+
             dispatch(addImageResponse(res));
           }
           closeModal();
@@ -112,6 +111,7 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
 
   return (
        <Pressable style={styles.container} onPress={closeModal}>
+           <StatusBar backgroundColor={'#00000080'} />
            <Pressable style={{ width: '100%', height: '23%', }}>
                  <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
                       <View style={styles.imageSelectionTitleView}>
@@ -125,8 +125,8 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
                                       <Text style={styles.txt}>Camera</Text>
                                </TouchableOpacity>
 
-                               <TouchableOpacity style={styles.selection}>
-                                      <Icon name="photo-library" size={40} color={'black'} onPress={() => handleImageGallery()}/>
+                               <TouchableOpacity style={styles.selection} onPress={() => handleImageGallery()}>
+                                      <Icon name="photo-library" size={40} color={'black'}/>
                                       <Text style={styles.txt}>Gallery</Text>
                                </TouchableOpacity>
 
