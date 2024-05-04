@@ -146,7 +146,7 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
 
   return (
     <View style={styles.mainContainer}>
-      <CustomHeader name="Add location" icon="map" call={handleLocation} />
+      <CustomHeader name="Add location" icon="map" call={handleLocation}/>
 
     
       <Searchbar

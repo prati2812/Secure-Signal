@@ -12,19 +12,21 @@ const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
   const token = useSelector((state:any) => state.userProfile.token);
  
   useEffect(() => {
-    if(token){
-      setTimeout(() => {
-        navigation.replace('TabNavigator');
-      }, 4000);
-    }
-    else{
-      setTimeout(() => {
-        navigation.replace('PhoneNumber');
-      }, 4000);
-    }
-    
-  }, []);
+    const navigateToScreen = () => {
+      if (token) { 
+        navigation.navigate('TabNavigator');
+      } else { 
+        navigation.navigate('PhoneNumber');
+      }
+    };
 
+    const timer = setTimeout(navigateToScreen, 4000);
+    return () => clearTimeout(timer);
+      
+  },[navigation , token]);
+
+
+  
   return (
     <View style={style.splashMain}>
       <LinearGradient

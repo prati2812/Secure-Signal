@@ -5,6 +5,7 @@ import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
 import OtpNumberScreen from "../screen/authentication/OtpNumberScreen";
 import EditProfile from "../screen/account/EditProfile";
 import NavigationStack from "./NavigationStack";
+import SubscriptionScreen from "../screen/subscription/SubscriptionScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ const AuthStack: React.FC = () => {
           <Stack.Screen name="OtpNumber" component={OtpNumberScreen} options={{ headerShown: false }} />
           <Stack.Screen name="EditProfile" component={EditProfile} options={{headerShown: false}}/>
           <Stack.Screen name="Home" component={NavigationStack}  options={{headerShown:false}}/>
+        
         </Stack.Navigator>
     
     );

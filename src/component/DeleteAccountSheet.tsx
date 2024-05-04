@@ -1,13 +1,22 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { firebase } from '@react-native-firebase/auth';
+import axios from 'axios';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler } from 'react-native';
+import { useSelector } from 'react-redux';
+
+
 
 interface DeleteAccountSheetProps {
     setDeleteAccountSheetVisible:any;
+    call?:any;
 }
 
-const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountSheetVisible}) => {
+const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountSheetVisible , call}) => {
   const slide = React.useRef(new Animated.Value(300)).current;
+  const userId = firebase.auth().currentUser?.uid; 
+  const token = useSelector((state : any) => state.userProfile.token);
 
   const slideUp = () => {
     Animated.timing(slide, {
@@ -36,6 +45,27 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
     }, 800);
   };
 
+  
+  const handleDeleteAccount = async() => {
+    await AsyncStorage.clear();
+    await axios.post('http://10.0.2.2:3000/deleteAccount', 
+      {userId,}, {
+      headers: {
+        'Content-Type':'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+  
+    BackHandler.exitApp();
+    slideDown();
+    setTimeout(() => {
+        setDeleteAccountSheetVisible(false);
+    }, 800);
+      
+   
+  }
+
   return (
     <Pressable style={styles.container} onPress={closeModal}>
       <Pressable style={{width: '100%', height: '25%'}}>
@@ -60,7 +90,9 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
                 <Text style={styles.btnText}>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.deleteButton}>
+              <TouchableOpacity 
+                  style={styles.deleteButton}
+                  onPress={handleDeleteAccount}>
                 <Text style={styles.btnText}>Delete</Text>
               </TouchableOpacity>
             </View>

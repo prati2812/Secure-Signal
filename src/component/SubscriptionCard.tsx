@@ -2,6 +2,8 @@ import React,{useState} from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import PaymentCard from './PaymentCard';
+import CrossLine from './CrossLine';
+import { useSelector } from 'react-redux';
 
 interface SubscriptionCardProps {
    subscriptionType:string,
@@ -13,15 +15,19 @@ interface SubscriptionCardProps {
 }
 
 const SubscriptionCard:React.FC<SubscriptionCardProps> = ({subscriptionType , price , details , onSelect, selected , onPress}) => {
- 
+  const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed); 
+  const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
 
   const handlePress = () => {
+    
      onSelect(subscriptionType , price); 
   }
   return (
-    <Pressable style={[styles.subscriptionCardView , selected && styles.isSelected]} onPress={handlePress}>
-
-         <View style={styles.subscriptionCardDataView}>
+    <Pressable style={[styles.subscriptionCardView , selected && styles.isSelected , subScriptionType === subscriptionType && styles.subscribedBannerCard]} onPress={handlePress} disabled={subScriptionType === subscriptionType}>
+         {
+            isSubscribed && subScriptionType === subscriptionType ? <CrossLine /> : null
+         }     
+         <View style={[styles.subscriptionCardDataView , subScriptionType === subscriptionType && styles.subscribedBanner]}>
                 <Text style={styles.subscriptionCardTypeText}>{subscriptionType}</Text>
                 <Text style={styles.subscriptionCardTypePrice}>{price}</Text>
          </View>
@@ -58,7 +64,7 @@ const styles = StyleSheet.create({
   },
   subscriptionCardDataView:{
     flexDirection:'row',
-    justifyContent:'space-between'
+    justifyContent:'space-between',
   },
   subscriptionCardTypeText:{
     fontSize:28,
@@ -92,7 +98,12 @@ const styles = StyleSheet.create({
   },
   isNotSelected:{
     backgroundColor:'gray',
-
+  },
+  subscribedBanner:{
+    paddingTop:10,
+  },
+  subscribedBannerCard:{
+    borderColor:'white',
   }
 
  

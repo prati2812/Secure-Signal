@@ -11,9 +11,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchLocation } from '../../redux/location/action';
 
 
-interface LocationHistoryProps {}
+interface LocationHistoryProps {
+  navigation:any;
+}
 
-const LocationHistory = (props: LocationHistoryProps) => {
+const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
     const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
     const [isVisble , setVisible] = useState(false);
     const userId = firebase.auth().currentUser?.uid;
@@ -54,7 +56,12 @@ const LocationHistory = (props: LocationHistoryProps) => {
     <View style={styles.container}>
          <StatusBar backgroundColor={'#3ebb6e'}/>
 
-         <CustomHeader name={'Locations'} icon={'cog-outline'} call={handleSetting}/>
+         <CustomHeader 
+             name={'Locations'} 
+             icon={'cog-outline'} 
+             call={handleSetting}
+             backIcon={'keyboard-backspace'}
+             backCall={() => navigation.goBack()}/>
 
          <ScrollView
              contentContainerStyle={{paddingTop:15}}

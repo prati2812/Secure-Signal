@@ -27,6 +27,8 @@ interface HelpScreenProps {
   };
 }
 
+
+
 const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   
   const [isVictim , setVictimButton] = useState(false);
@@ -34,9 +36,9 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const [query , setQuery] = useState('');
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
 
-  const mapNumber = route.params?.mapNumber;
+  const mapNumber = route.params?.mapNumber ?? undefined;
 
-  console.log("numberr" , mapNumber);
+ 
   
  
   
@@ -59,7 +61,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   }
 
   const handleLocationMap = () => {
-    if(mapNumber){
+    if(mapNumber !== undefined){
       navigation.navigate('LocationRouting' , {mapNumber});
     }
   }
@@ -72,20 +74,23 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile */}
         <View style={styles.backPressBtnContainer}>
-          <Pressable onPress={() => navigation.navigate('Home')}>
-          <View style={styles.backPressBtnView}>
-           
+          <Pressable onPress={() => navigation.goBack()}>
+            <View style={styles.backPressBtnView}>
               <Text>
                 <Icon name="arrow-back" size={35} color={'black'} />
               </Text>
-          </View>
-          </Pressable>  
+            </View>
+          </Pressable>
 
           <View style={styles.profileBtnView}>
             <Pressable onPress={() => navigation.navigate('Profile')}>
               <Image
                 resizeMode="cover"
-                source={{uri: imageUri ? imageUri : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}
+                source={{
+                  uri: imageUri
+                    ? imageUri
+                    : 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                }}
                 style={styles.profileImage}
               />
             </Pressable>
@@ -98,7 +103,9 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
 
         {/* location map */}
         <View style={styles.locationMapView}>
-          <Pressable style={styles.locationmapContainer} onPress={() => handleLocationMap()}>
+          <Pressable
+            style={styles.locationmapContainer}
+            onPress={() => handleLocationMap()}>
             <MapView
               style={styles.locationMap}
               provider={PROVIDER_GOOGLE}
@@ -111,64 +118,69 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
                 longitudeDelta: 0.0121,
               }}>
               {
-                 mapNumber == 1 ?
-                        <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
-                             <Icon name='local-police' size={40} color={'#5F4C24'}/>
-                        </Marker>         
-                    : mapNumber == 2 ?
-                    <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
-                             <Icon name='local-hospital' size={40} color={'red'}/>
-                    </Marker> : 
-                      <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}/>
-                     
-              }  
-              
+                <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
+                  {mapNumber === 1 ? (
+                    <Icon name="local-police" size={40} color={'#5F4C24'} />
+                  ) : mapNumber === 2 ? (
+                    <Icon name="local-hospital" size={40} color={'red'} />
+                  ) : (
+                    <Marker
+                      coordinate={{latitude: 37.78825, longitude: -122.4324}}
+                    />
+                  )}
+                </Marker>
+              }
             </MapView>
           </Pressable>
         </View>
 
-
         {/* Query Button */}
         <View style={styles.queryBtnView}>
-
-            <Pressable onPress={() => handleVictim()}>
-            <View style={[styles.queryBtn , isVictim && styles.activeBackground]}>
-                <Text>
-                    <Icon name="warning" size={35} style={[styles.icon , isVictim && styles.activeIcon]}/>
-                </Text>
-                <Text style={[styles.textStyle , isVictim && styles.activeTextStyle]}>
-                      I'm a{"\n"}victim
-                </Text>
+          <Pressable onPress={() => handleVictim()}>
+            <View
+              style={[styles.queryBtn, isVictim && styles.activeBackground]}>
+              <Text>
+                <Icon
+                  name="warning"
+                  size={35}
+                  style={[styles.icon, isVictim && styles.activeIcon]}
+                />
+              </Text>
+              <Text
+                style={[styles.textStyle, isVictim && styles.activeTextStyle]}>
+                I'm a{'\n'}victim
+              </Text>
             </View>
-            </Pressable>
+          </Pressable>
 
-            <Pressable onPress={() => handleWitness()}>
-            <View style={[styles.queryBtn , isWitness && styles.activeBackground]}>
-                <Text>
-                    <Icon name="visibility" size={35} style={[styles.icon , isWitness && styles.activeIcon]}/>
-                </Text>
-                <Text style={[styles.textStyle , isWitness && styles.activeTextStyle]}>
-                      I'm a{"\n"}witness
-                </Text>
-                  
+          <Pressable onPress={() => handleWitness()}>
+            <View
+              style={[styles.queryBtn, isWitness && styles.activeBackground]}>
+              <Text>
+                <Icon
+                  name="visibility"
+                  size={35}
+                  style={[styles.icon, isWitness && styles.activeIcon]}
+                />
+              </Text>
+              <Text
+                style={[styles.textStyle, isWitness && styles.activeTextStyle]}>
+                I'm a{'\n'}witness
+              </Text>
             </View>
-            </Pressable>    
+          </Pressable>
         </View>
 
-        <Pressable onPress={()=> handleHelpButton()}> 
-        <View style={styles.helpBtnView}>
-             <View style={styles.helpBtn}>
-                  <Text>
-                        <IconFont name='bell' size={30} color={'white'}/>
-                  </Text>
-                  <Text style={styles.helpBtnStyle}>
-                       Help
-                  </Text>
-             </View>
-        </View>
+        <Pressable onPress={() => handleHelpButton()}>
+          <View style={styles.helpBtnView}>
+            <View style={styles.helpBtn}>
+              <Text>
+                <IconFont name="bell" size={30} color={'white'} />
+              </Text>
+              <Text style={styles.helpBtnStyle}>Help</Text>
+            </View>
+          </View>
         </Pressable>
-
-
       </ScrollView>
     </SafeAreaView>
   );

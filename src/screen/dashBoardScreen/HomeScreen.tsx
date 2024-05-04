@@ -16,6 +16,9 @@ import Contact from '../../component/Contact';
 import HomeCustomHeader from '../../component/HomeCustomHeader';
 import { allNotificationReadOrNot, deleteAllNotificationOrNot } from '../../redux/notifications/action';
 import Geolocation from 'react-native-geolocation-service';
+import { startSubscriptionService } from '../../utils/SubscriptionService';
+import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscription/action';
+import { findNearestPoliceStation } from '../../redux/location/action';
 
 
 
@@ -48,19 +51,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : RootState) => state.selectedContacts);
   const matchedContacts = useSelector((state : any) => state.contacts.matchingContacts);
+  const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
+  const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const [appState,setAppState] = useState(AppState.currentState);
   const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
   const [volume , setVolume] = useState(-1);  
   const [token , setToken] = useState(null);
   const [volumUp, setVolumeUp] = useState(0);
-  
+  const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
    
-
  
 
   useEffect(() => {
+    
     if(volumUp === 3){
        sendSMS();
     }
@@ -68,12 +73,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     if(notificationReadStatus === null){
       dispatch(allNotificationReadOrNot(userId,token));
     }
-    else{
-       console.log(notificationReadStatus);
+
+    dispatch(findNearestPoliceStation(userId));
+    if(nearestPoliceStation === null){
+      dispatch(findNearestPoliceStation(userId));
     }
+    
+    
   });
   
-
   useEffect(() => {
     getToken();
     dispatch(addImageUri(userId,token));
@@ -82,7 +90,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   },[token]);
 
   
-
   useEffect(() => {
     volumeLevel();    
     //getNotificationToken(); 
@@ -111,7 +118,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   
   });
 
+  useEffect(() => {
+    if (isSubscribed === true) {
+      
+      
+      const interval = setInterval(() => {
+      
+        checkSubscriptionStatus();
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+    else{
+      navigation.navigate('Subscription');
+    }
+  }, [isSubscribed]);
+
   
+  const checkSubscriptionStatus = () => {
+   
+    let date = new Date();
+    let currentDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()} `;
+    if(currentDate > subScriptionEndTime){
+       dispatch(updateSubscriptionDetails(userId));
+    }
+    
+  }
 
 
 
@@ -288,7 +320,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
    
-
   const volumeLevel = async() => {
     
     VolumeManager.showNativeVolumeUI({ enabled: true });
@@ -305,9 +336,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
        
   }
 
-
-  
-
   // Send SMS
   const sendSMS = () => {
     SendDirectSms("+918733049183", `https://www.google.com/maps/search/?api=1&query=${21.1702},${72.8311}`)
@@ -315,26 +343,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     .catch((err) => console.log("catch", err))
   }
 
-  
-
-  
   const handleLocationMap = (mapNumber:number) => {
     navigation.navigate('HelpScreen', { mapNumber: mapNumber});
   }
+
   const handleNotification = () =>{
     navigation.navigate('Notification');
   }
+
   const handleContactList = () => {
       navigation.navigate('EmergencyContactList');
   }
 
-
-
-
   return (
     <View style={style.homeMain}>
       <StatusBar backgroundColor={'#3ebb6e'} />
-
+     
       {/* custom header */}
       <HomeCustomHeader name="Secure Signal" icon="bell" call={handleNotification} isRead={notificationReadStatus}/>
 
@@ -427,6 +451,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         </View>
 
       </ScrollView>
+     
     </View>
   );
 };

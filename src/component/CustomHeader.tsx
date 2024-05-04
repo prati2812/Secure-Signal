@@ -5,11 +5,14 @@ import { Appbar } from 'react-native-paper';
 interface CustomHeaderProps{
     name:string,
     icon?:string,
-    call?:any
+    call?:any,
+    backIcon?:string,
+    backCall?:any,    
 }
 
-const CustomHeader:React.FC<CustomHeaderProps> = ({name , icon , call}) => (
+const CustomHeader:React.FC<CustomHeaderProps> = ({name , icon , call , backIcon , backCall}) => (
   <Appbar.Header style={styles.appHeader}>
+    {backIcon && <Appbar.Action icon={backIcon} onPress={backCall} color='white' size={35}/>}
     <Appbar.Content title={name} color='white' titleStyle={styles.apptitle} />
     {icon && <Appbar.Action icon={icon} onPress={call} color='white' />}
   </Appbar.Header>

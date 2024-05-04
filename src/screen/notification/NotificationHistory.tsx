@@ -14,9 +14,11 @@ import PushNotification from '../../assets/icons/PushNotification';
 
 
 
-interface NotificationHistoryProps {}
+interface NotificationHistoryProps {
+  navigation:any;
+}
 
-const NotificationHistory = (props: NotificationHistoryProps) => {
+const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) => {
   const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
   const [read , setRead] = useState(false);
   const userId = firebase.auth().currentUser?.uid; 
@@ -67,6 +69,8 @@ const NotificationHistory = (props: NotificationHistoryProps) => {
           name={'Notification'}
           icon={'cog-outline'}
           call={handleSetting}
+          backIcon={'keyboard-backspace'}
+          backCall={() => navigation.goBack()}
         />
 
         {emergencyContactNotification.length > 0  &&

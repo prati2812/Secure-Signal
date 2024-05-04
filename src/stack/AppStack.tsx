@@ -4,26 +4,28 @@ import { NavigationContainer } from '@react-navigation/native'
 import AuthStack from "./AuthStack";
 import NavigationStack from "./NavigationStack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToken } from "../redux/userprofile/action";
 
 
 
-const Stack = createNativeStackNavigator();
+
 
 const AppStack: React.FC = () => {
-  const [token, setToken] = useState('');
+  const token = useSelector((state: any) => state.userProfile.token);
   const dispatch = useDispatch(); 
 
   const getToken = async() => {
     const token = await AsyncStorage.getItem('token');
-    dispatch(addToken(token));
-    setToken(token);
+    if(token){
+      dispatch(addToken(token));
+    }
+    
   }
   
   useEffect(() => {
     getToken();
-  },[token]);
+  },[]);
 
 
   

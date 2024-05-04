@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView, BackHandler } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BottomSheet from '../../component/BottomSheet';
@@ -8,6 +8,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import CustomProfileOption from '../../component/CustomProfileOption';
 import { addUserPhoneNumber } from '../../redux/userprofile/action';
 import { firebase } from '@react-native-firebase/auth';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface UserProfile {
   imageUri: string | null;
@@ -24,6 +26,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const userProfile = useSelector((state: { userProfile: UserProfile }) => state.userProfile);
   const userPhoneNumber = useSelector((state:any) => state.userProfile.phoneNumber);
   const token = useSelector((state : any) => state.userProfile.token);
+  const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
   const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
 
@@ -31,6 +34,9 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
 
 
   useEffect(() => {
+    console.log(subScriptionType);
+    
+    
     dispatch(addUserPhoneNumber(userId,token));
   },[]);
 
@@ -41,6 +47,8 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const openDeleteAccountSheet = () => {
     setDeleteAccountSheetVisible(true);
   };
+
+ 
 
   return (
     <View style={styles.container}>
@@ -76,7 +84,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           <CustomProfileOption optionName='PhoneNumber' data={userPhoneNumber} icon='call' />
 
           <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Subscription')}>
-            <CustomProfileOption optionName='subscription' icon='bolt' />
+            <CustomProfileOption optionName='subscription' icon='bolt' data={subScriptionType ? subScriptionType: ''}/>
           </TouchableOpacity>
         </View>
 

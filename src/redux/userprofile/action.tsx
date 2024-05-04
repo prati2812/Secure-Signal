@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Dispatch } from "redux";
 import RNFetchBlob from "rn-fetch-blob";
+import { IS_SUBSCRIBED, SUBSCRIPTION_END_TIME, SUBSCRIPTION_TYPE } from "../subscription/action";
 
 export const ADD_IMAGE_URI = 'IMAGE_URI';
 export const CHANGE_USER_NAME = 'CHANGE_USER_NAME';
@@ -54,11 +55,26 @@ export const changeUserName = (userId:string , token:string) => {
         
               if(response.status === 200){
                 const responseData = await response.data;
-                const{phoneNumber , userName} = responseData;
+                const{phoneNumber , userName , isSubscribed, subScriptionType , subscriptionEndTime} = responseData;
                 dispatch({
                      type: CHANGE_USER_NAME,
                      payload: userName,
                 })
+                dispatch({
+                  type:IS_SUBSCRIBED,
+                  payload:isSubscribed,
+                });
+                dispatch({
+                  type:SUBSCRIPTION_TYPE,
+                  payload:subScriptionType,
+                })
+                dispatch({
+                  type:SUBSCRIPTION_END_TIME,
+                  payload:subscriptionEndTime,
+                })
+               
+               
+                
               }
               else{
                 console.log("Something occured");
@@ -104,7 +120,7 @@ export const addUserPhoneNumber = (userId:string,token:string) => {
       
 };
 
-export const addToken = (token : string) =>({
+export const addToken = (token : string | null) =>({
        type: ADD_TOKEN,
        payload: token,
 });

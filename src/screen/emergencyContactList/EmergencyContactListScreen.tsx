@@ -1,5 +1,5 @@
 import React,{useEffect , useState} from 'react';
-import { Text, View, StyleSheet, Platform, PermissionsAndroid, FlatList, ScrollView, TouchableOpacity ,ActivityIndicator} from 'react-native';
+import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity ,ActivityIndicator} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import { Searchbar } from 'react-native-paper';
 import Contacts  from 'react-native-contacts';
@@ -11,7 +11,7 @@ import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import SectionList from '../../component/SectionList';
 import MatchingContact from '../../component/MatchingContact';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+
 
 
 

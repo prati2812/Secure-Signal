@@ -5,9 +5,9 @@ import userProfileReducer from './userprofile/userProfileReducer';
 import verificationReducer from './credential/verificationReducer';
 import locationReducer from './location/locationReducer';
 import notificationReducer from './notifications/notificationReducer';
+import subscripionReducer from './subscription/subscriptionReducer';
 
 const thunkMiddleware = require('redux-thunk').thunk
-
 
 
 const rootReducer = combineReducers({
@@ -17,10 +17,11 @@ const rootReducer = combineReducers({
   verification: verificationReducer,
   location:locationReducer,
   notifications:notificationReducer,
-
+  subscription:subscripionReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
+
 
 export default store;
 

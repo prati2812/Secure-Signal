@@ -8,8 +8,6 @@ import { requestUserPermission } from '../../utils/NotificationService';
 
 
 
-
-
 interface OtpNumberScreenProps {
   navigation: any; 
 }  

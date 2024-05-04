@@ -25,6 +25,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeUserName } from '../../redux/userprofile/action';
 import { firebase } from '@react-native-firebase/auth';
+import { addSubscriptionDetails } from '../../redux/subscription/action';
 
 
 interface EditProfileProps {
@@ -46,8 +47,9 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
   const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
   const phoneNumber = useSelector((state: any) => state.userProfile.phoneNumber);
-  const userId = firebase.auth().currentUser?.uid;
   
+  const userId = firebase.auth().currentUser?.uid;
+     
 
   const [appState, setAppState] = useState(AppState.currentState);
 
@@ -109,50 +111,53 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
   const handleSaveProfile = async() => {
        
-    console.log(userId);
-    console.log(notificationToken);
-    console.log(phoneNumber);
-    console.log(userName);
-    console.log(imageResponse);
+  
+    dispatch(changeUserName(userName));
 
-        
+    const formData = new FormData();
+    formData.append('image', {
+      uri: imageResponse.assets[0].uri,
+      type: imageResponse.assets[0].type,
+      name: imageResponse.assets[0].fileName,
+    });
 
-       dispatch(changeUserName(userName));
+    formData.append('phoneNumber', phoneNumber);
+    formData.append('userName', userName);
+    formData.append('userId', userId);
+    formData.append('notificationToken', notificationToken);
+
+    console.log(formData);
+
+    setIndicatorVisible(true);
+
+    const response = await axios.post(
+      'http://10.0.2.2:3000/uploadImage',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+
+    if(response.status === 201){
+      const responseData = await response.data;
+      const {token, imageUrl} = responseData;
+      AsyncStorage.setItem('token', token);
+  
+      dispatch(addSubscriptionDetails(userId , token));
+      setIndicatorVisible(false);
        
-     
-       
-       
-      
-        const formData = new FormData();
-        formData.append('image', {
-          uri: imageResponse.assets[0].uri,
-          type: imageResponse.assets[0].type,
-          name: imageResponse.assets[0].fileName,
-        });
+      navigation.navigate('Home');
+    
+    }
+    else{
+      setIndicatorVisible(false);
+      Alert.alert("Error" , 
+             "Something went to wrong, Please try again later");
+    }
 
-        formData.append('phoneNumber', phoneNumber); 
-        formData.append('userName', userName);
-        formData.append('userId', userId);
-        formData.append("notificationToken" , notificationToken._j);
-        
-        console.log(formData);
-        
       
-        setIndicatorVisible(true); 
-      
-        const response = await axios.post('http://10.0.2.2:3000/uploadImage', formData, {
-          headers: {
-            "Content-Type": 'multipart/form-data',
-          },
-        });
-
-
-          const responseData = await response.data;
-          const {token , imageUrl} = responseData;
-          AsyncStorage.setItem('token' , token);
-          
-        setIndicatorVisible(false);
-        navigation.navigate('Home');  
      
      
   }
