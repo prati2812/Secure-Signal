@@ -60,15 +60,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [volume , setVolume] = useState(-1);  
   const [token , setToken] = useState(null);
   const [volumUp, setVolumeUp] = useState(0);
+  const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
    
  
 
   useEffect(() => {
     
+    if(volumeDown === 3){
+       stop();
+       setVolumeDown(0);
+    }
     if(volumUp === 3){
        sendSMS();
+       backgroundService();
+       setVolumeUp(0);
     }
+
     dispatch(allNotificationReadOrNot(userId,token));
     if(notificationReadStatus === null){
       dispatch(allNotificationReadOrNot(userId,token));
@@ -111,6 +119,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
          if(keyMessage === 'VOLUME_UP_KEY'){
             setVolumeUp(volumUp+1);
          }
+         if(keyMessage === 'VOLUME_DOWN_KEY'){
+            setVolumeDown(volumeDown+1); 
+         }
+         
        });
       
     
@@ -120,7 +132,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (isSubscribed === true) {
-      
       
       const interval = setInterval(() => {
       
@@ -135,11 +146,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }, [isSubscribed]);
 
   
+  // check subscription status
   const checkSubscriptionStatus = () => {
    
     let date = new Date();
-    let currentDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()} `;
-    if(currentDate > subScriptionEndTime){
+    let currentFormattedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()} `;
+    let  currentDate = new Date(currentFormattedDate);
+    let endDate = new Date(subScriptionEndTime);
+    if(currentDate > endDate){
+      console.log(currentDate , subScriptionEndTime);
        dispatch(updateSubscriptionDetails(userId));
     }
     
@@ -151,18 +166,71 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const backgroundService = async() => {
     await BackgroundService.start(veryIntensiveTask, options  );
     await BackgroundService.updateNotification({taskDesc: 'New ExampleTask description'});
+
+
+    
+
+
+
+    let selectedUserId = [];
+    let tokenMapping = [];
+    for(const contact of selectedContacts){ 
+        if(contact.notificationToken){
+           selectedUserId.push(contact.notificationToken);
+        }
+    }
+
+
+    for(let i=0; i < selectedUserId.length; i++){
+      const userId = selectedUserId[i];
+      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
+          userId,},{
+          headers:{
+            'Content-Type':'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+      const data  = await response.data;
+      tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
+    }
+    
+  
+    
+
+
+    for(let i=0; i < tokenMapping.length; i++){
+      let  notifyToken = tokenMapping[i].notificationToken;
+      console.log(notifyToken);
+      
+      const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
+        notifyToken , userName},{
+        headers:{
+          'Content-Type':'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+
+
+       
+       console.log("successfully sent");
+      
+    }  
+
   }
 
+  // stop background service
   const stop = async() => {
      await BackgroundService.stop();
   }
 
   
+
   const veryIntensiveTask = async (taskDataArguments: { delay: any; } ) => {
     const { delay } = taskDataArguments;
     await new Promise( async (resolve) => {
         for (let i = 0; BackgroundService.isRunning(); i++) {
-         //   getCurrentLocation();
             sendLiveLocation(); 
             await sleep(delay);
         }
@@ -170,6 +238,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   };
 
 
+  // Background Service Notification Options
   const options = {
     taskName: 'Location',
     taskTitle: 'Location Sharing',
@@ -184,6 +253,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     },
   };
  
+
+
   const sendLiveLocation = async() => {
     let selectedUser = [];
     for(const contact of selectedContacts){ 
@@ -194,6 +265,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
     await getCurrentLocation();
     
+    let policeStationId = nearestPoliceStation.nearestPoliceStation.id;
+
+
+   
+    
+    await axios.post('http://10.0.2.2:3000/shareLocationNearestPoliceStation' , {
+        userId, policeStationId , location},{
+        headers:{
+          'Content-Type':'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+    });
+
+
+
     for(let i=0; i < selectedUser.length; i++){
       const selectedUserId = selectedUser[i];
       const response = await axios.post('http://10.0.2.2:3000/addLiveLocation' , {
@@ -204,15 +290,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         },
       });
 
+
     }
+
+
 
   }
 
   const getCurrentLocation = async() => {
     Geolocation.watchPosition(
       position => {
-        console.log(position.coords.latitude , position.coords.longitude);
-        setLocation({latitude:position.coords.latitude , longitude:position.coords.longitude});
+        const newLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+        console.log(newLocation); 
+        setLocation(prevLocation => ({ ...prevLocation, ...newLocation })); 
+        
       },
       error => {
         console.log(error.code, error.message);
@@ -410,12 +501,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               scrollEnabled={false}
               zoomEnabled={false}
               region={{
-                latitude: 37.78825,
-                longitude: -122.4324,
+                latitude:37.78825,
+                longitude:-122.4324,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
-              <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}} >
+              <Marker coordinate={{latitude: 37.78825, 
+                                   longitude:-122.4324}} >
                   <Icon name='local-police' size={40} color={'#5F4C24'}/>
               </Marker>
             </MapView>

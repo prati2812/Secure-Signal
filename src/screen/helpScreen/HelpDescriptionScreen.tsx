@@ -39,15 +39,19 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const [uri , setUri] = useState<ImageInfo[]>([]);
     const [complaint_location, setComplaintLocation] = useState({ latitude: 0, longitude: 0 });
     const [isIndicatorVisible, setIndicatorVisible] = useState(false);
-
+    const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation); 
+    const policeStationId = nearestPoliceStation.nearestPoliceStation.id;
 
     const token = useSelector((state : any) => state.userProfile.token);
     const complaintBy = route.params?.query;
     const userId = firebase.auth().currentUser?.uid;
 
 
-    useEffect(() => {
+    useEffect(() => {  
+      console.log(policeStationId);
+      
       currentLocation();  
+      
     },[complaint_location]);
 
 
@@ -107,6 +111,8 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
           }      
         } 
 
+
+        complaintData.append('policeStationId' , policeStationId);
         complaintData.append('userId', userId);
         complaintData.append('complaintBy', complaintBy);
         complaintData.append('complaint', complaint);
@@ -127,6 +133,12 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         });
 
         if(response.status === 200){
+          const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification',  {
+            headers: {
+              "Content-Type": 'application-json',
+            },
+          });
+     
            setIndicatorVisible(false);
            navigation.navigate('HelpConfirmation');
         }

@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface CustomProfileOptionProps {
     optionName: string,
-    data?: string,
+    data?: string | null,
     icon: string,
 }
 

@@ -68,11 +68,13 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   },[userName]);
 
 
-   const getToken = async() => {
+  const getToken = async() => {
     const notificationToken = await AsyncStorage.getItem('fcm_token');
     setNotificationToken(notificationToken);
-    
-   }
+  }
+
+  
+
 
   const handleAppStateChange = (nextAppState: any) => {
     setAppState(nextAppState);

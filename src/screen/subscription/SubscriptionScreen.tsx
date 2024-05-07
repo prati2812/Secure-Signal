@@ -97,6 +97,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
             })
              .then(()=>{
                dispatch(addImageUri(userId , token));
+               
                navigation.navigate('Home');
             }).catch((error) =>{
                 console.log(error);

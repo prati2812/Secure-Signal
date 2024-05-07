@@ -36,11 +36,12 @@ interface EmergencyContactListScreenProps {
   };
   selectedContacts: Contact[];
   contacts: RootState; 
+  navigation:any;
 }
 
 
 
-const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}) => {
+const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<Contact[]>([]);
   const [filteredMatchingContactData , setFilteredMatchingContactData] = useState([]);
@@ -67,6 +68,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
 
 
   useEffect(() => {   
+     
+      
        if (contacts.length > 0) {
        } else {
          handleContactList();
@@ -353,7 +356,9 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({}
  
   return (
     <View style={styles.mainContainer}>
-      <CustomHeader name="Contact List" icon={''} />
+      <CustomHeader name="Contact List" icon={''} 
+          backIcon={'keyboard-backspace'}
+          backCall={() => navigation.navigate('TabNavigator')}/>
 
       {/* Search Bar */}
       <Searchbar

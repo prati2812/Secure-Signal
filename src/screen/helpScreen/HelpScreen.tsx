@@ -35,10 +35,12 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const [isWitness , setWitnessButton] = useState(false);
   const [query , setQuery] = useState('');
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
-
+  const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const mapNumber = route.params?.mapNumber ?? undefined;
+  const latitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude;
+  const longtitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude;
 
- 
+
   
  
   
@@ -112,13 +114,13 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               scrollEnabled={false}
               zoomEnabled={false}
               region={{
-                latitude: 37.78825,
-                longitude: -122.4324,
+                latitude: latitude ? latitude : 37.78825,
+                longitude: longtitude ? longtitude :  -122.4324,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
               {
-                <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
+                <Marker coordinate={{latitude: latitude ? latitude :37.78825, longitude: longtitude ? longtitude :-122.4324}}>
                   {mapNumber === 1 ? (
                     <Icon name="local-police" size={40} color={'#5F4C24'} />
                   ) : mapNumber === 2 ? (

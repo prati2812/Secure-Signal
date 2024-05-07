@@ -7,6 +7,7 @@ import  poyline from 'google-polyline';
 import { useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from 'react-native-geolocation-service';
+import { useSelector } from 'react-redux';
 
 interface LocationRouteScreenProps {}
 const LocationRouteScreen = (props: LocationRouteScreenProps) => {
@@ -15,6 +16,17 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
   const [routeData, setRouteData] = useState<{ routes: any[] } | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number][]>([]);
   const [isVisible, setVisible] = useState(false);
+  const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
+
+
+  useEffect(() => {
+      if(nearestPoliceStation !== null){
+        const latitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude;
+        const longtitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude;
+        setDestination({latitude:latitude , longitude:longtitude});
+       
+      }
+  },[]);
   
 
   const route  = useRoute();

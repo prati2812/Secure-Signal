@@ -66,7 +66,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           </View>
 
           <Text style={styles.profileName}>{userName}</Text>
-          <Text style={styles.phoneNumber}>{userPhoneNumber}</Text>
+          <Text style={styles.phoneNumber}>{firebase.auth().currentUser?.phoneNumber}</Text>
 
           <TouchableOpacity style={styles.editProfileButton} onPress={openBottomSheet}>
             <View style={styles.editProfileButtonContent}>
@@ -81,7 +81,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           {/* Replace CustomProfileOption with your component */}
           
           <CustomProfileOption optionName='Name' data={userName} icon='person' />
-          <CustomProfileOption optionName='PhoneNumber' data={userPhoneNumber} icon='call' />
+          <CustomProfileOption optionName='PhoneNumber' data={firebase.auth().currentUser?.phoneNumber} icon='call' />
 
           <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Subscription')}>
             <CustomProfileOption optionName='subscription' icon='bolt' data={subScriptionType ? subScriptionType: ''}/>
