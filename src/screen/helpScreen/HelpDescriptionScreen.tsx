@@ -41,6 +41,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const [isIndicatorVisible, setIndicatorVisible] = useState(false);
     const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation); 
     const policeStationId = nearestPoliceStation.nearestPoliceStation.id;
+    const userName  = useSelector((state : any) => state.userProfile.userName);
 
     const token = useSelector((state : any) => state.userProfile.token);
     const complaintBy = route.params?.query;
@@ -48,7 +49,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
 
     useEffect(() => {  
-      console.log(policeStationId);
+      
       
       currentLocation();  
       
@@ -133,11 +134,29 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         });
 
         if(response.status === 200){
-          const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification',  {
-            headers: {
-              "Content-Type": 'application-json',
-            },
-          });
+        
+          
+        
+          let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
+          console.log(policeStationId);
+           
+           const title = 'Complaint';
+           const body = 'Complaint sent by '
+           const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification' , {
+              policeStationId , userName , title , body},{
+             headers:{
+               'Content-Type':'application/json',
+               Authorization: `Bearer ${token}`,
+             },
+           });
+     
+           if(response.status === 200){
+             console.log("complaint , sent");
+           }
+           else{
+             console.log("fail");
+             
+           } 
      
            setIndicatorVisible(false);
            navigation.navigate('HelpConfirmation');

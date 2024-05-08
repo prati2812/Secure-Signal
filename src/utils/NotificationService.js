@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import {PermissionsAndroid , Platform} from 'react-native';
+import notifee from '@notifee/react-native';
+
 
 export async function requestUserPermission() {
     const authStatus = await messaging().requestPermission();
@@ -53,5 +55,24 @@ export const notificationListener = () => {
   // Foreground State
   messaging().onMessage(async remoteMessage => {
     console.log('foreground', remoteMessage);
+
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
+    await notifee.displayNotification({
+      title: remoteMessage.notification.title,
+      body: remoteMessage.notification.body,
+      android: {
+        channelId,
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
   });
+
+
 };

@@ -30,14 +30,10 @@ export const addSelectedContact = (userId:string , token:string) =>{
     
             const responseData = await response.data;
             const {contacts} = responseData;
-            
-            for(let i=0; i < contacts[0].length; i++){
-                 dispatch({
-                    type:ADD_SELECTED_CONTACTS,
-                    payload: contacts[0][i],
-                 })
-            }
-    
+            dispatch({
+               type: ADD_SELECTED_CONTACTS,
+               payload: contacts,
+            });
            }
            else{
               console.log("something occured");

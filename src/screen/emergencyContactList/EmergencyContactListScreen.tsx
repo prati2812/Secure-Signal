@@ -59,30 +59,33 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   // Get Current User Id
   const userId = firebase.auth().currentUser?.uid;
 
-  const selectedContacts = useSelector((state : EmergencyContactListScreenProps) => state.selectedContacts);
+  const selectedContacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.selectedContact);
   const contacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.contacts);
   const matchedContacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.matchingContacts);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const token = useSelector((state : any) => state.userProfile.token);
   
 
+  
 
-  useEffect(() => {   
-     
-      
+  useEffect(() => {
+       console.log(selectedContacts);
+                 
        if (contacts.length > 0) {
        } else {
          handleContactList();
        }
-  });
+  },[]);
 
 
  
 
   useEffect(() => {  
     handleUpdateContactList();
-    handleMatchingUpdatedContactList();
-  },[!isUpdated]);
+    handleMatchingUpdatedContactList();    
+   
+    
+  },[contacts]);
  
   useEffect(() => {
      dispatch(addMatchingContacts(userId,contacts,token)); 
@@ -91,30 +94,61 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
 
   const handleUpdateContactList = () => {
-    const filteredContacts = contacts.filter((contactItem) =>
-    !matchedContacts.some(removeItem => removeItem.recordID === contactItem.recordID) &&
-    !selectedContacts.some(removeItem => removeItem.recordID === contactItem.recordID)
-    );
+     
+   if (selectedContacts && matchedContacts) {
+     const filteredContacts = contacts.filter(
+       contactItem =>
+         !matchedContacts.some(
+           removeItem => removeItem.recordID === contactItem.recordID,
+         ) &&
+         !selectedContacts.some(
+           removeItem => removeItem.recordID === contactItem.recordID,
+         ),
+     );
+
+     if (filteredContacts.length > 0) {
+       setIndicatorValue(indicatorValue + 1);
+       setUpdatedContact(filteredContacts);
+     }
+   } else if (matchedContacts) {
+     const filteredContacts = contacts.filter(
+       contactItem =>
+         !matchedContacts.some(
+           removeItem => removeItem.recordID === contactItem.recordID,
+         ),
+     );
+
+     if (filteredContacts.length > 0) {
+       setIndicatorValue(indicatorValue + 1);
+       setUpdatedContact(filteredContacts);
+     }
+   
+     
+   }
+    
 
     
-    if(filteredContacts.length > 0){
-      setIndicatorValue(indicatorValue+1);
-      setUpdatedContact(filteredContacts);  
-    }
-  
   }
 
   const handleMatchingUpdatedContactList = () => {
-    console.log(matchedContacts);
     
-    const filteredContacts = matchedContacts.filter((contactItem) =>
-       !selectedContacts.some(removeItem => removeItem.recordID === contactItem.recordID)
-    );
+    if (matchedContacts && selectedContacts) {
+      const filteredContacts = matchedContacts.filter(
+        contactItem =>
+          !selectedContacts.some(
+            removeItem => removeItem.recordID === contactItem.recordID,
+          ),
+      );
 
-    
-    if(filteredContacts.length > 0){
-       setIndicatorValue(indicatorValue+1);
-       setMatchingUpdatedContact(filteredContacts);   
+      if (filteredContacts.length > 0) {
+        setIndicatorValue(indicatorValue + 1);
+        setMatchingUpdatedContact(filteredContacts);
+      }
+    }
+    else{
+        
+      setMatchingUpdatedContact(matchedContacts);
+      
     }
     
     
@@ -142,7 +176,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       .then(contacts => dispatch(addContact(contacts)))
       .catch(e => {
         console.log(e);
-      });     
+      });  
+
+     
+      
   };
 
  
@@ -308,9 +345,11 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     for(let i=0; i < tokenMapping.length; i++){
         let  notifyToken = tokenMapping[i].notificationToken;
         console.log(notifyToken);
-      
+        
+        const title = 'Emergency Contact Set';
+        const body = 'You have been designated as an emergency contact by ';
         const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
-              notifyToken},{
+              notifyToken , userName, title , body},{
                     headers:{
                       'Content-Type':'application/json',
                       Authorization: `Bearer ${token}`,
@@ -373,7 +412,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
       {/* Selected Contacts list */}
       <View>
-        { isVisible===false && selectedContacts.length > 0 && (
+        { isVisible===false && selectedContacts  && (
           <View style={styles.guardiansView}>
             <Text style={styles.guardiansText}>Guardians</Text>
 
@@ -381,7 +420,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                 showsHorizontalScrollIndicator={false} 
                 contentContainerStyle={{paddingRight:17}}>
               <>{
-                 selectedContacts.map((item , key) => {
+                 selectedContacts.map((item: Contact , key: any) => {
                   return (
                     <View style={styles.selectedContactView}>
                       <View style={styles.placeHolder}>
@@ -415,20 +454,20 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
         style={{marginTop:10}}> 
       
       {
-          matchedContacts.length > 0 &&  <>
+          matchedContacts&&  <>
           <SectionList title={'Matched Contacts'} borderColor={'lightpink'} />
           <ScrollView
              showsVerticalScrollIndicator={false}
              style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
              {
                 
-                filteredMatchingContactData.length > 0 ? filteredMatchingContactData.map((item,key) => {
+                filteredMatchingContactData ? filteredMatchingContactData.map((item,key) => {
                   return (
                     <MatchingContact
                       contact={item}
                       key={key}
                       isSelected={(isSelectedContact === true && selectedContacts.some(
-                        contact => contact.recordID === item.recordID,
+                        (contact: { recordID: any; }) => contact.recordID === item.recordID,
                       ))}
                       handleMatchingSelected={() => {handleMatchingContactSelect(item)}}
                     />
@@ -436,7 +475,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                 })
               
                 :
-                 matchingUpdatedContact.length > 0  && matchingUpdatedContact.map((item , key) => {
+                 matchingUpdatedContact  && matchedContacts.map((item , key) => {
                    return (
                      <MatchingContact
                        contact={item}
@@ -462,7 +501,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
          
      {/* Contact List */}
      {
-         contacts.length > 0 && 
+         contacts && 
          <>
           
           <SectionList title={'No App Contacts'} borderColor={'lightpink'} />
@@ -473,7 +512,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
            {  
         
             // Select Contact through searchbar  
-            filteredData.length > 0 ? filteredData.map((item,key) => {
+            filteredData ? filteredData.map((item,key) => {
               return (
                 <Contact
                   contact={item}
@@ -487,7 +526,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
             })
             :
 
-
+          
+               
             updatedContact.map((item , key) => {
                return(
                  <Contact 
@@ -522,7 +562,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
      
 
      {/* Selected Contact List */}
-      { (selectedContacts.length > 0 && isVisible && isSelected > 0) && (
+      { (selectedContacts && isVisible && isSelected > 0) && (
         <TouchableOpacity
           style={styles.guardiansBtnView} onPress={() => handleSetasGuardian()}>
           <View style={styles.guardiansBtn}>

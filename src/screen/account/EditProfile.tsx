@@ -59,7 +59,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     return () => {
       subscription.remove();
     };
-  });
+  },[appState]);
 
   
   

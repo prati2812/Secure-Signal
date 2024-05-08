@@ -49,7 +49,7 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
-  const selectedContacts = useSelector((state : RootState) => state.selectedContacts);
+  const selectedContacts = useSelector((state : any) => state.contacts.selectedContact);
   const matchedContacts = useSelector((state : any) => state.contacts.matchingContacts);
   const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
@@ -62,21 +62,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [volumUp, setVolumeUp] = useState(0);
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
-   
+
  
 
   useEffect(() => {
-    
-    if(volumeDown === 3){
-       stop();
-       setVolumeDown(0);
-    }
-    if(volumUp === 3){
-       sendSMS();
-       backgroundService();
-       setVolumeUp(0);
-    }
+    getToken();
+    dispatch(addImageUri(userId,token));
+    dispatch(addSelectedContact(userId,token));
+    dispatch(changeUserName(userId,token));
+  },[token]);
 
+  useEffect(() => {
+    requestLocationSMSPermission();
     dispatch(allNotificationReadOrNot(userId,token));
     if(notificationReadStatus === null){
       dispatch(allNotificationReadOrNot(userId,token));
@@ -86,28 +83,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     if(nearestPoliceStation === null){
       dispatch(findNearestPoliceStation(userId));
     }
-    
-    
-  });
-  
-  useEffect(() => {
-    getToken();
-    dispatch(addImageUri(userId,token));
-    dispatch(addSelectedContact(userId,token));
-    dispatch(changeUserName(userId,token));
-  },[token]);
-
-  
-  useEffect(() => {
-    volumeLevel();    
-    //getNotificationToken(); 
-  },[volume]);
-
-
-  useEffect(() =>{     
-     requestLocationSMSPermission();
   },[]);
 
+  
 
   useEffect(() => {
   
@@ -117,10 +95,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       const keyMessage = event.keyMessage;
          console.log(keyMessage);
          if(keyMessage === 'VOLUME_UP_KEY'){
-            setVolumeUp(volumUp+1);
+           setVolumeUp(prevVolumeUp => prevVolumeUp + 1); 
          }
          if(keyMessage === 'VOLUME_DOWN_KEY'){
-            setVolumeDown(volumeDown+1); 
+            setVolumeDown(prevVolumeUp => prevVolumeUp + 1); 
          }
          
        });
@@ -128,7 +106,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     
       return () => subscription.remove();    
   
-  });
+  },[]);
+
+
+  useEffect(() => {
+   
+    if(volumUp === 3){
+       sendSMS();
+       backgroundService();
+       setVolumeUp(0);
+    }
+    if(volumeDown === 3){
+     stop();
+     setVolumeDown(0);
+    }
+ 
+  },[volumUp , volumeDown]);
 
   useEffect(() => {
     if (isSubscribed === true) {
@@ -148,7 +141,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   
   // check subscription status
   const checkSubscriptionStatus = () => {
-   
     let date = new Date();
     let currentFormattedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()} `;
     let  currentDate = new Date(currentFormattedDate);
@@ -167,10 +159,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     await BackgroundService.start(veryIntensiveTask, options  );
     await BackgroundService.updateNotification({taskDesc: 'New ExampleTask description'});
 
-
+    const title = 'Emergency';
+    const body = 'Live Location sent by '; 
     
-
-
+    console.log("hello");
+    
 
     let selectedUserId = [];
     let tokenMapping = [];
@@ -196,27 +189,81 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
     
   
+
+    console.log(tokenMapping);
     
 
 
     for(let i=0; i < tokenMapping.length; i++){
       let  notifyToken = tokenMapping[i].notificationToken;
-      console.log(notifyToken);
-      
+      console.log("selected user" , notifyToken);
+       
       const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
-        notifyToken , userName},{
+        notifyToken , userName , title , body},{
         headers:{
           'Content-Type':'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
 
-
+      
 
        
        console.log("successfully sent");
       
-    }  
+    }
+    
+
+     
+     let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
+     console.log(policeStationId);
+      
+      //send Live Location Notification
+      const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification' , {
+         policeStationId , userName , title , body},{
+        headers:{
+          'Content-Type':'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if(response.status === 200){
+        console.log("sent");
+      }
+      else{
+        console.log("fail");
+        
+      }
+      
+      
+      
+
+      let senderName = userName;
+      for(let i=0; i < tokenMapping.length; i++){
+
+         let userId = tokenMapping[i].userId;
+
+         const response = await axios.post(
+           'http://10.0.2.2:3000/saveLiveLocation',
+           {
+             userId,
+             senderName
+           },
+           {
+             headers: {
+               'Content-Type': 'application/json',
+               Authorization: `Bearer ${token}`,
+             },
+           },
+         );
+
+      }
+
+      console.log("successfully");
+      
+
+      
+      
 
   }
 
@@ -329,6 +376,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       }
    }
   }
+ 
 
 
   const getToken = async() => {
@@ -411,21 +459,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
    
-  const volumeLevel = async() => {
-    
-    VolumeManager.showNativeVolumeUI({ enabled: true });
-    
-    const { volume } = await VolumeManager.getVolume();
-  
-   
-    VolumeManager.addVolumeListener((result) => {
-      console.log("change volume" , result.volume);
-      setVolume(result.volume);
 
-    });
-  
-       
-  }
 
   // Send SMS
   const sendSMS = () => {
@@ -472,7 +506,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             </TouchableOpacity>
 
             {
-               selectedContacts && selectedContacts.length > 0 &&
+               selectedContacts  &&
                selectedContacts.map((item , key) => {
                 return(
                   <TouchableOpacity key={key} style={style.contactSelectedView}>
