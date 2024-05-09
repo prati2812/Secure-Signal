@@ -6,6 +6,7 @@ export const ADD_SELECTED_CONTACTS = 'ADD_SELECTED_CONTACTS';
 export const REMOVE_SELECTED_CONTACTS = 'REMOVE_SELECTED_CONTACTS';
 export const ADD_MATCHING_CONTACTS = 'ADD_MATCHING_CONTACTS';
 export const UPDATED_CONTACT_LIST = 'UPDATED_CONTACT_LIST';
+export const GET_SELECTED_CONTACTS_LIST = 'GET_SELECTED_CONTACTS_LIST';
 
 
 export const addContact = (contacts: any) => ({
@@ -30,8 +31,10 @@ export const addSelectedContact = (userId:string , token:string) =>{
     
             const responseData = await response.data;
             const {contacts} = responseData;
+            
+            
             dispatch({
-               type: ADD_SELECTED_CONTACTS,
+               type: GET_SELECTED_CONTACTS_LIST,
                payload: contacts,
             });
            }

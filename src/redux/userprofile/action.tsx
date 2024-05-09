@@ -2,6 +2,8 @@ import axios from "axios";
 import { Dispatch } from "redux";
 import RNFetchBlob from "rn-fetch-blob";
 import { IS_SUBSCRIBED, SUBSCRIPTION_END_TIME, SUBSCRIPTION_TYPE } from "../subscription/action";
+import axiosInstance from "../../axios/axiosInstance";
+
 
 export const ADD_IMAGE_URI = 'IMAGE_URI';
 export const CHANGE_USER_NAME = 'CHANGE_USER_NAME';
@@ -44,13 +46,8 @@ export const addImageUri = (userId:string,token:string) => {
 
 export const changeUserName = (userId:string , token:string) => {
     return async (dispatch:Dispatch) => {
-       const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-              userId,},{
-                headers:{
-                  'Content-Type':'application/json',
-                  Authorization: `Bearer ${token}`,
-                },
-              });
+       const response = await axiosInstance.post('/fetchUserDetails' , {
+              userId});
         
         
               if(response.status === 200){

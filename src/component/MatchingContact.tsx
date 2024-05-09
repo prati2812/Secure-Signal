@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
@@ -6,6 +7,7 @@ import RNFetchBlob from 'rn-fetch-blob';
 
 
 interface ContactRoot {
+    userId: any;
     recordID: string;
     givenName: string;
     phoneNumbers: { number: string }[];
@@ -23,10 +25,16 @@ interface MatchingContactProps {
 
 const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected , handleMatchingSelected}) => {
    
-    const [imageData , setImageData] = React.useState(null); 
+    const [imageData , setImageData] = React.useState<String|null>(null); 
   
-    const userId = contact.id; 
+    const userId = contact.userId;
+   
+    
     const token = useSelector((state:any) => state.userProfile.token);
+
+    useEffect(() => {
+      fetchUserProfile();
+   },[]); 
  
     const fetchUserProfile = async() => {
         const response = await RNFetchBlob.fetch(
@@ -43,7 +51,8 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
         if(response.data){
           const imageData = response.data;
           const image = `data:image/jpeg;base64,${imageData.toString('base64')}`;
-          setImageData(image);
+          setImageData(image); 
+        
           
         }
         else{
@@ -54,11 +63,7 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
     }
 
    
-   React.useEffect(() => {
-      fetchUserProfile();
-      console.log(imageData);
-      
-   },[]); 
+ 
       
     
   return (
@@ -75,7 +80,7 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
                imageData &&
                
                       <Image
-                        source={{uri: (imageData !== 'data:image/jpeg;base64,Internal Server Error') ? imageData : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
+                        source={{uri: (imageData !== null) ? imageData : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
                         style={{flex:1}}
                       />  
            }

@@ -10,6 +10,7 @@ import {Text, View} from 'react-native'
 import AppStack  from './src/stack/AppStack';
 import { notificationListener } from './src/utils/NotificationService';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import { STRIPE_PUBLISH_KEY } from '@env';
 
 
 const App = () => {
@@ -20,7 +21,7 @@ const App = () => {
  
 
   return(    
-    <StripeProvider publishableKey='pk_test_51P7brgSDcdgSk3wP7hEakFuVVciPeOtf1Hsqs3i5HbL3jgSGxF8wTUYI2XVSJaRObtC1EbKtps9HDQLze6c9TQlJ00199XWpX4'>
+    <StripeProvider publishableKey={STRIPE_PUBLISH_KEY}>
       <AppStack />
     </StripeProvider>  
       

@@ -42,7 +42,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
     const handleSubscribeBtn = async () => {
      
       if(subScriptionType){
-          console.log("hello");
+          
           Alert.alert("Alert" , 
              `You already subscribed ${subScriptionType} subscription`); 
       }

@@ -1,11 +1,12 @@
-import { ADD_CONTACTS, ADD_MATCHING_CONTACTS , ADD_SELECTED_CONTACTS, REMOVE_SELECTED_CONTACTS, UPDATED_CONTACT_LIST } from "./action";
+import { ADD_CONTACTS, ADD_MATCHING_CONTACTS , ADD_SELECTED_CONTACTS, GET_SELECTED_CONTACTS_LIST, REMOVE_SELECTED_CONTACTS, UPDATED_CONTACT_LIST } from "./action";
+
 
 const initialState = {
     contacts: [],
     matchingContacts: [],
     updatedContactList : [],
-    selectedContact:[],
-  };
+    selectedContact: [],
+};
   
 
   const contactReducer = (state = initialState, action: { type: any; payload: any; }) => {
@@ -25,12 +26,22 @@ const initialState = {
           ...state,
           updatedContactList: [],
         };
+      case GET_SELECTED_CONTACTS_LIST:
+        if(action.payload){
+          return{
+            ...state,
+            selectedContact:action.payload,
+          }
+        }
+        
+      case ADD_SELECTED_CONTACTS:        
+        if(action.payload){          
+          return {
+            ...state,
+            selectedContact: [...state.selectedContact, action.payload],
+          }; 
+        }
 
-      case ADD_SELECTED_CONTACTS:
-        return {
-          ...state,
-          selectedContact:action.payload
-        };
       case REMOVE_SELECTED_CONTACTS:
         return{
           ...state,

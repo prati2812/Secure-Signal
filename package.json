@@ -28,6 +28,7 @@
     "react-native": "0.73.5",
     "react-native-background-actions": "^3.0.1",
     "react-native-contacts": "^7.0.8",
+    "react-native-dotenv": "^3.4.11",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-image-crop-picker": "^0.40.3",
     "react-native-image-picker": "^7.1.1",
