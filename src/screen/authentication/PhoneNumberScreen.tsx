@@ -5,7 +5,7 @@ import HandleError from "../../hook/useError";
 import auth from '@react-native-firebase/auth';
 import { useDispatch } from "react-redux";
 import { addVerificationId } from "../../redux/credential/action";
-import { addUserPhoneNumber } from "../../redux/userprofile/action";
+
 
 
 interface PhoneNumberScreenProps {

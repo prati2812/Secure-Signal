@@ -6,10 +6,7 @@ import BottomSheet from '../../component/BottomSheet';
 import DeleteAccountSheet from '../../component/DeleteAccountSheet';
 import { useDispatch, useSelector } from 'react-redux';
 import CustomProfileOption from '../../component/CustomProfileOption';
-import { addUserPhoneNumber } from '../../redux/userprofile/action';
 import { firebase } from '@react-native-firebase/auth';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface UserProfile {
   imageUri: string | null;
@@ -35,9 +32,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
 
   useEffect(() => {
     console.log(subScriptionType);
-    
-    
-    dispatch(addUserPhoneNumber(userId,token));
   },[]);
 
   const openBottomSheet = () => {
@@ -66,7 +60,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           </View>
 
           <Text style={styles.profileName}>{userName}</Text>
-          <Text style={styles.phoneNumber}>{firebase.auth().currentUser?.phoneNumber}</Text>
+          <Text style={styles.phoneNumber}>{userPhoneNumber}</Text>
 
           <TouchableOpacity style={styles.editProfileButton} onPress={openBottomSheet}>
             <View style={styles.editProfileButtonContent}>

@@ -2,7 +2,9 @@ import axios from "axios";
 import { Dispatch } from "redux";
 import RNFetchBlob from "rn-fetch-blob";
 import { IS_SUBSCRIBED, SUBSCRIPTION_END_TIME, SUBSCRIPTION_TYPE } from "../subscription/action";
-import axiosInstance from "../../axios/axiosInstance";
+import instance from "../../axios/axiosInstance";
+
+
 
 
 export const ADD_IMAGE_URI = 'IMAGE_URI';
@@ -44,18 +46,21 @@ export const addImageUri = (userId:string,token:string) => {
        
 };
 
+
 export const changeUserName = (userId:string , token:string) => {
     return async (dispatch:Dispatch) => {
-       const response = await axiosInstance.post('/fetchUserDetails' , {
-              userId});
-        
-        
+      const response = await instance.post('/fetchUserDetails', { userId });
+     
               if(response.status === 200){
                 const responseData = await response.data;
                 const{phoneNumber , userName , isSubscribed, subScriptionType , subscriptionEndTime} = responseData;
                 dispatch({
                      type: CHANGE_USER_NAME,
                      payload: userName,
+                })
+                dispatch({
+                   type:ADD_USER_PHONE_NUMBER,
+                   payload:phoneNumber,
                 })
                 dispatch({
                   type:IS_SUBSCRIBED,
@@ -88,34 +93,6 @@ export const addImageResponse = (response: object) => ({
        payload: response,
 });
 
-
-export const addUserPhoneNumber = (userId:string,token:string) => {
-       return async (dispatch:Dispatch) => {
-              const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-                     userId,},{
-                       headers:{
-                         'Content-Type':'application/json',
-                         Authorization: `Bearer ${token}`,
-                       },
-                     });
-               
-               
-                     if(response.status === 200){
-                       const responseData = await response.data;
-                       const{phoneNumber , userName} = responseData;
-                       dispatch({
-                            type: ADD_USER_PHONE_NUMBER,
-                            payload: phoneNumber
-                       })
-                     }
-                     else{
-                       console.log("Something occured");
-                       
-                     }
-       
-       }     
-      
-};
 
 export const addToken = (token : string | null) =>({
        type: ADD_TOKEN,

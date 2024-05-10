@@ -1,5 +1,7 @@
 import axios from "axios";
 import { Dispatch } from "redux";
+import instance from "../../axios/axiosInstance";
+
 
 export const ADD_CONTACTS = 'ADD_CONTACTS';
 export const ADD_SELECTED_CONTACTS = 'ADD_SELECTED_CONTACTS';
@@ -18,14 +20,7 @@ export const addSelectedContact = (userId:string , token:string) =>{
 
     return async (dispatch:Dispatch)=>{
 
-        const response = await axios.post('http://10.0.2.2:3000/fetchContacts', {
-            userId,
-          }, {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          });
+        const response = await instance.post('/fetchContacts', {userId});
     
            if(response.status === 200){
     
@@ -50,14 +45,7 @@ export const addSelectedContact = (userId:string , token:string) =>{
 
 export const removeSelectedContact = (userId:string , contact:Object,token:string) => {
    return async (dispatch: Dispatch) => {
-    const response = await axios.post('http://10.0.2.2:3000/removeSelectedContact',{
-      userId , contact},
-      {
-       headers: {
-         'Content-Type': 'application/json',
-         Authorization: `Bearer ${token}`,
-       },
-     });
+    const response = await instance.post('/removeSelectedContact',{userId , contact});
    
      if(response.status === 200){
       dispatch({
@@ -75,15 +63,8 @@ export const removeSelectedContact = (userId:string , contact:Object,token:strin
 
 export const addMatchingContacts = (userId:string, contacts:Object[], token:string) => {
     return async (dispatch: Dispatch) => {
-      const response = await axios.post('http://10.0.2.2:3000/findMatchingContacts',{
-         userId , contacts},
-         {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
+      const response = await instance.post('findMatchingContacts',{userId , contacts});
+        
         if(response.status === 200){
            const matchingUsers = await response.data;
            dispatch({

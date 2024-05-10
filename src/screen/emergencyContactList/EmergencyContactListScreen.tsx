@@ -75,42 +75,52 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     }
   }, []);
  
-  useEffect(() => {
+  useEffect(() => { 
     dispatch(addMatchingContacts(userId, contacts, token)); 
   }, [contacts]);
 
   useEffect(() => {  
     handleUpdateContactList();
     handleMatchingUpdatedContactList();     
-  }, [contacts, matchedContacts]); 
-  
- 
+  }, [contacts,  matchedContacts]); 
   
   useEffect(() => {
     handleMatchingUpdatedContactList(); 
   }, []);
 
-  
 
+  useEffect(() => {
+      handleContactList();
+      handleUpdateContactList();
+      handleMatchingUpdatedContactList();
+  },[isUpdated]);
+  
+  
+  
 
   
   // Update Contact List Remove selected and Matching Contact from contact List
-  const handleUpdateContactList = () => {
+  const handleUpdateContactList = () => {  
 
    if (selectedContacts && matchedContacts) {
-   
     
-     const filteredContacts = contacts.filter(
-       contactItem =>
-         !matchedContacts.some(
-           removeItem => removeItem.recordID === contactItem.recordID,
-         ) &&
-         !selectedContacts.some(
-           removeItem => removeItem.recordID === contactItem.recordID,
-         ),
-     );
+    let filteredContacts = contacts.filter(
+      contactItem =>
+        !selectedContacts.some(
+          selectedItem => selectedItem.recordID === contactItem.recordID,
+        ),
+    );
+  
+    filteredContacts = filteredContacts.filter(
+      contactItem =>
+        !matchedContacts.some(
+          matchedItem => matchedItem.recordID === contactItem.recordID,
+        ),
+    );
 
-     if (filteredContacts.length > 0) {
+    
+    
+     if (filteredContacts.length > 0) {     
        setIndicatorValue(indicatorValue + 1);
        setUpdatedContact(filteredContacts);
      }
@@ -122,12 +132,11 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
            removeItem => removeItem.recordID === contactItem.recordID,
          ),
      );
-
+          
      if (filteredContacts.length > 0) {
        setIndicatorValue(indicatorValue + 1);
        setUpdatedContact(filteredContacts);
      }
-    
      
      
    }
@@ -143,8 +152,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
   // Update Matching Contact List Remove selected contact from matching contact list. 
   const handleMatchingUpdatedContactList = () => {
-   
-    
+     
     // Remove Selected Contact from Matching Contact List.
     if (matchedContacts && selectedContacts) {
    
@@ -246,6 +254,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   };
 
 
+
+
   // Select Contact From Contact List
   const handleSelectedContact = (item : Contact) => { 
   
@@ -271,38 +281,52 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
        
   }
 
-  // Select Contact From Matching Contact List
-  const handleMatchingContactSelect = (item : Contact) => {
-    if (selectedContacts && selectedContacts.some((contact) => contact.recordID === item.recordID)) {
-      setSelected(isSelected-1);
-      dispatch({
-        type:'REMOVE_SELECTED_CONTACTS',
-        payload:item.recordID
-      });
-    } else {
-      setSelected(isSelected+1);
-      dispatch({
-        type: 'ADD_SELECTED_CONTACTS',
-        payload:item,
-      });
-    }
-    setVisible(true);
-    setSelectedContact(true);   
-  }
-
+  
   // Set Selected Contact as Guardian
   const handleSetasGuardian = async() =>{
     setUpdated(!isUpdated);
     setVisible(false); 
     setSelectedContact(false);
-    const updatedContact = contacts.filter((contact: { recordID: string; }) => 
-                          !selectedContacts.some(selectedContact => 
-                          selectedContact.recordID === contact.recordID));  
-                          
-                          
-    dispatch(addContact(updatedContact));
   
-    
+    // Update non-app contact list if selected contacts are from there
+    let updatedNonMatchingContacts = updatedContact;
+    if (
+      selectedContacts.some(contact =>
+        updatedNonMatchingContacts.some(
+          item => item.recordID === contact.recordID,
+        ),
+      )
+    ) {
+      updatedNonMatchingContacts = updatedNonMatchingContacts.filter(
+        contact =>
+          !selectedContacts.some(
+            selected => selected.recordID === contact.recordID,
+          ),
+      );
+      setUpdatedContact(updatedNonMatchingContacts);
+    }
+
+    // Update app contact list if selected contacts are from there
+    let updatedMatchingContacts = matchingUpdatedContact;
+    if (
+      selectedContacts.some(contact =>
+        updatedMatchingContacts.some(
+          item => item.recordID === contact.recordID,
+        ),
+      )
+    ) {
+      updatedMatchingContacts = updatedMatchingContacts.filter(
+        contact =>
+          !selectedContacts.some(
+            selected => selected.recordID === contact.recordID,
+          ),
+      );
+      setMatchingUpdatedContact(updatedMatchingContacts);
+    }
+
+
+
+
     let emergencyContactList: Contact[] = [];
 
     selectedContacts.forEach((item) => {
@@ -395,12 +419,15 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
   // Delete Selected Contact
   const handleDeleteSelectedContact = async(contact: Contact) => {
-      
+    console.log("=======" , contact);   
     dispatch(removeSelectedContact(userId, contact, token));
-    const unselectedContacts = contacts.filter(
-      (item: { recordID: string }) => item.recordID !== contact.recordID
-    );
+    
+    
+    
+     // Filter out the deleted contact from the unselected contacts
+     const unselectedContacts = contacts.filter(item => item.recordID !== contact.recordID); 
     dispatch(addContact(unselectedContacts));
+    
     setUpdated(!isUpdated);
     
   }
@@ -423,10 +450,16 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
         elevation={1}
       />
 
-
+      {
+          contacts.length === 0 && 
+            <View style={{marginTop:20 , flex:1 , alignItems:'center'}}>
+                <Text style={{fontSize:30}}>No Contacts</Text>
+            </View>
+      }  
+    
       {/* Selected Contacts list */}
       <View>
-        { isVisible===false && selectedContacts  && (
+        { isVisible===false && selectedContacts.length > 0  && (
           <View style={styles.guardiansView}>
             <Text style={styles.guardiansText}>Guardians</Text>
 
@@ -469,7 +502,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       
       {
           matchingUpdatedContact.length > 0 &&  <>
-          <SectionList title={'Matched Contacts'} borderColor={'lightpink'} />
+          <SectionList title={'App Contacts'} borderColor={'lightpink'} />
           <ScrollView
              showsVerticalScrollIndicator={false}
              style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
@@ -483,7 +516,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                       isSelected={(isSelectedContact === true && selectedContacts.some(
                         (contact: { recordID: any; }) => contact.recordID === item.recordID,
                       ))}
-                      handleMatchingSelected={() => {handleMatchingContactSelect(item)}}
+                      handleMatchingSelected={() => {handleSelectedContact(item)}}
                     />
                   );
                 })
@@ -500,7 +533,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                            (contact: { recordID: string; }) => contact.recordID === item.recordID,
                          )
                        }
-                       handleMatchingSelected={() => {handleMatchingContactSelect(item)}}
+                       handleMatchingSelected={() => {handleSelectedContact(item)}}
                      />
                    );
                  })
@@ -519,7 +552,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
          updatedContact.length > 0 && 
          <>
           
-          <SectionList title={'No App Contacts'} borderColor={'lightpink'} />
+          <SectionList title={'Non App Contacts'} borderColor={'lightpink'} />
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 30}}
@@ -579,7 +612,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
           </View>
         </TouchableOpacity>
       )}
-
+    
+    
     </View>
   );
 };

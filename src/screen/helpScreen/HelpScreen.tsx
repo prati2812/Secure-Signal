@@ -37,12 +37,14 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const mapNumber = route.params?.mapNumber ?? undefined;
-  const latitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude;
-  const longtitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude;
 
+ 
+  const latitude = '';
+  const longtitude='';
 
   
- 
+  console.log(nearestPoliceStation);
+  
   
   const handleVictim = () => {
      setVictimButton(true);

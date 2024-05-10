@@ -1,11 +1,7 @@
 package com.reactdemo
 
-import android.app.ActivityManager
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
-import android.widget.Toast
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.bridge.Arguments

@@ -1,6 +1,8 @@
 import axios from "axios";
 import { Dispatch } from "redux";
 import { startSubscriptionService } from "../../utils/SubscriptionService";
+import instance from "../../axios/axiosInstance";
+
 
 export const IS_SUBSCRIBED = 'IS_SUBSCRIBED';
 export const SUBSCRIPTION_TYPE = 'SUBSCRIPTION_TYPE';
@@ -10,14 +12,7 @@ export const SUBSCRIPTION_END_TIME = 'SUBSCRIPTION_END_TIME';
 
 export const addSubscriptionDetails = (userId:string, token:string) => {
     return async (dispatch:Dispatch) => {
-        const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-               userId,},{
-                 headers:{
-                   'Content-Type':'application/json',
-                   Authorization: `Bearer ${token}`,
-                 },
-               });
-         
+        const response = await instance.post('/fetchUserDetails' , {userId});
          
                if(response.status === 200){
                   const responseData = await response.data;
@@ -29,8 +24,6 @@ export const addSubscriptionDetails = (userId:string, token:string) => {
 
                   startSubscriptionService();
                 
-                  
-                  
                }
                else{
                  console.log("Something occured");
@@ -44,12 +37,7 @@ export const addSubscriptionDetails = (userId:string, token:string) => {
 
 export const updateSubscriptionDetails = (userId:string) => {
   return async (dispatch:Dispatch) => {
-    const response = await axios.post('http://10.0.2.2:3000/updateSubscriptionDetails' , {
-           userId,},{
-             headers:{
-               'Content-Type':'application/json',
-             },
-           });
+    const response = await instance.post('/updateSubscriptionDetails' , {userId});
      
      
            if(response.status === 200){

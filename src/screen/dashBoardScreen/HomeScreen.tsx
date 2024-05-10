@@ -7,7 +7,7 @@ import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
 import { VolumeManager } from 'react-native-volume-manager';
 import { firebase } from '@react-native-firebase/auth';
-import { addImageUri, addToken, addUserPhoneNumber, changeUserName } from '../../redux/userprofile/action';
+import { addImageUri, addToken, changeUserName } from '../../redux/userprofile/action';
 import RNFetchBlob from 'rn-fetch-blob';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addMatchingContacts, addSelectedContact, updateContactList} from '../../redux/contacts/action';
@@ -63,7 +63,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
 
- 
+  
+   
 
   useEffect(() => {
     getToken();
@@ -76,16 +77,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     requestLocationSMSPermission();
-    dispatch(allNotificationReadOrNot(userId,token));
-    if(notificationReadStatus === null){
-      dispatch(allNotificationReadOrNot(userId,token));
+    dispatch(allNotificationReadOrNot(userId, token));
+    if (notificationReadStatus === null) {
+      dispatch(allNotificationReadOrNot(userId, token));
     }
 
     dispatch(findNearestPoliceStation(userId));
-    if(nearestPoliceStation === null){
+    if (nearestPoliceStation === null) {
       dispatch(findNearestPoliceStation(userId));
     }
-  },[]);
+    
+    
+  }, []);
+
 
   
 
