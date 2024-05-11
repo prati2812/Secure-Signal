@@ -9,7 +9,7 @@ export const NEAREST_POLICE_STATION_LOCATION = 'NEAREST_POLICE_STATION_LOCATION'
 export const fetchLocation = (userId:string , token:string) => {
     
     return async (dispatch : Dispatch) => {
-      const response = await axios.post('/fetchTravellingLocations', {userId});
+      const response = await instance.post('/fetchTravellingLocations', {userId});
 
       if(response.status === 200){
          dispatch({
@@ -29,7 +29,8 @@ export const fetchLocation = (userId:string , token:string) => {
 
 export const findNearestPoliceStation = (userId:string) => {
     return async(dispatch : Dispatch) => {
-      const response = await axios.post('/nearestPoliceStation',{userId});
+      
+      const response = await instance.post('/nearestPoliceStation',{userId});
 
       if(response.status === 200){
             const responseData = await response.data;

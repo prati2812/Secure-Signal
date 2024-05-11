@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import NotificationBottomSheet from '../../component/NotificationBottomSheet';
-import { fetchEmergencyContactNotification } from '../../redux/notifications/action';
+import { fetchEmergencyContactNotification, fetchLiveLocationNotification } from '../../redux/notifications/action';
 import { useDispatch, useSelector } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
@@ -26,6 +26,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
   const notificationDeleteStatus = useSelector((state : any) => state.notifications.deleteAllNotificationOrNot);
   const emergencyContactNotification = useSelector((state : any) => state.notifications.fetchSelectedContactNotification);
+  const liveLocationNotification = useSelector((state:any) => state.notifications.fetchLiveLocationNotification);
 
   const dispatch = useDispatch();
 
@@ -33,11 +34,15 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
   useEffect(() => {
     dispatch(fetchEmergencyContactNotification(userId,token)); 
+    dispatch(fetchLiveLocationNotification(userId,token));
   },[read]); 
 
 
+  
+  
+  
 
-  const handleSetting = () => {
+  const handleSetting = () => {  
       setBottomSheetVisible(true);
   }
 
@@ -73,8 +78,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
           backCall={() => navigation.goBack()}
         />
 
-        {emergencyContactNotification.length > 0  &&
-        emergencyContactNotification  && notificationDeleteStatus === false? (
+        {(emergencyContactNotification || liveLocationNotification)  && notificationDeleteStatus === false? (
           <ScrollView
             contentContainerStyle={{paddingTop: 15}}
             showsVerticalScrollIndicator={false}>
@@ -104,6 +108,33 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                   );
                 },
               )}
+              {
+                liveLocationNotification && 
+                  liveLocationNotification.map(
+                    (
+                      item: {
+                        notification_id: String;
+                        isRead: boolean;
+                        senderName: any;
+                        timeStamp: string;
+                      },
+                      key: React.Key | null | undefined,
+                    ) => {
+                         return (
+                           <NotificationCard
+                             key={key}
+                             icon={'location-pin'}
+                             message={`Live Location Shared by a ${item.senderName}.`}
+                             time={item.timeStamp}
+                             color={'#FF5733'}
+                             isRead={notificationReadStatus !== null && notificationReadStatus === true ? true : item.isRead}
+                             handleIsRead={() =>
+                               handleNotificationRead(item.notification_id)
+                             }
+                           />
+                         );
+                    },) 
+              }
           </ScrollView>
         ) : (
             <View style={{flex:1 , top:'20%'}}> 

@@ -19,6 +19,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { startSubscriptionService } from '../../utils/SubscriptionService';
 import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscription/action';
 import { findNearestPoliceStation } from '../../redux/location/action';
+import instance from '../../axios/axiosInstance';
 
 
 
@@ -62,7 +63,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [volumUp, setVolumeUp] = useState(0);
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
-
+  const latitude = nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.policeStationLocation.latitude : 0.00;
+  const longitude = nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.policeStationLocation.longitude : 0.00;
+  
+  
   
    
 
@@ -76,21 +80,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
  
 
   useEffect(() => {
+    // Request location SMS permission
     requestLocationSMSPermission();
-    dispatch(allNotificationReadOrNot(userId, token));
-    if (notificationReadStatus === null) {
-      dispatch(allNotificationReadOrNot(userId, token));
+
+    // Define a function to check if both nearestPoliceStation and notificationReadStatus are not null
+    const checkValuesNotNull = () => {
+        if (nearestPoliceStation !== null && notificationReadStatus !== null) {
+            return true;
+        }
+        return false;
+    };
+
+    // If both values are null, dispatch actions
+    if (!checkValuesNotNull()) {
+        dispatch(allNotificationReadOrNot(userId, token));
+        dispatch(findNearestPoliceStation(userId));
     }
+  }, [nearestPoliceStation, notificationReadStatus]);
 
-    dispatch(findNearestPoliceStation(userId));
-    if (nearestPoliceStation === null) {
-      dispatch(findNearestPoliceStation(userId));
-    }
-    
-    
-  }, []);
-
-
+  
   
 
   useEffect(() => {
@@ -159,6 +167,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
 
+  
+  
+  
 
   // Start Background Service
   const backgroundService = async() => {
@@ -168,14 +179,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     const title = 'Emergency';
     const body = 'Live Location sent by '; 
     
-    console.log("hello");
-    
+   
+     
 
     let selectedUserId = [];
     let tokenMapping = [];
     for(const contact of selectedContacts){ 
-        if(contact.notificationToken){
-           selectedUserId.push(contact.notificationToken);
+        if(contact.userId){
+           selectedUserId.push(contact.userId);
         }
     }
 
@@ -204,6 +215,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       let  notifyToken = tokenMapping[i].notificationToken;
       console.log("selected user" , notifyToken);
        
+      // Send Live Location Notification to Selected User
       const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
         notifyToken , userName , title , body},{
         headers:{
@@ -220,11 +232,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
     
 
-     
+   
+          
      let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
      console.log(policeStationId);
       
-      //send Live Location Notification
+      //send Live Location Notification to Nearest Police Station
       const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification' , {
          policeStationId , userName , title , body},{
         headers:{
@@ -249,7 +262,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
          let userId = tokenMapping[i].userId;
 
-         const response = await axios.post(
+         // save LiveLocation Notification 
+         await axios.post(
            'http://10.0.2.2:3000/saveLiveLocation',
            {
              userId,
@@ -261,11 +275,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                Authorization: `Bearer ${token}`,
              },
            },
-         );
+         ).then(() => {
+             console.log('successfully notification saved');
+         }).catch((err) => {
+             console.log(err);             
+         });
 
       }
 
-      console.log("successfully");
+      
+      await instance.post('/savePoliceStationNotification', 
+                      {policeStationId , senderName}).then(() => {
+          console.log("successfully notification savedd");
+            
+      }).catch((err) => {
+         console.log(err);
+      });
+
+      
       
 
       
@@ -286,6 +313,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         for (let i = 0; BackgroundService.isRunning(); i++) {
             sendLiveLocation(); 
             await sleep(delay);
+                        
         }
     });
   };
@@ -309,32 +337,37 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
 
   const sendLiveLocation = async() => {
+    
     let selectedUser = [];
     for(const contact of selectedContacts){ 
-        if(contact.notificationToken){
-           selectedUser.push(contact.notificationToken);
+        if(contact.userId){
+           selectedUser.push(contact.userId);
         }
     }
-
+    
+    
     await getCurrentLocation();
     
     let policeStationId = nearestPoliceStation.nearestPoliceStation.id;
 
-
-   
+  
+    console.log("=======",location);
     
-    await axios.post('http://10.0.2.2:3000/shareLocationNearestPoliceStation' , {
-        userId, policeStationId , location},{
-        headers:{
-          'Content-Type':'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+    
+    // Share Live Location to nearest police station.
+    await instance.post('/shareLocationNearestPoliceStation' , {
+        userId, policeStationId , location}).then(() => {
+       console.log("successfully saved");       
+    }).catch((err) => {
+       console.log(err);
     });
 
 
 
     for(let i=0; i < selectedUser.length; i++){
       const selectedUserId = selectedUser[i];
+
+      // Share Live Location to the selected user.
       const response = await axios.post('http://10.0.2.2:3000/addLiveLocation' , {
         userId, selectedUserId , location},{
         headers:{
@@ -351,12 +384,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
   const getCurrentLocation = async() => {
-    Geolocation.watchPosition(
+    
+    Geolocation.getCurrentPosition(
       position => {
-        const newLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-        console.log(newLocation); 
+        const newLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude }; 
         setLocation(prevLocation => ({ ...prevLocation, ...newLocation })); 
-        
       },
       error => {
         console.log(error.code, error.message);
@@ -543,12 +575,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 scrollEnabled={false}
                 zoomEnabled={false}
                 region={{
-                  latitude: 37.78825,
-                  longitude: -122.4324,
+                  latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825,
+                  longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324,
                   latitudeDelta: 0.015,
                   longitudeDelta: 0.0121,
                 }}>
-                <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
+                <Marker coordinate={{latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825, 
+                                     longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324}}>
                   <Icon name="local-police" size={40} color={'#5F4C24'} />
                 </Marker>
               </MapView>
@@ -568,12 +601,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 scrollEnabled={false}
                 zoomEnabled={false}
                 region={{
-                  latitude: 37.78825,
-                  longitude: -122.4324,
+                  latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825,
+                  longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324,
                   latitudeDelta: 0.015,
                   longitudeDelta: 0.0121,
                 }}>
-                <Marker coordinate={{latitude: 37.78825, longitude: -122.4324}}>
+                <Marker coordinate={{latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825, 
+                                     longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324}}>
                   <Icon name="local-hospital" size={40} color={'red'} />
                 </Marker>
               </MapView>
