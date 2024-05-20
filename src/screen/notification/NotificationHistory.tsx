@@ -11,6 +11,7 @@ import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import NotifyIcon from '../../assets/icons/NotifyIcon';
 import PushNotification from '../../assets/icons/PushNotification';
+import instance from '../../axios/axiosInstance';
 
 
 
@@ -48,14 +49,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
   const handleNotificationRead = async(notification_id : String) => {
     let notificationId = notification_id;
-    const response = await axios.post('http://10.0.2.2:3000/markAsRead', {
-      userId, notificationId
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await instance.post('/markAsRead', {userId, notificationId});
 
     if(response.status === 200){
        console.log("successfully Read");
@@ -63,6 +57,15 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
        
     }
  
+  }
+
+  const handleLiveLocationNotificationRead = async(notification_id : String) => {
+    let notificationId = notification_id;
+    const response = await instance.post('/liveLocationNotificationMarkAsRead' , {userId , notificationId});
+    if(response.status === 200){
+      console.log("Live Location Notification Successfully Read");
+      setRead(!read);  
+    }
   }
   
   return (
@@ -78,11 +81,11 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
           backCall={() => navigation.goBack()}
         />
 
-        {(emergencyContactNotification || liveLocationNotification)  && notificationDeleteStatus === false? (
+        {(emergencyContactNotification.length > 0  || liveLocationNotification.length > 0)  && notificationDeleteStatus === false ? (
           <ScrollView
             contentContainerStyle={{paddingTop: 15}}
             showsVerticalScrollIndicator={false}>
-            {emergencyContactNotification &&
+            {emergencyContactNotification.length > 0 &&
               emergencyContactNotification.map(
                 (
                   item: {
@@ -109,7 +112,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                 },
               )}
               {
-                liveLocationNotification && 
+                liveLocationNotification.length > 0 && 
                   liveLocationNotification.map(
                     (
                       item: {
@@ -129,7 +132,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                              color={'#FF5733'}
                              isRead={notificationReadStatus !== null && notificationReadStatus === true ? true : item.isRead}
                              handleIsRead={() =>
-                               handleNotificationRead(item.notification_id)
+                               handleLiveLocationNotificationRead(item.notification_id)
                              }
                            />
                          );

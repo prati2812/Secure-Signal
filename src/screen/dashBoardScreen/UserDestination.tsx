@@ -10,6 +10,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { firebase } from '@react-native-firebase/auth';
 import { useSelector } from 'react-redux';
+import instance from '../../axios/axiosInstance';
 
 
 
@@ -121,13 +122,8 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
        longtitude: destination.longitude
     }
     let placeName = searchQuery;
-    const response = await axios.post('http://10.0.2.2:3000/addTravelLocation', {
+    const response = await instance.post('/addTravelLocation', {
       userId, travellingLocation, placeName
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
     });
     
     if(response.status === 200){

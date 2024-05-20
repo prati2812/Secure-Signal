@@ -260,13 +260,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       let senderName = userName;
       for(let i=0; i < tokenMapping.length; i++){
 
-         let userId = tokenMapping[i].userId;
+         let senderId = tokenMapping[i].userId;
 
          // save LiveLocation Notification 
          await axios.post(
            'http://10.0.2.2:3000/saveLiveLocation',
            {
              userId,
+             senderId,
              senderName
            },
            {
@@ -285,7 +286,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
       
       await instance.post('/savePoliceStationNotification', 
-                      {policeStationId , senderName}).then(() => {
+                      {userId , policeStationId , senderName}).then(() => {
           console.log("successfully notification savedd");
             
       }).catch((err) => {
@@ -337,6 +338,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
 
   const sendLiveLocation = async() => {
+
+    await getCurrentLocation();
     
     let selectedUser = [];
     for(const contact of selectedContacts){ 
@@ -345,9 +348,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         }
     }
     
-    
-    await getCurrentLocation();
-    
+  
     let policeStationId = nearestPoliceStation.nearestPoliceStation.id;
 
   
@@ -368,13 +369,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       const selectedUserId = selectedUser[i];
 
       // Share Live Location to the selected user.
-      const response = await axios.post('http://10.0.2.2:3000/addLiveLocation' , {
-        userId, selectedUserId , location},{
-        headers:{
-          'Content-Type':'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await instance.post('/addLiveLocation' , {
+        userId, selectedUserId , location}).then(() =>{
+           console.log("successfully saved");
+        }).catch((err) => {
+           console.log(err);           
+        });
 
 
     }
@@ -497,7 +497,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
    
-
+  
+  
 
   // Send SMS
   const sendSMS = () => {

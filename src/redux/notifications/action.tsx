@@ -2,6 +2,7 @@ import axios from "axios";
 import { Dispatch } from "redux";
 import instance from "../../axios/axiosInstance";
 
+
 export  const FETCH_EMERGENCY_CONTACTS_NOTIFICATION= 'FETCH_EMERGENCY_CONTACTS_NOTIFICATION';
 export const ALL_NOTIFICATION_READ = 'ALL_NOTIFICATION_READ';
 export const DELETE_ALL_NOTIFICATION = 'DELETE_ALL_NOTIFICATION';
@@ -33,19 +34,21 @@ export const allNotificationReadOrNot = (userId: string , token: string) => {
     if (response.status === 200) { 
       const data = response.data;
       
-      if (response.data.length === 0) {
-        dispatch({
-          type: ALL_NOTIFICATION_READ,
-          payload: true,
-        });
-      } else {
+      if (response.data.length === 0) {   
+        // dispatch({
+        //   type: ALL_NOTIFICATION_READ,
+        //   payload: true,
+        // });
+         isAllRead = true;
+      } else {         
         for (let i = 0; i < data.length; i++) {
           const read = data[i].isRead;
           if(read === false){
-            dispatch({
-              type: ALL_NOTIFICATION_READ,
-              payload: false,
-            });
+            // dispatch({
+            //   type: ALL_NOTIFICATION_READ,
+            //   payload: false,
+            // });
+            isAllRead = false;
             break;
           }
           else{
@@ -67,22 +70,24 @@ export const allNotificationReadOrNot = (userId: string , token: string) => {
 
          if(response.status === 200){
             const data = response.data;
-           
+            
             
             if (response.data.length === 0) {
-              dispatch({
-                type: ALL_NOTIFICATION_READ,
-                payload: true,
-              });
+              // dispatch({
+              //   type: ALL_NOTIFICATION_READ,
+              //   payload: true,
+              // });
+              isAllLiveNotificationRead = true;
             } 
             else {
               for (let i = 0; i < data.length; i++) {
                 const read = data[i].isRead;
                 if(read === false){
-                  dispatch({
-                    type: ALL_NOTIFICATION_READ,
-                    payload: false,
-                  });
+                  // dispatch({
+                  //   type: ALL_NOTIFICATION_READ,
+                  //   payload: false,
+                  // });
+                  isAllLiveNotificationRead = false;
                   break;
                 }
                 else{

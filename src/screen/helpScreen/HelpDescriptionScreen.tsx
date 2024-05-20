@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import Geolocation from 'react-native-geolocation-service';
+import instance from '../../axios/axiosInstance';
 
 
 
@@ -49,7 +50,6 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
 
     useEffect(() => {  
-      
       
       currentLocation();  
       

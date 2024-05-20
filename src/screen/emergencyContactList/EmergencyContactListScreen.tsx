@@ -11,6 +11,7 @@ import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import SectionList from '../../component/SectionList';
 import MatchingContact from '../../component/MatchingContact';
+import instance from '../../axios/axiosInstance';
 
 
 
@@ -333,14 +334,9 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
          emergencyContactList.push(item);
     })
   
-    const response = await axios.post('http://10.0.2.2:3000/emergencyContact', {
+    const response = await instance.post('/emergencyContact', {
       emergencyContactList,
       userId
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      }
     });
 
     if(response){
@@ -368,13 +364,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     
     for(let i=0; i < selectedUserId.length; i++){
       const userId = selectedUserId[i];
-      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-          userId,},{
-          headers:{
-            'Content-Type':'application/json',
-             Authorization: `Bearer ${token}`,
-          },
-      });
+      const response = await instance.post('/fetchUserDetails' , {userId});
 
       const data  = await response.data;
       tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
@@ -386,24 +376,13 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
         
         const title = 'Emergency Contact Set';
         const body = 'You have been designated as an emergency contact by ';
-        const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
-              notifyToken , userName, title , body},{
-                    headers:{
-                      'Content-Type':'application/json',
-                      Authorization: `Bearer ${token}`,
-                    },
-              });
+        const response = await instance.post('/sendNotificationEmergencyContact' , {notifyToken , userName, title , body});
 
               if(response.status === 200){  
                     let userId = tokenMapping[i].userId;
                     let senderName = userName;
-                    const response = await axios.post('http://10.0.2.2:3000/saveEmergencyContactNotification' , {
-                    userId , senderName},{
-                          headers:{
-                            'Content-Type':'application/json',
-                            Authorization: `Bearer ${token}`,
-                          },
-                    });
+                    const response = await instance.post('/saveEmergencyContactNotification' , {
+                    userId , senderName});
 
                     if(response.status === 200){
                         console.log("notifcation saved successfully");
