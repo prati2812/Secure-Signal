@@ -26,6 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeUserName } from '../../redux/userprofile/action';
 import { firebase } from '@react-native-firebase/auth';
 import { addSubscriptionDetails } from '../../redux/subscription/action';
+import instance from '../../axios/axiosInstance';
 
 
 interface EditProfileProps {
@@ -132,15 +133,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
     setIndicatorVisible(true);
 
-    const response = await axios.post(
-      'http://10.0.2.2:3000/uploadImage',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      },
-    );
+    const response = await instance.post('/uploadImage',formData);
 
     if(response.status === 201){
       const responseData = await response.data;

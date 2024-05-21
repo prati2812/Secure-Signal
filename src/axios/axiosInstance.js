@@ -9,7 +9,7 @@ console.log(BASE_URL);
 
 const instance = axios.create({
     baseURL:BASE_URL,
-    timeout:1000,
+    timeout:10000,
     headers:{
         'Content-Type': 'application/json',
     },
@@ -22,6 +22,14 @@ instance.interceptors.request.use(
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
+
+            if (config.data instanceof FormData) {
+                config.headers['Content-Type'] = 'multipart/form-data';
+            } else {
+                config.headers['Content-Type'] = 'application/json';
+            }
+
+
         } catch (error) {
             console.error('Error fetching token from AsyncStorage:', error);
         }

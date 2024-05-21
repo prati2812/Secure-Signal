@@ -59,12 +59,15 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
  
   }
 
-  const handleLiveLocationNotificationRead = async(notification_id : String) => {
+  const handleLiveLocationNotificationRead = async(notification_id : String , senderId : String) => {
     let notificationId = notification_id;
     const response = await instance.post('/liveLocationNotificationMarkAsRead' , {userId , notificationId});
     if(response.status === 200){
       console.log("Live Location Notification Successfully Read");
       setRead(!read);  
+      navigation.navigate("LiveLocationRoute" , {senderId});
+      
+      
     }
   }
   
@@ -120,6 +123,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                         isRead: boolean;
                         senderName: any;
                         timeStamp: string;
+                        senderId:string;
                       },
                       key: React.Key | null | undefined,
                     ) => {
@@ -132,7 +136,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                              color={'#FF5733'}
                              isRead={notificationReadStatus !== null && notificationReadStatus === true ? true : item.isRead}
                              handleIsRead={() =>
-                               handleLiveLocationNotificationRead(item.notification_id)
+                               handleLiveLocationNotificationRead(item.notification_id , item.senderId)
                              }
                            />
                          );

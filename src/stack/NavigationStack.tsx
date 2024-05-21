@@ -11,6 +11,7 @@ import EmergencyContactListScreen from "../screen/emergencyContactList/Emergency
 import SubscriptionScreen from "../screen/subscription/SubscriptionScreen";
 import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
 import { useSelector } from "react-redux";
+import LiveLocationRouteScreen from "../screen/location/LiveLocationRouteScreen";
 
 
 
@@ -31,6 +32,7 @@ const NavigationStack: React.FC = () => {
           <Stack.Screen name="Location" component={LocationHistory} options={{headerShown:false}} />
           <Stack.Screen name="EmergencyContactList" component={EmergencyContactListScreen} options={{headerShown:false}}/>
           <Stack.Screen name="Subscription" component={SubscriptionScreen} options={{headerShown:false}} />
+          <Stack.Screen name="LiveLocationRoute" component={LiveLocationRouteScreen} options={{headerShown:false}} />
           
         </Stack.Navigator>
     

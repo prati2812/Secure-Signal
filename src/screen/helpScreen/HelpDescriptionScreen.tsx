@@ -126,29 +126,17 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
       try{
 
-        const response = await axios.post('http://10.0.2.2:3000/uploadComplaints', complaintData, {
-          headers: {
-            "Content-Type": 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await instance.post('/uploadComplaints', complaintData);
 
         if(response.status === 200){
         
-          
         
           let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
           console.log(policeStationId);
            
            const title = 'Complaint';
            const body = 'Complaint sent by '
-           const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification' , {
-              policeStationId , userName , title , body},{
-             headers:{
-               'Content-Type':'application/json',
-               Authorization: `Bearer ${token}`,
-             },
-           });
+           const response = await instance.post('/sendComplaintNotification' , {policeStationId , userName , title , body});
      
            if(response.status === 200){
              console.log("complaint , sent");
@@ -179,8 +167,6 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
         
     }
-
-  
 
 
   return (

@@ -108,7 +108,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     let filteredContacts = contacts.filter(
       contactItem =>
         !selectedContacts.some(
-          selectedItem => selectedItem.recordID === contactItem.recordID,
+          (selectedItem: { recordID: string; }) => selectedItem.recordID === contactItem.recordID,
         ),
     );
   
@@ -292,7 +292,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     // Update non-app contact list if selected contacts are from there
     let updatedNonMatchingContacts = updatedContact;
     if (
-      selectedContacts.some(contact =>
+      selectedContacts.some((contact: { recordID: string; }) =>
         updatedNonMatchingContacts.some(
           item => item.recordID === contact.recordID,
         ),
@@ -301,7 +301,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       updatedNonMatchingContacts = updatedNonMatchingContacts.filter(
         contact =>
           !selectedContacts.some(
-            selected => selected.recordID === contact.recordID,
+            (selected: { recordID: string; }) => selected.recordID === contact.recordID,
           ),
       );
       setUpdatedContact(updatedNonMatchingContacts);
@@ -310,7 +310,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     // Update app contact list if selected contacts are from there
     let updatedMatchingContacts = matchingUpdatedContact;
     if (
-      selectedContacts.some(contact =>
+      selectedContacts.some((contact: { recordID: string; }) =>
         updatedMatchingContacts.some(
           item => item.recordID === contact.recordID,
         ),
@@ -319,7 +319,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       updatedMatchingContacts = updatedMatchingContacts.filter(
         contact =>
           !selectedContacts.some(
-            selected => selected.recordID === contact.recordID,
+            (selected: { recordID: string; }) => selected.recordID === contact.recordID,
           ),
       );
       setMatchingUpdatedContact(updatedMatchingContacts);
@@ -330,7 +330,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
     let emergencyContactList: Contact[] = [];
 
-    selectedContacts.forEach((item) => {
+    selectedContacts.forEach((item: Contact) => {
          emergencyContactList.push(item);
     })
   

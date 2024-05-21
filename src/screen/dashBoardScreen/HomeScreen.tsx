@@ -167,9 +167,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
 
-  
-  
-  
 
   // Start Background Service
   const backgroundService = async() => {
@@ -193,13 +190,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
     for(let i=0; i < selectedUserId.length; i++){
       const userId = selectedUserId[i];
-      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-          userId,},{
-          headers:{
-            'Content-Type':'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const response = await instance.post('/fetchUserDetails',{userId});
 
       const data  = await response.data;
       tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
@@ -216,18 +207,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       console.log("selected user" , notifyToken);
        
       // Send Live Location Notification to Selected User
-      const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
-        notifyToken , userName , title , body},{
-        headers:{
-          'Content-Type':'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await instance.post('/sendNotificationEmergencyContact' , {notifyToken , userName , title , body});
 
-      
-
+      if(response.status === 200){
+        console.log("successfully notification sent to selected user");
+      }
+      else{
+        console.log("fail");
+      }
        
-       console.log("successfully sent");
       
     }
     
@@ -235,19 +223,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
    
           
      let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
-     console.log(policeStationId);
+     console.log("====",policeStationId);
       
       //send Live Location Notification to Nearest Police Station
-      const response = await axios.post('http://10.0.2.2:3000/sendComplaintNotification' , {
-         policeStationId , userName , title , body},{
-        headers:{
-          'Content-Type':'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await instance.post('/sendComplaintNotification' , {policeStationId , userName , title , body});
 
       if(response.status === 200){
-        console.log("sent");
+        console.log("sent notification to nearest police station");
       }
       else{
         console.log("fail");
@@ -263,20 +245,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
          let senderId = tokenMapping[i].userId;
 
          // save LiveLocation Notification 
-         await axios.post(
-           'http://10.0.2.2:3000/saveLiveLocation',
+         await instance.post('/saveLiveLocation',
            {
              userId,
              senderId,
              senderName
-           },
-           {
-             headers: {
-               'Content-Type': 'application/json',
-               Authorization: `Bearer ${token}`,
-             },
-           },
-         ).then(() => {
+           }).then(() => {
              console.log('successfully notification saved');
          }).catch((err) => {
              console.log(err);             
@@ -293,11 +267,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
          console.log(err);
       });
 
-      
-      
-
-      
-      
+          
 
   }
 
@@ -307,7 +277,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
   
-
   const veryIntensiveTask = async (taskDataArguments: { delay: any; } ) => {
     const { delay } = taskDataArguments;
     await new Promise( async (resolve) => {
@@ -338,8 +307,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
 
   const sendLiveLocation = async() => {
-
+    
     await getCurrentLocation();
+
     
     let selectedUser = [];
     for(const contact of selectedContacts){ 
@@ -348,17 +318,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         }
     }
     
-  
+    
     let policeStationId = nearestPoliceStation.nearestPoliceStation.id;
 
   
-    console.log("=======",location);
+  
     
     
     // Share Live Location to nearest police station.
     await instance.post('/shareLocationNearestPoliceStation' , {
         userId, policeStationId , location}).then(() => {
-       console.log("successfully saved");       
+       console.log("successfully saved to nearest police station");       
     }).catch((err) => {
        console.log(err);
     });
@@ -371,7 +341,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       // Share Live Location to the selected user.
       await instance.post('/addLiveLocation' , {
         userId, selectedUserId , location}).then(() =>{
-           console.log("successfully saved");
+           console.log("successfully saved to selected user");
         }).catch((err) => {
            console.log(err);           
         });
