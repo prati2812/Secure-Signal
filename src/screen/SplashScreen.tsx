@@ -1,7 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { Image, StatusBar, Text, View , StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setProfileCompleted } from '../redux/userprofile/action';
 
 interface SplashScreenProps {
   navigation:any
@@ -10,11 +12,22 @@ interface SplashScreenProps {
 const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
  
   const token = useSelector((state:any) => state.userProfile.token);
+  const isProfile = useSelector((state:any) => state.userProfile.isProfileCompleted);  
+  const dispatch = useDispatch(); 
+ 
  
   useEffect(() => {
-    const navigateToScreen = () => {
+    const navigateToScreen = async() => {
       if (token) { 
-        navigation.navigate('TabNavigator');
+        const profileExist = await AsyncStorage.getItem("profileExist");
+        if(profileExist){
+          dispatch(setProfileCompleted(true)); 
+          navigation.navigate('TabNavigator'); 
+        }
+        else{
+          dispatch(setProfileCompleted(false)); 
+          navigation.navigate('EditProfile');
+        }
       } else { 
         navigation.navigate('PhoneNumber');
       }

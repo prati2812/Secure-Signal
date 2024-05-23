@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator} from "react-native";
+import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert} from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from "../../hook/useError";
-import auth from '@react-native-firebase/auth';
+import auth, { firebase } from '@react-native-firebase/auth';
 import { useDispatch } from "react-redux";
 import { addVerificationId } from "../../redux/credential/action";
 
@@ -13,52 +13,83 @@ interface PhoneNumberScreenProps {
 }
 
 const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => {
+  const regex = /[.,+\-' ']/;
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
   const [isError, setIsError] = useState(false);
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
   const dispatch = useDispatch();
 
 
-  useEffect(() =>{
-     setIsError(false);
-  },[phoneNumber]);
- 
+
 
   // Phone Number Verification
-  const handlePhoneNumber = async() => {
+  const handlePhoneNumber = async () => {
     try {
-        if (!phoneNumber) {
-          return setIsError(true);
-        } else {
-          setIsError(false);
-        }
+      if (!phoneNumber) {
+        setIsError(true);
+        setPhoneNumber(phoneNumber);
+        return false;
+      }
 
-        if (phoneNumber.length < 10) {
-          return setIsError(true);
-        } else {
-          setIsError(false);
-        }
-     
-        let phoneNo = '+91'+phoneNumber;
-        dispatch({
-          type: 'ADD_USER_PHONE_NUMBER',
-          payload: phoneNo
-     })
+      let phoneNo = '+91' + phoneNumber;
+      dispatch({
+        type: 'ADD_USER_PHONE_NUMBER',
+        payload: phoneNo,
+      });
 
-        setIndicatorVisible(true);
+      setIndicatorVisible(true);
+      try {
+        firebase.auth().settings.appVerificationDisabledForTesting = true;
         const confirmation = await auth().signInWithPhoneNumber(phoneNo);
         console.log(confirmation.verificationId);
 
         dispatch(addVerificationId(confirmation.verificationId));
-        
+
         setIndicatorVisible(false);
         navigation.navigate('OtpNumber');
-
+      } catch (error) {
+        setIndicatorVisible(false);
+        Alert.alert(
+          'Error',
+          'Please try again later',
+          [
+            {
+              text: 'Ohk',
+            },
+          ],
+          {
+            cancelable: false,
+          },
+        );
+      }
     } catch (error) {
       console.log(error);
-       
     }
+  };
+
+
+  const phoneNumberValidation = (text:string) => {
+    if (!text) {
+      setIsError(true);
+      setPhoneNumber(text);
+      return false;
+    } 
+    else if (text.length < 10) {
+      setIsError(true);
+      setPhoneNumber(text);
+      return false;
+    } 
+    else if(regex.test(text)) {
+       setIsError(true);
+       setPhoneNumber(text);
+       return false;
+    }
+    else{
+      setPhoneNumber(text);
+      setIsError(false);
+    }
+    
+    
   
   }
 
@@ -85,11 +116,11 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
             placeholder="Phone number"
             keyboardType="numeric"
             value={phoneNumber}
-            onChangeText={(text) => setPhoneNumber(text)}
+            onChangeText={phoneNumberValidation}
             maxLength={10} />
         </View>
       </View>
-      {isError && phoneNumber.length < 10 && phoneNumber.length >= 1 ?
+      {isError && phoneNumber.length <= 10 && phoneNumber.length >= 1  && regex.test(phoneNumber) ?
         <HandleError title="please enter valid phone number" />
         : isError ? <HandleError title="please enter phone number" /> : null
       }
@@ -102,8 +133,9 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
       
       <View style={style.sendCodeBtnView}>
         <TouchableOpacity
-          style={style.sendBtnCode}
-          onPress={async() => await handlePhoneNumber()}>
+          style={[style.sendBtnCode, isError && style.sendBtnCodeDisable]}
+          onPress={async() => await handlePhoneNumber()}
+          disabled={isError}>  
           <View style={style.btnView}>
             {
                isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/> 
@@ -190,6 +222,9 @@ const style  = StyleSheet.create({
       padding:13,
       borderRadius:10,
       elevation:3,
+  },
+  sendBtnCodeDisable:{
+    backgroundColor: '#74d198', 
   },
   btnView:{
      color:'white',

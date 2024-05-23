@@ -21,9 +21,8 @@ import HandleError from '../../hook/useError';
 import { useEffect, useState } from 'react';
 import ImagePickerSheet from '../../component/ImagePickerSheet';
 import { useSelector , useDispatch} from 'react-redux';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { changeUserName } from '../../redux/userprofile/action';
+import { changeUserName, setProfileCompleted } from '../../redux/userprofile/action';
 import { firebase } from '@react-native-firebase/auth';
 import { addSubscriptionDetails } from '../../redux/subscription/action';
 import instance from '../../axios/axiosInstance';
@@ -48,11 +47,17 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
   const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
   const phoneNumber = useSelector((state: any) => state.userProfile.phoneNumber);
-  
+  const name  = useSelector((state : any) => state.userProfile.userName);
   const userId = firebase.auth().currentUser?.uid;
      
 
   const [appState, setAppState] = useState(AppState.currentState);
+
+
+  useEffect(() => {
+    getToken();
+    dispatch(changeUserName(userId));
+  },[]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
@@ -62,11 +67,13 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     };
   },[appState]);
 
-  
-  
   useEffect(() => {
      getToken();   
   },[userName]);
+
+  useEffect(() => {
+    setUserName(name);
+  },[name]);
 
 
   const getToken = async() => {
@@ -114,21 +121,25 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
   const handleSaveProfile = async() => {
        
-  
-    dispatch(changeUserName(userName));
+    dispatch({
+      type: 'CHANGE_USER_NAME',
+      payload: userName,
+    })
 
     const formData = new FormData();
-    formData.append('image', {
-      uri: imageResponse.assets[0].uri,
-      type: imageResponse.assets[0].type,
-      name: imageResponse.assets[0].fileName,
-    });
-
+    if (imageResponse && imageResponse.assets && imageResponse.assets.length > 0){
+      formData.append('image' , {
+        uri: imageResponse.assets[0].uri,
+        type: imageResponse.assets[0].type,
+        name: imageResponse.assets[0].fileName,
+      }); 
+    }
+    
     formData.append('phoneNumber', phoneNumber);
     formData.append('userName', userName);
     formData.append('userId', userId);
     formData.append('notificationToken', notificationToken);
-
+    
     console.log(formData);
 
     setIndicatorVisible(true);
@@ -136,15 +147,10 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     const response = await instance.post('/uploadImage',formData);
 
     if(response.status === 201){
-      const responseData = await response.data;
-      const {token, imageUrl} = responseData;
-      AsyncStorage.setItem('token', token);
-  
-      dispatch(addSubscriptionDetails(userId , token));
+      AsyncStorage.setItem("profileExist", "true");
+      dispatch(setProfileCompleted(true));  
       setIndicatorVisible(false);
-       
       navigation.navigate('Home');
-    
     }
     else{
       setIndicatorVisible(false);

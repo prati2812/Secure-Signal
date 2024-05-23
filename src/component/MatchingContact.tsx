@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
-import RNFetchBlob from 'rn-fetch-blob';
-
+import instance from '../axios/axiosInstance';
+import base64 from 'base64-js';
 
 interface ContactRoot {
     userId: any;
@@ -25,7 +25,7 @@ interface MatchingContactProps {
 
 const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected , handleMatchingSelected}) => {
    
-    const [imageData , setImageData] = React.useState<String|null>(null); 
+    const [imageData , setImageData] = React.useState<string|null>(null); 
   
     const userId = contact.userId;
    
@@ -37,21 +37,14 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
    },[]); 
  
     const fetchUserProfile = async() => {
-        const response = await RNFetchBlob.fetch(
-                    'POST' , 
-                    'http://10.0.2.2:3000/fetchUserProfile',
-                    {
-                      'Content-Type' : 'application/json' , 
-                      'Authorization': `Bearer ${token}`,
-                    },
-                    JSON.stringify({userId})
-                  );
-    
-        
-        if(response.data){
-          const imageData = response.data;
-          const image = `data:image/jpeg;base64,${imageData.toString('base64')}`;
-          setImageData(image); 
+        const response = await instance.post('/fetchUserDetails',{ userId });
+                
+        if(response.status === 200){
+          const { userData, imageBuffer } = await response.data;      
+          const base64Image = base64.fromByteArray(imageBuffer.data);
+          const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+
+          setImageData(imageUrl); 
         
           
         }

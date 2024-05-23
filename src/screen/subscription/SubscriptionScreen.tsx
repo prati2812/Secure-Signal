@@ -11,7 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import CrossLine from '../../component/CrossLine';
 import LinearGradient from 'react-native-linear-gradient';
 import { IS_SUBSCRIBED } from '../../redux/subscription/action';
-import { addImageUri } from '../../redux/userprofile/action';
+import instance from '../../axios/axiosInstance';
+import { changeUserName } from '../../redux/userprofile/action';
 
 
 
@@ -52,17 +53,10 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
           let totalAmount = amount.replace('₹', '');
           console.log(totalAmount);
  
-          const response = await axios.post(
-            'http://10.0.2.2:3000/payment',
+          const response = await instance.post('/payment',
             {
               totalAmount,
-            },
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          );
+            });
  
           const {paymentIntent, ephemeralKey, customer} = await response.data;
  
@@ -88,16 +82,9 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
             return;
           } 
           else {
-            await axios.post('http://10.0.2.2:3000/paymentSucess' , 
-            {userId , selectedSubscription},
-            {
-              headers: {
-               'Content-Type': 'application/json',
-              },
-            })
-             .then(()=>{
-               dispatch(addImageUri(userId , token));
-               
+            await instance.post('/paymentSucess' , 
+            {userId , selectedSubscription}).then(()=>{
+               dispatch(changeUserName(userId , token));
                navigation.navigate('Home');
             }).catch((error) =>{
                 console.log(error);

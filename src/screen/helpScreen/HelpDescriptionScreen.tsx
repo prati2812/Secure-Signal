@@ -24,11 +24,7 @@ interface ImageInfo {
 
 interface HelpDescriptionScreenProps {
     navigation: any,
-    route: {
-      params?: {
-        query?: string; 
-      };
-    };
+    route: any,
 }
 
 const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation,route}) => {

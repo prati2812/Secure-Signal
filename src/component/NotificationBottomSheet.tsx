@@ -8,6 +8,7 @@ import { firebase } from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteAllNotificationOrNot } from '../redux/notifications/action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import instance from '../axios/axiosInstance';
 
 
 interface NotificationBottomSheetProps {
@@ -52,14 +53,7 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
     }
 
     const handleAllMarkAsNotification = async() => {
-      const response = await axios.post('http://10.0.2.2:3000/markAllAsRead' , {
-         userId,
-      },{
-         headers:{
-           'Content-Type' : 'application/json',
-           Authorization: `Bearer ${token}` ,
-         },
-      });
+      const response = await instance.post('/markAllAsRead' , {userId});
 
       if(response.status === 200){
         console.log("successfully Read All Notification");
@@ -77,14 +71,7 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
     } 
 
     const handleDeleteAllNotificaion = async() => {
-      const response = await axios.post('http://10.0.2.2:3000/deleteAllNotification', {
-        userId
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await instance.post('/deleteAllNotification', {userId});
   
       if(response.status === 200){
          console.log("successfully Delete All Notification");

@@ -7,8 +7,7 @@ import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
 import { VolumeManager } from 'react-native-volume-manager';
 import { firebase } from '@react-native-firebase/auth';
-import { addImageUri, addToken, changeUserName } from '../../redux/userprofile/action';
-import RNFetchBlob from 'rn-fetch-blob';
+import {addToken, changeUserName } from '../../redux/userprofile/action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addMatchingContacts, addSelectedContact, updateContactList} from '../../redux/contacts/action';
 import axios from 'axios';
@@ -72,7 +71,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     getToken();
-    dispatch(addImageUri(userId,token));
     dispatch(changeUserName(userId,token));
     dispatch(addSelectedContact(userId,token));    
   },[token]);

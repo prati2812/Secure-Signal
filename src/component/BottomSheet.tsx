@@ -6,6 +6,7 @@ import { useSelector , useDispatch } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
 import { changeUserName } from '../redux/userprofile/action';
 import axios from 'axios';
+import instance from '../axios/axiosInstance';
 
 
 
@@ -97,12 +98,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
       try{
    
      
-         const response = await axios.post('http://10.0.2.2:3000/updateUserProfile', formData, {
-           headers: {
-             'Content-Type': 'multipart/form-data',
-             Authorization: `Bearer ${token}`,
-           },
-         });
+         const response = await instance.post('/updateUserProfile', formData);
   
          if (response.data) {
           setIndicatorVisible(false);
@@ -117,11 +113,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
         console.log(err);
         
       }   
-     
-  
- 
-     
-
+    
        
     }
 

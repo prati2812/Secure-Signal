@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform,
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CameraOptions, ImageLibraryOptions, MediaType, launchCamera , launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch } from 'react-redux';
-import { ADD_IMAGE_URI, addImageResponse, addImageUri } from '../redux/userprofile/action';
+import { ADD_IMAGE_URI, addImageResponse} from '../redux/userprofile/action';
 
 
 interface ImagePickerSheetProps {

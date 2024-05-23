@@ -5,6 +5,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler } from 'react-native';
 import { useSelector } from 'react-redux';
+import instance from '../axios/axiosInstance';
 
 
 
@@ -47,21 +48,18 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
 
   
   const handleDeleteAccount = async() => {
-    await AsyncStorage.clear();
-    await axios.post('http://10.0.2.2:3000/deleteAccount', 
-      {userId,}, {
-      headers: {
-        'Content-Type':'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+    const response = await instance.post("/deleteUserAccount", {userId});
   
-    BackHandler.exitApp();
-    slideDown();
-    setTimeout(() => {
+   if(response.status === 200){
+      await AsyncStorage.clear();
+      BackHandler.exitApp();
+      slideDown();
+      setTimeout(() => {
         setDeleteAccountSheetVisible(false);
-    }, 800);
+      }, 800);
+   }
+    
+    
       
    
   }

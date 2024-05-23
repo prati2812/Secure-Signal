@@ -1,11 +1,12 @@
 import React, {useState, useRef, useMemo, useEffect} from 'react';
-import {View, Text, TextInput, TouchableOpacity , StyleSheet , ActivityIndicator} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity , StyleSheet , ActivityIndicator, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from '../../hook/useError';
 import auth from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { requestUserPermission } from '../../utils/NotificationService';
-
+import instance from '../../axios/axiosInstance';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 interface OtpNumberScreenProps {
@@ -13,7 +14,7 @@ interface OtpNumberScreenProps {
 }  
 
 const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
-  const regex = /[.,+\-]/;
+  const regex = /[.,+\-' ']/;
   const [otp, setOtp] = useState('');
   const [isError, setIsError] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -29,10 +30,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
   },[]);
 
 
-  useEffect(() => {
-     setIsError(false);
-  },[otp]);
-
+  
 
   // Otp Number Verification
   const handleOtpNumber = async() => {
@@ -40,28 +38,44 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
     try
     {
 
-      if(!otp) {
+      if(!otp){
         setIsError(true);
-        return false;
-      } 
-      else if ((otp.length > 1 && otp.length < 6)) {
-        setIsError(true);
-        return false;
+        setOtp(otp);
+        return false;  
       }
-      else if(regex.test(otp)){
-        setIsError(true);
-        return false;
-      } 
-      setIsError(false);
+  
       setIndicatorVisible(true);
       const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
-      await auth().signInWithCredential(credential);
+      const dataa = await auth().signInWithCredential(credential);
+      const userId = dataa.user.uid;
+      const phoneNumber = dataa.user.phoneNumber;
+
+      const response = await instance.post("/userAuthentication" , {userId , phoneNumber});
+      if(response.status === 201){
+         const responseData = await response.data;
+         const {token} = responseData;
+         AsyncStorage.setItem('token' , token);
+      }
+
       setIndicatorVisible(false); 
       navigation.navigate('EditProfile');
     }
     catch(error)
     {
-      
+      setIndicatorVisible(false);
+      Alert.alert(
+       'Invalid Otp',
+       `Please enter the correct otp`,
+       [
+         {
+           text: 'Ohk',
+         },
+       ],
+       {
+         cancelable: true,
+       },
+     );
+      console.log(error);     
     }
     
   };
@@ -82,6 +96,29 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
     [otp],
   );
 
+  const otpValidation = (text: string) => {
+    if(!text) {
+      setIsError(true);
+      setOtp(text);
+      return false;
+    }
+    else if(regex.test(text)){
+      setIsError(true);
+      setOtp(text);
+      return false;
+    } 
+    else if ((text.length < 6)) {
+      setIsError(true);
+      setOtp(text);
+      return false;
+    }
+    else{
+      setIsError(false);
+      setOtp(text);
+    } 
+    
+  }
+
   return (
     <View style={style.otpNumberMain}>
       <View style={style.iconArrowBackView}>
@@ -101,13 +138,13 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
           maxLength={6}
           ref={inputRef}
           style={style.otpTextInput}
-          onChangeText={text => setOtp(text)}
+          onChangeText={otpValidation}
           value={otp}
           keyboardType="number-pad"
         />
         {otpContent}
       </View>
-      {isError && (otp.length > 1 && otp.length < 6 || regex.test(otp)) ? (
+      {isError && otp.length >= 1 && otp.length <= 6 && regex.test(otp) ? (
         <View style={{marginTop: 23, marginLeft: -2}}>
           <HandleError title="please enter the valid code" />
         </View>
@@ -126,8 +163,9 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
       </View>
       <View style={style.verifyCodeBtnView}>
         <TouchableOpacity
-          style={style.verifyBtnCode}
-          onPress={() => handleOtpNumber()}>
+          style={[style.verifyBtnCode , isError && style.verifyCodeBtnDisable]}
+          onPress={() => handleOtpNumber()}
+          disabled={isError}>
           <View style={style.btnView}>
               {  isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>  
                  : <Text style={style.verifyCode}>Next</Text>
@@ -225,6 +263,9 @@ const style = StyleSheet.create({
       padding:13,
       borderRadius:10,
       elevation:3,
+  },
+  verifyCodeBtnDisable:{
+    backgroundColor: '#74d198', 
   },
   btnView:{
       alignItems:'center',
