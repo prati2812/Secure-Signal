@@ -6,7 +6,7 @@ import instance from "../../axios/axiosInstance";
 export const FETCH_LOCATIONS = 'FETCH_LOCATIONS';
 export const NEAREST_POLICE_STATION_LOCATION = 'NEAREST_POLICE_STATION_LOCATION';
 
-export const fetchLocation = (userId:string , token:string) => {
+export const fetchLocation = (userId:string | undefined) => {
     
     return async (dispatch : Dispatch) => {
       const response = await instance.post('/fetchTravellingLocations', {userId});
@@ -27,7 +27,7 @@ export const fetchLocation = (userId:string , token:string) => {
 }
 
 
-export const findNearestPoliceStation = (userId:string) => {
+export const findNearestPoliceStation = (userId:string | undefined) => {
     return async(dispatch : Dispatch) => {
       
       const response = await instance.post('/nearestPoliceStation',{userId});

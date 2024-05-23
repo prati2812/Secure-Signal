@@ -1,4 +1,4 @@
-import React,{useEffect, useState} from 'react';
+import React,{Dispatch, useEffect, useState} from 'react';
 import { Text, View, StyleSheet , StatusBar, Pressable, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -12,6 +12,7 @@ import axios from 'axios';
 import NotifyIcon from '../../assets/icons/NotifyIcon';
 import PushNotification from '../../assets/icons/PushNotification';
 import instance from '../../axios/axiosInstance';
+import store from '../../redux/store';
 
 
 
@@ -34,8 +35,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
 
   useEffect(() => {
-    dispatch(fetchEmergencyContactNotification(userId,token)); 
-    dispatch(fetchLiveLocationNotification(userId,token));
+    dispatchStore(fetchEmergencyContactNotification(userId)); 
+    dispatchStore(fetchLiveLocationNotification(userId));
   },[read]); 
 
 
@@ -168,5 +169,6 @@ const styles = StyleSheet.create({
 });
 
 export default NotificationHistory;
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>
 
 

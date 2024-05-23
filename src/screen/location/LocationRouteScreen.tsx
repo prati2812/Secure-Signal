@@ -8,6 +8,7 @@ import { useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from 'react-native-geolocation-service';
 import { useSelector } from 'react-redux';
+import { RAPID_API_BASE_URL, X_RAPID_API_HOST, X_RAPID_API_KEY } from '@env';
 
 interface LocationRouteScreenProps {}
 const LocationRouteScreen = (props: LocationRouteScreenProps) => {
@@ -51,13 +52,13 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
       
       const options = {
         method: 'GET',
-        url: `https://fast-routing.p.rapidapi.com/route/v1/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
+        url: `${RAPID_API_BASE_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
         params: {
           alternatives: 'true'
         },
         headers: {
-          'X-RapidAPI-Key': '80d5459a70msh8bd6e06f4f88c16p1ceddbjsn78651e30baf8',
-          'X-RapidAPI-Host': 'fast-routing.p.rapidapi.com'
+          'X-RapidAPI-Key': X_RAPID_API_KEY,
+          'X-RapidAPI-Host': X_RAPID_API_HOST,
         }
       };
 

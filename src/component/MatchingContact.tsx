@@ -33,7 +33,9 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
     const token = useSelector((state:any) => state.userProfile.token);
 
     useEffect(() => {
-      fetchUserProfile();
+      if(userId){
+        fetchUserProfile();
+      }
    },[]); 
  
     const fetchUserProfile = async() => {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,8 +17,9 @@ import { allNotificationReadOrNot, deleteAllNotificationOrNot } from '../../redu
 import Geolocation from 'react-native-geolocation-service';
 import { startSubscriptionService } from '../../utils/SubscriptionService';
 import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscription/action';
-import { findNearestPoliceStation } from '../../redux/location/action';
+import { fetchLocation, findNearestPoliceStation } from '../../redux/location/action';
 import instance from '../../axios/axiosInstance';
+import store from '../../redux/store';
 
 
 
@@ -58,21 +59,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
   const [volume , setVolume] = useState(-1);  
-  const [token , setToken] = useState(null);
+  const [token , setToken] = useState<string | null>(null);
   const [volumUp, setVolumeUp] = useState(0);
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
   const latitude = nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.policeStationLocation.latitude : 0.00;
   const longitude = nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.policeStationLocation.longitude : 0.00;
-  
+  const locationData = useSelector((state: any) => state.location.locations);
   
   
    
 
   useEffect(() => {
     getToken();
-    dispatch(changeUserName(userId,token));
-    dispatch(addSelectedContact(userId,token));    
+    dispatchStore(changeUserName(userId));
+    dispatchStore(addSelectedContact(userId));
+    dispatchStore(fetchLocation(userId));
+    getCurrentLocation();   
   },[token]);
 
  
@@ -91,12 +94,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
     // If both values are null, dispatch actions
     if (!checkValuesNotNull()) {
-        dispatch(allNotificationReadOrNot(userId, token));
-        dispatch(findNearestPoliceStation(userId));
+        dispatchStore(allNotificationReadOrNot(userId));
+        dispatchStore(findNearestPoliceStation(userId));
     }
   }, [nearestPoliceStation, notificationReadStatus]);
 
-  
   
 
   useEffect(() => {
@@ -150,6 +152,39 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }, [isSubscribed]);
 
+ 
+
+  useEffect(() => {
+    // const currentLocation = () => {
+    //   Geolocation.getCurrentPosition(
+    //     position => {
+    //       setLocation({
+    //         latitude: position.coords.latitude,
+    //         longitude: position.coords.longitude
+    //       });
+    //       console.log(location);
+          
+    //     },
+    //     error => {
+    //       console.log(error.code, error.message);
+    //     },
+    //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    //   );
+    // };
+    // currentLocation();
+    // if(locationData){
+    //   const interval = setInterval(() => {
+    //      travellingLocationNotification();
+    //   }, 10000);
+    
+    //   return () => clearInterval(interval);  
+    // }
+  }, []);
+
+
+
+
+
   
   // check subscription status
   const checkSubscriptionStatus = () => {
@@ -159,12 +194,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     let endDate = new Date(subScriptionEndTime);
     if(currentDate > endDate){
       console.log(currentDate , subScriptionEndTime);
-       dispatch(updateSubscriptionDetails(userId));
+       dispatchStore(updateSubscriptionDetails(userId));
     }
     
   }
 
 
+  
 
   // Start Background Service
   const backgroundService = async() => {
@@ -189,9 +225,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     for(let i=0; i < selectedUserId.length; i++){
       const userId = selectedUserId[i];
       const response = await instance.post('/fetchUserDetails',{userId});
-
-      const data  = await response.data;
-      tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
+     
+      const {userData} = await response.data;
+      
+      tokenMapping.push({notificationToken:userData.notificationToken , userId:userId});
     }
     
   
@@ -202,7 +239,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
     for(let i=0; i < tokenMapping.length; i++){
       let  notifyToken = tokenMapping[i].notificationToken;
-      console.log("selected user" , notifyToken);
        
       // Send Live Location Notification to Selected User
       const response = await instance.post('/sendNotificationEmergencyContact' , {notifyToken , userName , title , body});
@@ -275,8 +311,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
   
-  const veryIntensiveTask = async (taskDataArguments: { delay: any; } ) => {
-    const { delay } = taskDataArguments;
+  const veryIntensiveTask = async (taskDataArguments?: { delay: number; } ) => {
+    const { delay } = taskDataArguments || {delay : 1000};
     await new Promise( async (resolve) => {
         for (let i = 0; BackgroundService.isRunning(); i++) {
             sendLiveLocation(); 
@@ -395,84 +431,131 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
   
   
- 
 
   const getNotificationToken = async() => {
-    console.log("hello");
-        
+    const title = 'Safe Arrival Notification';
+    const body = `Great news! ${userName} has safely arrived at his destination`; 
+    
+   
+     
+
     let selectedUserId = [];
     let tokenMapping = [];
     for(const contact of selectedContacts){ 
-        if(contact.notificationToken){
-           selectedUserId.push(contact.notificationToken);
+        if(contact.userId){
+           selectedUserId.push(contact.userId);
         }
     }
 
 
     for(let i=0; i < selectedUserId.length; i++){
       const userId = selectedUserId[i];
-      const response = await axios.post('http://10.0.2.2:3000/fetchUserDetails' , {
-          userId,},{
-          headers:{
-            'Content-Type':'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-      const data  = await response.data;
-      tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
+      const response = await instance.post('/fetchUserDetails',{userId});
+     
+      const {userData} = await response.data;
+      
+      tokenMapping.push({notificationToken:userData.notificationToken , userId:userId});
     }
+    
+  
+
+    console.log(tokenMapping);
     
 
 
     for(let i=0; i < tokenMapping.length; i++){
       let  notifyToken = tokenMapping[i].notificationToken;
-      console.log(notifyToken);
-      
-      const response = await axios.post('http://10.0.2.2:3000/sendNotificationEmergencyContact' , {
-        notifyToken , userName},{
-        headers:{
-          'Content-Type':'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+       
+      // Send Live Location Notification to Selected User
+      const response = await instance.post('/sendNotificationEmergencyContact' , {notifyToken , userName , title , body});
 
       if(response.status === 200){
-      
-    
-         let userId = tokenMapping[i].userId;
-         let senderName = userName; 
-         const response = await axios.post('http://10.0.2.2:3000/saveEmergencyContactNotification' , {
-          userId , senderName},{
-          headers:{
-            'Content-Type':'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if(response.status === 200){
-          console.log("notifcation saved successfully");
-          
-        }
-
-          console.log("notification send successfully");
-      
-      }   
-         
+        console.log("successfully notification sent to selected user");
+      }
+      else{
+        console.log("fail");
+      }
     }
+
+
+
+    let senderName = userName;
+    for(let i=0; i < tokenMapping.length; i++){
+
+       let senderId = tokenMapping[i].userId;
+
+       // save LiveLocation Notification 
+       await instance.post('/saveSafelyArrivalNotification',
+         {
+           userId,
+           senderId,
+           senderName
+         }).then(() => {
+           console.log('successfully notification saved');
+       }).catch((err) => {
+           console.log(err);             
+       });
+
+    }
+
+
+
+
         
            
   }
 
    
+  const travellingLocationNotification = async() => {
+      let threshold = 2;
+
+      for(let i=0;  i < locationData.length; i++){
+          console.log(locationData[i]);
+          let currentLocation = location;
+          console.log("====",location);
+          
+          let travellingLocation = locationData[i];
+          const response = await instance.post("/findTravellingDistance" , {currentLocation, travellingLocation});
+          if(response.status === 200){
+             const {distance} = await response.data;
+             console.log(distance);
+             if(distance <= threshold){             
+                 getNotificationToken();
+                 let locationId = travellingLocation.locationId;
+                 const response = await instance.post("/deleteTravellingLocation" , {userId,locationId});
+                 if(response.status === 200){
+                     console.log("Delete Location Successfully");
+                     dispatchStore(fetchLocation(userId));   
+                 }
+                 else{
+                    console.log("fail");
+                 }
+             }
+             
+          }
+          
+      }
+      
+  }
   
   
 
   // Send SMS
   const sendSMS = () => {
-    SendDirectSms("+918733049183", `https://www.google.com/maps/search/?api=1&query=${21.1702},${72.8311}`)
+   
+  
+   selectedContacts.forEach((phoneNumber : any) =>{
+    let number = phoneNumber.phoneNumbers[0].number;
+    number = number.replace(/[()-\s]/g, '');
+    number="+91"+number;
+    
+    SendDirectSms(number, `https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`)
     .then((res) => console.log("then", res))
     .catch((err) => console.log("catch", err))
+    
+   }) 
+
+    
   }
 
   const handleLocationMap = (mapNumber:number) => {
@@ -517,7 +600,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               <Text style={style.contactText}>+</Text>
             </TouchableOpacity>
 
-            {selectedContacts && selectedContacts.map((item, key) => (
+            {selectedContacts && selectedContacts.map((item: { givenName: string | any[]; }, key: React.Key | null | undefined) => (
                 <TouchableOpacity key={key} style={style.contactSelectedView}>
                     <Text style={style.contactText}>{item.givenName && item.givenName.length > 0 ? item.givenName[0] : ''}</Text>
                 </TouchableOpacity>
@@ -679,3 +762,4 @@ const style = StyleSheet.create({
 
 
 export default HomeScreen;
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>

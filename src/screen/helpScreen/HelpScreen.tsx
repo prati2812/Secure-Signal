@@ -20,11 +20,7 @@ const width = Dimensions.get('window').width;
 
 interface HelpScreenProps {
   navigation: any;
-  route: {
-    params?: {
-      mapNumber?: number; 
-    };
-  };
+  route: any;
 }
 
 

@@ -35,7 +35,7 @@ export const addSubscriptionDetails = (userId:string, token:string) => {
 };
 
 
-export const updateSubscriptionDetails = (userId:string) => {
+export const updateSubscriptionDetails = (userId:string | undefined) => {
   return async (dispatch:Dispatch) => {
     const response = await instance.post('/updateSubscriptionDetails' , {userId});
      

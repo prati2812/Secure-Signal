@@ -16,7 +16,7 @@ export const addContact = (contacts: any) => ({
     payload: contacts,
 })
 
-export const addSelectedContact = (userId:string , token:string) =>{
+export const addSelectedContact = (userId:string | undefined) =>{
 
     return async (dispatch:Dispatch)=>{
 
@@ -43,7 +43,7 @@ export const addSelectedContact = (userId:string , token:string) =>{
     
 };
 
-export const removeSelectedContact = (userId:string , contact:Object,token:string) => {
+export const removeSelectedContact = (userId:string | undefined, contact:Object) => {
    return async (dispatch: Dispatch) => {
     const response = await instance.post('/removeSelectedContact',{userId , contact});
    
@@ -61,7 +61,7 @@ export const removeSelectedContact = (userId:string , contact:Object,token:strin
     
 }
 
-export const addMatchingContacts = (userId:string, contacts:Object[], token:string) => {
+export const addMatchingContacts = (userId:string|undefined, contacts:Object[]) => {
     return async (dispatch: Dispatch) => {
       const response = await instance.post('findMatchingContacts',{userId , contacts});
         

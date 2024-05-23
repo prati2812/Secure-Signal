@@ -1,4 +1,4 @@
-import React, {useEffect, useRef , useState} from 'react';
+import React, {Dispatch, useEffect, useRef , useState} from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePickerSheet from './ImagePickerSheet';
@@ -7,6 +7,7 @@ import { firebase } from '@react-native-firebase/auth';
 import { changeUserName } from '../redux/userprofile/action';
 import axios from 'axios';
 import instance from '../axios/axiosInstance';
+import store from '../redux/store';
 
 
 
@@ -102,7 +103,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
   
          if (response.data) {
           setIndicatorVisible(false);
-          dispatch(changeUserName(edittedUsername)); 
+          dispatchStore(changeUserName(edittedUsername)); 
           closeModal();
          } else {
           setIndicatorVisible(false);
@@ -293,4 +294,4 @@ const styles = StyleSheet.create({
 
   
 export default BottomSheet;
-
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>

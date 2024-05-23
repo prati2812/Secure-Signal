@@ -41,7 +41,8 @@ const userProfileReducer = (state = initialState , action: { type: any; payload:
         case IS_PROFILE_COMPLETED:
             return{
                 ...state,
-                isProfileCompleted:action.payload,            }                        
+                isProfileCompleted:action.payload,            
+            }                        
         default:
             return state;    
     }

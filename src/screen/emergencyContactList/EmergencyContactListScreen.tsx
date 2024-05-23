@@ -1,4 +1,4 @@
-import React,{useEffect , useState} from 'react';
+import React,{useEffect , useState , Dispatch} from 'react';
 import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity ,ActivityIndicator} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import { Searchbar } from 'react-native-paper';
@@ -12,6 +12,8 @@ import axios from 'axios';
 import SectionList from '../../component/SectionList';
 import MatchingContact from '../../component/MatchingContact';
 import instance from '../../axios/axiosInstance';
+import store from '../../redux/store';
+
 
 
 
@@ -45,7 +47,7 @@ interface EmergencyContactListScreenProps {
 const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<Contact[]>([]);
-  const [filteredMatchingContactData , setFilteredMatchingContactData] = useState([]);
+  const [filteredMatchingContactData , setFilteredMatchingContactData] = useState<Contact[]>([]);
   const [updatedContact , setUpdatedContact] = useState<Contact[]>([]);
   const [matchingUpdatedContact , setMatchingUpdatedContact] = useState<Contact[]>([]);
   const [isVisible, setVisible] = useState(false);
@@ -77,7 +79,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   }, []);
  
   useEffect(() => { 
-    dispatch(addMatchingContacts(userId, contacts, token)); 
+    dispatchStore(addMatchingContacts(userId, contacts)); 
   }, [contacts]);
 
   useEffect(() => {  
@@ -103,50 +105,66 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   // Update Contact List Remove selected and Matching Contact from contact List
   const handleUpdateContactList = () => {  
 
-   if (selectedContacts && matchedContacts) {
+  //  if (selectedContacts && matchedContacts) {
     
-    let filteredContacts = contacts.filter(
-      contactItem =>
-        !selectedContacts.some(
-          (selectedItem: { recordID: string; }) => selectedItem.recordID === contactItem.recordID,
-        ),
-    );
+  //   let filteredContacts = contacts.filter(
+  //     contactItem =>
+  //       !selectedContacts.some(
+  //         (selectedItem: { recordID: string; }) => selectedItem.recordID === contactItem.recordID,
+  //       ),
+  //   );
   
-    filteredContacts = filteredContacts.filter(
-      contactItem =>
-        !matchedContacts.some(
-          matchedItem => matchedItem.recordID === contactItem.recordID,
-        ),
-    );
+  //   filteredContacts = filteredContacts.filter(
+  //     contactItem =>
+  //       !matchedContacts.some(
+  //         matchedItem => matchedItem.recordID === contactItem.recordID,
+  //       ),
+  //   );
 
     
     
-     if (filteredContacts.length > 0) {     
-       setIndicatorValue(indicatorValue + 1);
-       setUpdatedContact(filteredContacts);
-     }
+  //    if (filteredContacts.length > 0) {     
+  //      setIndicatorValue(indicatorValue + 1);
+  //      setUpdatedContact(filteredContacts);
+  //    }
 
-   } else if (matchedContacts) {
-     const filteredContacts = contacts.filter(
-       contactItem =>
-         !matchedContacts.some(
-           removeItem => removeItem.recordID === contactItem.recordID,
-         ),
-     );
+  //  } else if (matchedContacts) {
+  //    const filteredContacts = contacts.filter(
+  //      contactItem =>
+  //        !matchedContacts.some(
+  //          removeItem => removeItem.recordID === contactItem.recordID,
+  //        ),
+  //    );
           
-     if (filteredContacts.length > 0) {
-       setIndicatorValue(indicatorValue + 1);
-       setUpdatedContact(filteredContacts);
-     }
+  //    if (filteredContacts.length > 0) {
+  //      setIndicatorValue(indicatorValue + 1);
+  //      setUpdatedContact(filteredContacts);
+  //    }
      
      
-   }
-   else{
+  //  }
+  //  else{
        
-       setUpdatedContact(contacts);
-   }
+  //      setUpdatedContact(contacts);
+  //  }
     
+  let filteredContacts = contacts;
 
+  if (selectedContacts) {
+    
+    filteredContacts = filteredContacts.filter(
+      contactItem => !selectedContacts.some((selectedItem: { recordID: string; }) => selectedItem.recordID === contactItem.recordID)
+    );
+  }
+
+  if (matchedContacts) {
+    filteredContacts = filteredContacts.filter(
+      contactItem => !matchedContacts.some(matchedItem => matchedItem.recordID === contactItem.recordID)
+    );
+  }
+
+  
+  setUpdatedContact(filteredContacts);
     
   }
 
@@ -205,6 +223,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       
   };
 
+  
+  
  
   // Search Contact 
   const handleSearch = (text: string) =>{
@@ -260,7 +280,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   // Select Contact From Contact List
   const handleSelectedContact = (item : Contact) => { 
   
-      if (selectedContacts && selectedContacts.some((contact) => contact.recordID === item.recordID)){
+      if (selectedContacts && selectedContacts.some((contact: { recordID: string; }) => contact.recordID === item.recordID)){
          setSelected(isSelected-1);
          dispatch({
           type:'REMOVE_SELECTED_CONTACTS',
@@ -399,7 +419,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   // Delete Selected Contact
   const handleDeleteSelectedContact = async(contact: Contact) => {
     console.log("=======" , contact);   
-    dispatch(removeSelectedContact(userId, contact, token));
+    dispatchStore(removeSelectedContact(userId, contact));
     
     
     
@@ -691,4 +711,4 @@ const styles = StyleSheet.create({
 
 
 export default EmergencyContactListScreen;
-
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>

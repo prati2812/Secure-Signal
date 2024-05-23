@@ -9,7 +9,7 @@ export const DELETE_ALL_NOTIFICATION = 'DELETE_ALL_NOTIFICATION';
 export const FETCH_LIVE_LOCATION_NOTIFICATION = 'FETCH_LIVE_LOCATION_NOTIFICATION';
 
 
-export const fetchEmergencyContactNotification = (userId : string , token:string) => {
+export const fetchEmergencyContactNotification = (userId : string | undefined) => {
      return async (dispatch: Dispatch) => {
        const response = await instance.post('/fetchEmergencyContactNotification',{userId});
 
@@ -24,7 +24,7 @@ export const fetchEmergencyContactNotification = (userId : string , token:string
      };
 }
 
-export const allNotificationReadOrNot = (userId: string , token: string) => {
+export const allNotificationReadOrNot = (userId: string | undefined) => {
   return async (dispatch : Dispatch) => {
     
      
@@ -113,7 +113,7 @@ export const allNotificationReadOrNot = (userId: string , token: string) => {
   }
 }
 
-export const fetchLiveLocationNotification = (userId:string, token:string) => {
+export const fetchLiveLocationNotification = (userId:string | undefined) => {
   return async (dispatch: Dispatch) => {
     const response = await instance.post('/fetchLiveLocationNotification',{userId});
 

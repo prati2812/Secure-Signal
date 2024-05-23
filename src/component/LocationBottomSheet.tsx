@@ -1,7 +1,13 @@
 import * as React from 'react';
-import { useEffect } from 'react';
-import { Text, View, StyleSheet, Animated, Pressable } from 'react-native';
+import { Dispatch, useEffect } from 'react';
+import { Text, View, StyleSheet, Animated, Pressable, TouchableOpacity } from 'react-native';
 import NotificationFilter from './NotificationFilter';
+import instance from '../axios/axiosInstance';
+import { firebase } from '@react-native-firebase/auth';
+import { deleteAllNotificationOrNot } from '../redux/notifications/action';
+import { useDispatch } from 'react-redux';
+import store from '../redux/store';
+import { fetchLocation } from '../redux/location/action';
 
 interface LocationBottomSheetProps {
     setBottomSheetVisible: any;
@@ -9,6 +15,12 @@ interface LocationBottomSheetProps {
 
 const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetVisible}) => {
     const slide = React.useRef(new Animated.Value(300)).current;
+    const userId = firebase.auth().currentUser?.uid;
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      slideUp()
+    })
 
 
     const slideUp = () => {
@@ -28,17 +40,23 @@ const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetV
         }).start();
       };
   
-      useEffect(() => {
-        slideUp()
-      })
-
+    
 
     const closeModal = () => {
         slideDown();
         setTimeout(() => {
          setBottomSheetVisible(false);
         },800);
-     }
+    }
+
+    const handleDeleteAllLocation = async() => {
+        const response = await instance.post("/deleteAllTravellingLocation" , {userId});
+        if(response.status === 200){
+          console.log("successfully Delete All Notification");
+          dispatchStore(fetchLocation(userId));
+          closeModal();
+       }  
+    }
 
     return (
     <Pressable style={styles.container} onPress={closeModal}>
@@ -46,6 +64,7 @@ const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetV
         <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
         <View style={styles.notificationBottomSheet}>
 
+        <TouchableOpacity onPress={() => handleDeleteAllLocation()}>  
           <NotificationFilter
             icon={'delete'}
             color={'red'}
@@ -53,6 +72,7 @@ const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetV
             iconBackgroundColor={'#FFD6D7'}
             textColor={'red'}
           />
+        </TouchableOpacity>  
         </View>
         </Animated.View>
       </Pressable>  
@@ -84,4 +104,5 @@ const styles = StyleSheet.create({
 });
   
 export default LocationBottomSheet;
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>
 

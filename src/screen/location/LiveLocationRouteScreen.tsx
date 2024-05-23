@@ -13,11 +13,7 @@ import axios from 'axios';
 
 
 interface LiveLocationRouteScreenProps {
-    route: {
-        params?: {
-          senderId?: string; 
-        };
-    };
+    route:any;
 }
 
 const LiveLocationRouteScreen:React.FC<LiveLocationRouteScreenProps> = ({route}) => {

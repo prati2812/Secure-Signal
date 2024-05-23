@@ -3,6 +3,7 @@ import { Dispatch } from "redux";
 import { IS_SUBSCRIBED, SUBSCRIPTION_END_TIME, SUBSCRIPTION_TYPE } from "../subscription/action";
 import instance from "../../axios/axiosInstance";
 import base64 from 'base64-js';
+import store from "../store";
 
 
 
@@ -16,8 +17,10 @@ export const IS_PROFILE_COMPLETED = 'IS_PROFILE_COMPLETED';
  
 
 
-export const changeUserName = (userId:string) => {
-    return async (dispatch:Dispatch) => {
+
+
+export const changeUserName = (userId:string | undefined) => {
+  return async (dispatch:Dispatch) => {
       try {
         const response = await instance.post('/fetchUserDetails', {userId});
 

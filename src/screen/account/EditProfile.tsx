@@ -18,7 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import HandleError from '../../hook/useError';
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import ImagePickerSheet from '../../component/ImagePickerSheet';
 import { useSelector , useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -26,6 +26,7 @@ import { changeUserName, setProfileCompleted } from '../../redux/userprofile/act
 import { firebase } from '@react-native-firebase/auth';
 import { addSubscriptionDetails } from '../../redux/subscription/action';
 import instance from '../../axios/axiosInstance';
+import store from '../../redux/store';
 
 
 interface EditProfileProps {
@@ -52,11 +53,12 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
      
 
   const [appState, setAppState] = useState(AppState.currentState);
+  
 
 
   useEffect(() => {
     getToken();
-    dispatch(changeUserName(userId));
+    dispatchStore(changeUserName(userId));
   },[]);
 
   useEffect(() => {
@@ -337,3 +339,4 @@ const style = StyleSheet.create({
 });
 
 export default EditProfile;
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Text, View, StyleSheet, ScrollView, Alert, TextInput, Button } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import SubscriptionCard from '../../component/SubscriptionCard';
-import { useState } from 'react';
+import { Dispatch, useState } from 'react';
 import PaymentCard from '../../component/PaymentCard';
 import { initPaymentSheet, presentPaymentSheet, useStripe , Address , BillingDetails, useConfirmPayment, CardField} from '@stripe/stripe-react-native';
 import axios from 'axios';
@@ -13,6 +13,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { IS_SUBSCRIBED } from '../../redux/subscription/action';
 import instance from '../../axios/axiosInstance';
 import { changeUserName } from '../../redux/userprofile/action';
+import store from '../../redux/store';
 
 
 
@@ -84,7 +85,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
           else {
             await instance.post('/paymentSucess' , 
             {userId , selectedSubscription}).then(()=>{
-               dispatch(changeUserName(userId , token));
+               dispatchStore(changeUserName(userId));
                navigation.navigate('Home');
             }).catch((error) =>{
                 console.log(error);
@@ -186,4 +187,5 @@ const styles = StyleSheet.create({
 });
   
 export default SubscriptionScreen;
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>
 

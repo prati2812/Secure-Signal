@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { firebase } from '@react-native-firebase/auth';
 import { useSelector } from 'react-redux';
 import instance from '../../axios/axiosInstance';
+import { RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
 
 
 
@@ -30,7 +31,7 @@ interface UserDestinationProps {
 const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [desiredLocation , setDesiredLocation] = useState<Place[]>([]);
-  const [suggestion , setSuggestion] = useState([]);
+  const [suggestion , setSuggestion] = useState<string[]>([]);
   const [isVisble , setVisible] = useState(false);
   const [isSetDestinationLocation , setDestinationLocation] = useState(false);
   const [destination , setDestination] = useState({ latitude: 0, longitude: 0 });
@@ -48,14 +49,14 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
     setDestinationLocation(false);
     const options = {
       method: 'GET',
-      url: 'https://place-autocomplete1.p.rapidapi.com/autocomplete/json',
+      url: RAPID_API_PLACE_AUTOCOMPLETE_URL,
       params: {
         input: searchQuery,
         radius: '50000'
       },
       headers: {
-        'X-RapidAPI-Key': '80d5459a70msh8bd6e06f4f88c16p1ceddbjsn78651e30baf8',
-        'X-RapidAPI-Host': 'place-autocomplete1.p.rapidapi.com'
+        'X-RapidAPI-Key': X_RAPID_API_PLACE_AUTOCOMPLETE_KEY,
+        'X-RapidAPI-Host': X_RAPID_API_PLACE_AUTOCOMPLETE_HOST
       }
     };
 
@@ -156,12 +157,10 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
         suggestion.length > 0  && isVisble && <View style={styles.autoSuggestion}>
       {
          suggestion && isVisble && suggestion.map((item , Key) => (
-             <View>
+             <View key={Key}>
                   <TouchableOpacity onPress={() => searchLocation(item)} style={{backgroundColor:'#F5F5F5' , borderRadius:15, padding:10, elevation:3,}}>
                   <Text style={styles.autoSuggestionText}>{item}</Text>
                   </TouchableOpacity>
-
-
              </View>            
          ))
       }

@@ -2,13 +2,15 @@ import * as React from 'react';
 import { Text, View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 import NotificationBottomSheet from '../../component/NotificationBottomSheet';
 import LocationBottomSheet from '../../component/LocationBottomSheet';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchLocation } from '../../redux/location/action';
+import store from '../../redux/store';
+import PushNotification from '../../assets/icons/PushNotification';
 
 
 interface LocationHistoryProps {
@@ -25,7 +27,7 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
 
     useEffect(() => {
       // fetchTravellingLocation();
-      dispatch(fetchLocation(userId,token));
+      dispatchStore(fetchLocation(userId));
     },[]); 
 
 
@@ -63,31 +65,40 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
              backIcon={'keyboard-backspace'}
              backCall={() => navigation.goBack()}/>
 
-         <ScrollView
-             contentContainerStyle={{paddingTop:15}}
-             showsVerticalScrollIndicator={false}>
-
-         {
-             locationData.length > 0 &&   locationData.map((item: { createdAt: string; placeName: string; } , key: React.Key | null | undefined) => {
-                let date = dateConvert(item.createdAt);
-                return (
-                  <NotificationCard 
-                    key={key}
-                    icon={'pin-drop'}
-                    message={item.placeName}
-                    time={date}
-                    color={'green'} 
-                    isRead={true} 
-                    handleIsRead={() => {}}/>     
-                )
-             })
-           
-         }     
-
-           
-
-
-          </ScrollView>
+          {
+             locationData.length > 0 ? (
+              <ScrollView
+              contentContainerStyle={{paddingTop:15}}
+              showsVerticalScrollIndicator={false}>
+ 
+          {
+              locationData.length > 0 &&   locationData.map((item: { createdAt: string; placeName: string; } , key: React.Key | null | undefined) => {
+                 let date = dateConvert(item.createdAt);
+                 return (
+                   <NotificationCard 
+                     key={key}
+                     icon={'pin-drop'}
+                     message={item.placeName}
+                     time={date}
+                     color={'green'} 
+                     isRead={true} 
+                     handleIsRead={() => {}}/>     
+                 )
+              })
+            
+          }     
+ 
+            
+ 
+ 
+           </ScrollView>
+             ) : (
+                 <View style={{flex:1 , top:'20%'}}>
+                       <PushNotification />
+                 </View>
+             )
+          }
+          
     </View>
     
     {
@@ -106,4 +117,4 @@ const styles = StyleSheet.create({
   
 
 export default LocationHistory;
-
+export const dispatchStore = store.dispatch as typeof store.dispatch | Dispatch<any>
