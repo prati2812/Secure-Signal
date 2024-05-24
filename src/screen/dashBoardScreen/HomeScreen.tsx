@@ -1,5 +1,5 @@
 import React, { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch, useSelector } from 'react-redux';
@@ -68,7 +68,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const locationData = useSelector((state: any) => state.location.locations);
   
   
-   
+  
+  
 
   useEffect(() => {
     getToken();
@@ -154,6 +155,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
  
 
+
   useEffect(() => {
     // const currentLocation = () => {
     //   Geolocation.getCurrentPosition(
@@ -172,14 +174,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     //   );
     // };
     // currentLocation();
-    // if(locationData){
-    //   const interval = setInterval(() => {
-    //      travellingLocationNotification();
-    //   }, 10000);
+    if(locationData){
+      const interval = setInterval(() => { 
+         travellingLocationNotification();
+      }, 100000);
     
-    //   return () => clearInterval(interval);  
-    // }
-  }, []);
+      return () => clearInterval(interval);  
+    }
+  }, [locationData]);
 
 
 
@@ -432,10 +434,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   
   
 
-  const getNotificationToken = async() => {
+  const getNotificationToken = async(travellingLocation: string) => {
     const title = 'Safe Arrival Notification';
-    const body = `Great news! ${userName} has safely arrived at his destination`; 
-    
+    const body = `Great news! ${userName} has safely arrived at ${travellingLocation}.`; 
+    let placeName = travellingLocation;
    
      
 
@@ -484,12 +486,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
        let senderId = tokenMapping[i].userId;
 
-       // save LiveLocation Notification 
+       // save SafelyArrival Notification 
        await instance.post('/saveSafelyArrivalNotification',
          {
            userId,
            senderId,
-           senderName
+           senderName,
+           placeName
          }).then(() => {
            console.log('successfully notification saved');
        }).catch((err) => {
@@ -519,9 +522,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           if(response.status === 200){
              const {distance} = await response.data;
              console.log(distance);
-             if(distance <= threshold){             
-                 getNotificationToken();
+             if(distance <= threshold){
+                 if(selectedContacts.length > 0){
+                   getNotificationToken(travellingLocation.placeName);  
+                 }
+                 console.log("hesdf");
+                              
                  let locationId = travellingLocation.locationId;
+                 console.log("=====",locationId);                 
                  const response = await instance.post("/deleteTravellingLocation" , {userId,locationId});
                  if(response.status === 200){
                      console.log("Delete Location Successfully");

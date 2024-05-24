@@ -18,8 +18,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
  
   useEffect(() => {
     const navigateToScreen = async() => {
-      if (token) { 
-        const profileExist = await AsyncStorage.getItem("profileExist");
+      const profileExist = await AsyncStorage.getItem("profileExist");
+      if (token) {
+        console.log("sdsd" , profileExist);
+        console.log("csdfsd" , token);
+          
         if(profileExist){
           dispatch(setProfileCompleted(true)); 
           navigation.navigate('TabNavigator'); 
@@ -28,7 +31,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
           dispatch(setProfileCompleted(false)); 
           navigation.navigate('EditProfile');
         }
-      } else { 
+      } 
+      else { 
         navigation.navigate('PhoneNumber');
       }
     };
@@ -36,7 +40,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
     const timer = setTimeout(navigateToScreen, 4000);
     return () => clearTimeout(timer);
       
-  },[navigation , token]);
+  },[navigation]);
 
 
   

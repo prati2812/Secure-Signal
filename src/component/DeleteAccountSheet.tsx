@@ -4,8 +4,9 @@ import axios from 'axios';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import instance from '../axios/axiosInstance';
+import { isDeleted } from '../redux/userprofile/action';
 
 
 
@@ -18,6 +19,7 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
   const slide = React.useRef(new Animated.Value(300)).current;
   const userId = firebase.auth().currentUser?.uid; 
   const token = useSelector((state : any) => state.userProfile.token);
+  const dispatch = useDispatch();
 
   const slideUp = () => {
     Animated.timing(slide, {
@@ -48,18 +50,29 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
 
   
   const handleDeleteAccount = async() => {
-    const response = await instance.post("/deleteUserAccount", {userId});
+     const response = await instance.post("/deleteUserAccount", {userId});
   
-   if(response.status === 200){
+  //  if(response.status === 200){
+  //     await AsyncStorage.clear();
+  //     BackHandler.exitApp();
+  //     slideDown();
+  //     setTimeout(() => {
+  //       setDeleteAccountSheetVisible(false);
+  //     }, 800);
+  //  }
+    
+    
+    if(response.status === 200){
+      dispatch(isDeleted(true));
       await AsyncStorage.clear();
-      BackHandler.exitApp();
       slideDown();
       setTimeout(() => {
         setDeleteAccountSheetVisible(false);
       }, 800);
-   }
+      
+    }
     
-    
+      
       
    
   }

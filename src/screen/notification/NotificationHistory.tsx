@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import NotificationBottomSheet from '../../component/NotificationBottomSheet';
-import { fetchEmergencyContactNotification, fetchLiveLocationNotification } from '../../redux/notifications/action';
+import { fetchEmergencyContactNotification, fetchLiveLocationNotification, fetchSafeArrivalNotification } from '../../redux/notifications/action';
 import { useDispatch, useSelector } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
@@ -29,14 +29,15 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   const notificationDeleteStatus = useSelector((state : any) => state.notifications.deleteAllNotificationOrNot);
   const emergencyContactNotification = useSelector((state : any) => state.notifications.fetchSelectedContactNotification);
   const liveLocationNotification = useSelector((state:any) => state.notifications.fetchLiveLocationNotification);
-
-  const dispatch = useDispatch();
+  const safeArrivalNotification = useSelector((state:any) => state.notifications.fetchSafeArrivalNotification);
+  
 
 
 
   useEffect(() => {
     dispatchStore(fetchEmergencyContactNotification(userId)); 
     dispatchStore(fetchLiveLocationNotification(userId));
+    dispatchStore(fetchSafeArrivalNotification(userId));
   },[read]); 
 
 
@@ -71,6 +72,20 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
       
     }
   }
+
+  const handleSafeArrivalNotificationRead = async(notification_id : String) => {
+    let notificationId = notification_id;
+    const response = await instance.post('/safeArrivalNotificationMarksAsRead', {userId, notificationId});
+
+    if(response.status === 200){
+       console.log("successfully Read");
+       setRead(!read);
+       
+    }
+ 
+  }
+  
+  
   
   return (
     <>
@@ -85,7 +100,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
           backCall={() => navigation.goBack()}
         />
 
-        {(emergencyContactNotification.length > 0  || liveLocationNotification.length > 0)  && notificationDeleteStatus === false ? (
+        {(emergencyContactNotification.length > 0  || liveLocationNotification.length > 0 || safeArrivalNotification.length > 0)  && notificationDeleteStatus === false ? (
           <ScrollView
             contentContainerStyle={{paddingTop: 15}}
             showsVerticalScrollIndicator={false}>
@@ -139,6 +154,33 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                              handleIsRead={() =>
                                handleLiveLocationNotificationRead(item.notification_id , item.senderId)
                              }
+                           />
+                         );
+                    },) 
+              }
+              {
+                safeArrivalNotification.length > 0 && 
+                  safeArrivalNotification.map(
+                    (
+                      item: {
+                        notification_id: String;
+                        isRead: boolean;
+                        senderName: any;
+                        timeStamp: string;
+                        senderId:string;
+                        placeName:string;
+                      },
+                      key: React.Key | null | undefined,
+                    ) => {
+                         return (
+                           <NotificationCard
+                             key={key}
+                             icon={'celebration'}
+                             message={`Great news! ${item.senderName} has safely arrived at ${item.placeName}.`}
+                             time={item.timeStamp}
+                             color={'#fc6c85'}
+                             isRead={notificationReadStatus !== null && notificationReadStatus === true ? true : item.isRead}
+                             handleIsRead={() => handleSafeArrivalNotificationRead(item.notification_id)}
                            />
                          );
                     },) 

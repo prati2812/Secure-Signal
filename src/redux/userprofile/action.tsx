@@ -14,7 +14,7 @@ export const ADD_USER_ID = 'ADD_USER_ID';
 export const ADD_USER_PHONE_NUMBER = 'ADD_USER_PHONE_NUMBER';
 export const ADD_TOKEN = 'ADD_TOKEN';
 export const IS_PROFILE_COMPLETED = 'IS_PROFILE_COMPLETED';
- 
+export const IS_PROFILE_DELETED = 'IS_PROFILE_DELETED'; 
 
 
 
@@ -88,4 +88,9 @@ export const addToken = (token : string | null) =>({
 export const setProfileCompleted = (isProfile: boolean | null) => ({
      type:IS_PROFILE_COMPLETED,
      payload:isProfile,
+})
+
+export const isDeleted = (isdeleted: boolean | null) => ({
+   type: IS_PROFILE_DELETED,
+   payload: isdeleted
 })

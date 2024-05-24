@@ -22,6 +22,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const [isDeleteAccountSheetVisible, setDeleteAccountSheetVisible] = useState(false);
   const userProfile = useSelector((state: { userProfile: UserProfile }) => state.userProfile);
   const userPhoneNumber = useSelector((state:any) => state.userProfile.phoneNumber);
+  const isProfileDeleted = useSelector((state:any) => state.userProfile.isProfileDeleted);
   const token = useSelector((state : any) => state.userProfile.token);
   const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
   const userId = firebase.auth().currentUser?.uid; 
@@ -34,6 +35,14 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
     console.log(subScriptionType);
   },[]);
 
+  useEffect(() => {
+     if(isProfileDeleted){
+        console.log("hiiiii");
+        BackHandler.exitApp();
+     }
+  },[isProfileDeleted])
+
+  
   const openBottomSheet = () => {
     setBottomSheetVisible(true);
   };
@@ -71,8 +80,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
         </View>
 
         <View style={styles.optionsSection}>
-          {/* Render custom profile options */}
-          {/* Replace CustomProfileOption with your component */}
+          
           
           <CustomProfileOption optionName='Name' data={userName} icon='person' />
           <CustomProfileOption optionName='PhoneNumber' data={firebase.auth().currentUser?.phoneNumber} icon='call' />
@@ -82,7 +90,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Render delete account button */}
+        
         <TouchableOpacity style={styles.deleteAccountButton} onPress={openDeleteAccountSheet}>
           <View style={styles.deleteAccountButtonContent}>
             <Icon name='delete-forever' size={25} color={'white'} />

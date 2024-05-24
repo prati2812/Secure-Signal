@@ -7,6 +7,7 @@ export  const FETCH_EMERGENCY_CONTACTS_NOTIFICATION= 'FETCH_EMERGENCY_CONTACTS_N
 export const ALL_NOTIFICATION_READ = 'ALL_NOTIFICATION_READ';
 export const DELETE_ALL_NOTIFICATION = 'DELETE_ALL_NOTIFICATION';
 export const FETCH_LIVE_LOCATION_NOTIFICATION = 'FETCH_LIVE_LOCATION_NOTIFICATION';
+export const FETCH_SAFE_ARRIVAL_NOTIFICATION = 'FETCH_SAFE_ARRIVAL_NOTIFICATION';
 
 
 export const fetchEmergencyContactNotification = (userId : string | undefined) => {
@@ -98,7 +99,34 @@ export const allNotificationReadOrNot = (userId: string | undefined) => {
          }
     })
 
-    if(isAllLiveNotificationRead === false || isAllRead === false){
+
+    let isAllSafeArrivalNotificationRead = false;
+    await instance
+      .post('/fetchSafeArrivalNotification', {userId})
+      .then(response => {
+        if (response.status === 200) {
+          const data = response.data;
+
+          if (response.data.length === 0) {
+            isAllSafeArrivalNotificationRead = true;
+          } else {
+            for (let i = 0; i < data.length; i++) {
+              const read = data[i].isRead;
+              if (read === false) {
+                isAllSafeArrivalNotificationRead = false;
+                break;
+              } else {
+                isAllSafeArrivalNotificationRead = read;
+              }
+            }
+          }
+        }
+      });
+
+
+
+
+    if(isAllLiveNotificationRead === false || isAllRead === false || isAllSafeArrivalNotificationRead === false){
       dispatch({
         type: ALL_NOTIFICATION_READ,
         payload: false,
@@ -127,6 +155,24 @@ export const fetchLiveLocationNotification = (userId:string | undefined) => {
     }
   };
 }
+
+export const fetchSafeArrivalNotification = (userId: string | undefined) => {
+  return async(dispatch:Dispatch) => {
+    const response = await instance.post('/fetchSafeArrivalNotification' , {userId});
+     
+     if(response.status === 200){
+        dispatch({
+          type: FETCH_SAFE_ARRIVAL_NOTIFICATION,
+          payload: response.data,
+        });
+     }
+     else{
+       console.log("someting went to occured");
+       
+     }
+  } 
+}
+
 
 export const deleteAllNotificationOrNot = ( notificationDelete : boolean) => ({
     type:DELETE_ALL_NOTIFICATION,

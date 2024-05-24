@@ -354,13 +354,14 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
          emergencyContactList.push(item);
     })
   
-    const response = await instance.post('/emergencyContact', {
-      emergencyContactList,
-      userId
-    });
+    const response = await instance.post('/emergencyContact', {emergencyContactList,userId});
 
-    if(response){
+    if(response.status === 201){
         sendNotification();
+    }
+    else{
+       console.log("something went to wrong");
+       
     }
 
      
@@ -375,20 +376,28 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   
     let selectedUserId = [];
     let tokenMapping = [];
+    
     for(const contact of selectedContacts){ 
-        if(contact.notificationToken){
-           selectedUserId.push(contact.notificationToken);
-        }
+      if(contact.userId){
+         selectedUserId.push(contact.userId);
+      }
     }
 
     
+     
     for(let i=0; i < selectedUserId.length; i++){
       const userId = selectedUserId[i];
+      console.log("-------",userId);
+      
       const response = await instance.post('/fetchUserDetails' , {userId});
 
-      const data  = await response.data;
-      tokenMapping.push({notificationToken:data.notificationToken , userId:userId});
+      const {userData} = await response.data;
+      console.log("userData" , userData);
+      tokenMapping.push({notificationToken:userData.notificationToken , userId:userId});
     }
+
+    console.log("=========" , tokenMapping);
+    
 
     for(let i=0; i < tokenMapping.length; i++){
         let  notifyToken = tokenMapping[i].notificationToken;
@@ -407,9 +416,16 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                     if(response.status === 200){
                         console.log("notifcation saved successfully");
                     }
+                    else{
+                       console.log("fail to saved notification");
+                    }
 
                     console.log("notification send successfully");
       
+              }
+              else{
+                 console.log("fail notification");
+                 
               }
 
 

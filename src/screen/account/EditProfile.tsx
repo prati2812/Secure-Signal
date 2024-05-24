@@ -86,10 +86,11 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   
 
 
-  const handleAppStateChange = (nextAppState: any) => {
+  const handleAppStateChange = async(nextAppState: any) => {
     setAppState(nextAppState);
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
-       if(isExit === true){
+       if(isExit){
+          await AsyncStorage.clear();
           navigation.navigate('Splash');
        }
     }
