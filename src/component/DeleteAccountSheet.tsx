@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import instance from '../axios/axiosInstance';
-import { isDeleted } from '../redux/userprofile/action';
+import { addToken} from '../redux/userprofile/action';
 
 
 
@@ -63,7 +63,7 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
     
     
     if(response.status === 200){
-      dispatch(isDeleted(true));
+      dispatch(addToken(''));
       await AsyncStorage.clear();
       slideDown();
       setTimeout(() => {
@@ -91,7 +91,7 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
              </View>
 
              <View style={styles.deleteWarningView}>
-                  <Text style={styles.deleteWarningText}>You will lose all your data by deleting your account.{'\n'}This action cannot be undone.</Text>  
+                  <Text style={styles.deleteWarningText}>Your account data will be deleted in 14 days. Log in to keep your data. We'll be glad to see you if you return!</Text>  
              </View> 
 
              <View style={styles.buttonView}>

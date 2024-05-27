@@ -1,4 +1,4 @@
-import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD_USER_PHONE_NUMBER , ADD_TOKEN, IS_PROFILE_COMPLETED, IS_PROFILE_DELETED} from "./action";
+import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD_USER_PHONE_NUMBER , ADD_TOKEN, IS_PROFILE_COMPLETED} from "./action";
 
 
 const initialState = {
@@ -9,7 +9,6 @@ const initialState = {
     phoneNumber:'',
     token:'',
     isProfileCompleted:false,
-    isProfileDeleted:false,
 };
 
 const userProfileReducer = (state = initialState , action: { type: any; payload: any; }) => {
@@ -45,11 +44,7 @@ const userProfileReducer = (state = initialState , action: { type: any; payload:
                 isProfileCompleted:action.payload,            
             }
         
-        case IS_PROFILE_DELETED:
-            return{
-                ...state,
-                isProfileDeleted:action.payload,   
-            }    
+            
         default:
             return state;    
     }

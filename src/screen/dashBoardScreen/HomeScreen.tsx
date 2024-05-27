@@ -1,5 +1,5 @@
 import React, { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler, Alert} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch, useSelector } from 'react-redux';
@@ -7,7 +7,7 @@ import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
 import { VolumeManager } from 'react-native-volume-manager';
 import { firebase } from '@react-native-firebase/auth';
-import {addToken, changeUserName } from '../../redux/userprofile/action';
+import {addToken, changeUserName} from '../../redux/userprofile/action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addMatchingContacts, addSelectedContact, updateContactList} from '../../redux/contacts/action';
 import axios from 'axios';
@@ -68,8 +68,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const locationData = useSelector((state: any) => state.location.locations);
   
   
-  
-  
+    
 
   useEffect(() => {
     getToken();
@@ -84,7 +83,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   useEffect(() => {
     // Request location SMS permission
     requestLocationSMSPermission();
-
+    getCurrentLocation();  
     // Define a function to check if both nearestPoliceStation and notificationReadStatus are not null
     const checkValuesNotNull = () => {
         if (nearestPoliceStation !== null && notificationReadStatus !== null) {
@@ -108,12 +107,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     
       const subscription = eventEmitter.addListener('onKeyMessage', event => {
       const keyMessage = event.keyMessage;
-         console.log(keyMessage);
          if(keyMessage === 'VOLUME_UP_KEY'){
            setVolumeUp(prevVolumeUp => prevVolumeUp + 1); 
          }
          if(keyMessage === 'VOLUME_DOWN_KEY'){
             setVolumeDown(prevVolumeUp => prevVolumeUp + 1); 
+         }
+         if(keyMessage === 'BACK_PRESS_KEY'){
+             navigation.goBack();
          }
          
        });
@@ -153,27 +154,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }, [isSubscribed]);
 
+  
  
 
 
   useEffect(() => {
-    // const currentLocation = () => {
-    //   Geolocation.getCurrentPosition(
-    //     position => {
-    //       setLocation({
-    //         latitude: position.coords.latitude,
-    //         longitude: position.coords.longitude
-    //       });
-    //       console.log(location);
-          
-    //     },
-    //     error => {
-    //       console.log(error.code, error.message);
-    //     },
-    //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    //   );
-    // };
-    // currentLocation();
     if(locationData){
       const interval = setInterval(() => { 
          travellingLocationNotification();

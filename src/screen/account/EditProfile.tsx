@@ -91,7 +91,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
        if(isExit){
           await AsyncStorage.clear();
-          navigation.navigate('Splash');
+          navigation.navigate('PhoneNumber');
        }
     }
   };
@@ -153,7 +153,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
       AsyncStorage.setItem("profileExist", "true");
       dispatch(setProfileCompleted(true));  
       setIndicatorVisible(false);
-      navigation.navigate('Home');
+      navigation.navigate('TabNavigator');
     }
     else{
       setIndicatorVisible(false);

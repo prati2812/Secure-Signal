@@ -1,4 +1,4 @@
-import React, {useState , useEffect} from 'react';
+import React, {useState , useEffect, useCallback} from 'react';
 import {
   Text,
   View,
@@ -8,12 +8,16 @@ import {
   Image,
   ScrollView,
   Dimensions,
+  BackHandler,
+  NativeEventEmitter,
+  NativeModules,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconFont from 'react-native-vector-icons/FontAwesome';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import { useSelector } from 'react-redux';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 
 const width = Dimensions.get('window').width;
@@ -39,7 +43,9 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const longtitude='';
 
   
-  console.log(nearestPoliceStation);
+      
+  
+  
   
   
   const handleVictim = () => {

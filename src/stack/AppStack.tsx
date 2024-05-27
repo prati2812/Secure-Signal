@@ -39,6 +39,7 @@ const AppStack: React.FC = () => {
 
   
   return (
+    
     <NavigationContainer>
         {
           token && isProfile

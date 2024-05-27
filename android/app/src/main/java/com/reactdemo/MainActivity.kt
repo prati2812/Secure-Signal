@@ -9,7 +9,7 @@ import com.facebook.react.bridge.ReactContext
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 import com.facebook.react.modules.core.DeviceEventManagerModule
-
+import org.devio.rn.splashscreen.SplashScreen;
 
 class MainActivity : ReactActivity() {
 
@@ -19,6 +19,7 @@ class MainActivity : ReactActivity() {
    */
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    SplashScreen.show(this);
     super.onCreate(savedInstanceState)
 
 
@@ -51,6 +52,9 @@ class MainActivity : ReactActivity() {
       KeyEvent.KEYCODE_VOLUME_UP -> {
         KeyMessage = "VOLUME_UP_KEY";
 
+      }
+      KeyEvent.KEYCODE_BACK -> {
+        KeyMessage = "BACK_PRESS_KEY";
       }
 
     }

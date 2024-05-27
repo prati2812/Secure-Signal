@@ -7,6 +7,11 @@ import DeleteAccountSheet from '../../component/DeleteAccountSheet';
 import { useDispatch, useSelector } from 'react-redux';
 import CustomProfileOption from '../../component/CustomProfileOption';
 import { firebase } from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer } from '@react-navigation/native'
+import AppStack from '../../stack/AppStack';
+
+
 
 interface UserProfile {
   imageUri: string | null;
@@ -35,14 +40,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
     console.log(subScriptionType);
   },[]);
 
-  useEffect(() => {
-     if(isProfileDeleted){
-        console.log("hiiiii");
-        BackHandler.exitApp();
-     }
-  },[isProfileDeleted])
-
-  
   const openBottomSheet = () => {
     setBottomSheetVisible(true);
   };
