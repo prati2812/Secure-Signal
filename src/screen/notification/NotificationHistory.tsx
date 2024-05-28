@@ -30,7 +30,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   const emergencyContactNotification = useSelector((state : any) => state.notifications.fetchSelectedContactNotification);
   const liveLocationNotification = useSelector((state:any) => state.notifications.fetchLiveLocationNotification);
   const safeArrivalNotification = useSelector((state:any) => state.notifications.fetchSafeArrivalNotification);
-  
+  const notificationTypes = useSelector((state : any) => state.notifications.notificationTypes);
 
 
 
@@ -40,7 +40,13 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
     dispatchStore(fetchSafeArrivalNotification(userId));
   },[read]); 
 
-
+  useEffect(() => {
+     if(notificationTypes){
+      console.log("--------",notificationTypes);
+     }
+  },[notificationTypes])
+  
+  
   
   
   
@@ -49,6 +55,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
       setBottomSheetVisible(true);
   }
 
+  // Read Emergency Notification 
   const handleNotificationRead = async(notification_id : String) => {
     let notificationId = notification_id;
     const response = await instance.post('/markAsRead', {userId, notificationId});
@@ -61,6 +68,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
  
   }
 
+  // Read Live Location Notification
   const handleLiveLocationNotificationRead = async(notification_id : String , senderId : String) => {
     let notificationId = notification_id;
     const response = await instance.post('/liveLocationNotificationMarkAsRead' , {userId , notificationId});
@@ -73,6 +81,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
     }
   }
 
+  // Read Safe Arrival Notification
   const handleSafeArrivalNotificationRead = async(notification_id : String) => {
     let notificationId = notification_id;
     const response = await instance.post('/safeArrivalNotificationMarksAsRead', {userId, notificationId});
@@ -104,7 +113,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
           <ScrollView
             contentContainerStyle={{paddingTop: 15}}
             showsVerticalScrollIndicator={false}>
-            {emergencyContactNotification.length > 0 &&
+            { (notificationTypes === "All" || notificationTypes === "Emergency Contact") && emergencyContactNotification.length > 0 &&
               emergencyContactNotification.map(
                 (
                   item: {
@@ -131,7 +140,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                 },
               )}
               {
-                liveLocationNotification.length > 0 && 
+                (notificationTypes === "All" || notificationTypes === "Live Location") && liveLocationNotification.length > 0 && 
                   liveLocationNotification.map(
                     (
                       item: {
@@ -159,7 +168,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                     },) 
               }
               {
-                safeArrivalNotification.length > 0 && 
+                (notificationTypes === "All" || notificationTypes === "Safe Arrival") && safeArrivalNotification.length > 0 && 
                   safeArrivalNotification.map(
                     (
                       item: {

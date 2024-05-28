@@ -21,6 +21,7 @@ import store from '../../redux/store';
 
 
 interface Contact {
+  userId:any;
   contact: any;
   recordID: string;
   givenName: string;

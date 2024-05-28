@@ -68,6 +68,7 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
   };
 
 
+  // Phone number validation
   const phoneNumberValidation = (text:string) => {
     if (!text) {
       setIsError(true);

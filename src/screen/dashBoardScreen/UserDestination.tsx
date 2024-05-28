@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { firebase } from '@react-native-firebase/auth';
 import { useSelector } from 'react-redux';
 import instance from '../../axios/axiosInstance';
-import { RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
+import { RAPID_API_FIND_PLACE_BASE_URL, RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_FIND_PLACE_HOST, X_RAPID_API_FIND_PLACE_KEY, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
 
 
 
@@ -87,13 +87,13 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
     setSearchQuery(place);
     const options = {
       method: 'GET',
-      url: 'https://map-geocoding.p.rapidapi.com/json',
+      url: RAPID_API_FIND_PLACE_BASE_URL,
       params: {
         address: place
       },
       headers: {
-        'X-RapidAPI-Key': '80d5459a70msh8bd6e06f4f88c16p1ceddbjsn78651e30baf8',
-        'X-RapidAPI-Host': 'map-geocoding.p.rapidapi.com'
+        'X-RapidAPI-Key': X_RAPID_API_FIND_PLACE_KEY,
+        'X-RapidAPI-Host': X_RAPID_API_FIND_PLACE_HOST
       }
     };
     
@@ -116,6 +116,8 @@ const UserDestination:React.FC<UserDestinationProps> = ({navigation}) => {
     navigation.navigate('Location');
   }
 
+
+  // Set travelling location to Location History
   const handleSetLocation = async() => {
 
     let travellingLocation = {

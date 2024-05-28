@@ -33,7 +33,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
     const dispatch = useDispatch();    
     
     
-  
+    // Select the subscription
     const handleSelectSubscription = async(subscriptionType: string , price:string) => {
    
       setSelectedSubscription(subscriptionType);
@@ -41,6 +41,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
     };
     
 
+    // purchase the subscription
     const handleSubscribeBtn = async () => {
      
       if(subScriptionType){

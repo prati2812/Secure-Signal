@@ -299,7 +299,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
      await BackgroundService.stop();
   }
 
-  
+  // Background Service is Running
   const veryIntensiveTask = async (taskDataArguments?: { delay: number; } ) => {
     const { delay } = taskDataArguments || {delay : 1000};
     await new Promise( async (resolve) => {
@@ -328,7 +328,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   };
  
 
-
+  // Send Live Location to the guardians or police station
   const sendLiveLocation = async() => {
     
     await getCurrentLocation();
@@ -376,6 +376,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   }
 
+  // Get current user location
   const getCurrentLocation = async() => {
     
     Geolocation.getCurrentPosition(
@@ -392,7 +393,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
   
 
-
+  // Request Location and SMS Permission
   const requestLocationSMSPermission = async() => {
     if(Platform.OS === 'android'){
       const granted = await PermissionsAndroid.requestMultiple(['android.permission.ACCESS_FINE_LOCATION' , 
@@ -409,7 +410,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
  
 
-
+  // Get token
   const getToken = async() => {
     const value = await AsyncStorage.getItem('token');
     if(value !== null){
@@ -420,7 +421,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
   
   
-
+  // Get Notification token and send the notification
   const getNotificationToken = async(travellingLocation: string) => {
     const title = 'Safe Arrival Notification';
     const body = `Great news! ${userName} has safely arrived at ${travellingLocation}.`; 
@@ -495,7 +496,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
            
   }
 
-   
+   // Travellig location notification
   const travellingLocationNotification = async() => {
       let threshold = 2;
 
@@ -553,17 +554,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     
   }
 
+  // Navigate to the HelpScreen
   const handleLocationMap = (mapNumber:number) => {
     navigation.navigate('HelpScreen', { mapNumber: mapNumber});
   }
 
+  // Navigate to the Notification Screen
   const handleNotification = () =>{
     navigation.navigate('Notification');
   }
 
+  // Navigate to the Emergency Contact List Screen
   const handleContactList = () => {
       navigation.navigate('EmergencyContactList');
   }
+
+  
 
   return (
     <View style={style.homeMain}>

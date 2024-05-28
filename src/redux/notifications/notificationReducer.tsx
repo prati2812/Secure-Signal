@@ -1,4 +1,4 @@
-import { ALL_NOTIFICATION_READ, DELETE_ALL_NOTIFICATION, FETCH_EMERGENCY_CONTACTS_NOTIFICATION, FETCH_LIVE_LOCATION_NOTIFICATION, FETCH_SAFE_ARRIVAL_NOTIFICATION } from "./action";
+import { ALL_NOTIFICATION_READ, DELETE_ALL_NOTIFICATION, FETCH_EMERGENCY_CONTACTS_NOTIFICATION, FETCH_LIVE_LOCATION_NOTIFICATION, FETCH_SAFE_ARRIVAL_NOTIFICATION, NOTIFICATION_TYPES } from "./action";
 
 
 
@@ -8,6 +8,7 @@ const initialState = {
     deleteAllNotificationOrNot : false,
     fetchLiveLocationNotification:[],
     fetchSafeArrivalNotification:[],
+    notificationTypes:"All",
 };
 
 
@@ -36,6 +37,12 @@ const notificationReducer = (state=initialState , action: { type: any; payload: 
                 ...state,
                 fetchSafeArrivalNotification: action.payload,
             }
+
+        case NOTIFICATION_TYPES:
+            return{
+                ...state,
+                notificationTypes: action.payload,
+            }    
                 
         case DELETE_ALL_NOTIFICATION:
             return{

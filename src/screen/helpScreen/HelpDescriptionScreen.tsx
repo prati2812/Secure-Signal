@@ -55,6 +55,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     },[complaint_location]);
 
 
+    // Get current user location
     const currentLocation = () => {
       Geolocation.getCurrentPosition(
         position => {
@@ -80,14 +81,24 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         setInjured('No');
     }
 
+
+    // Select Images
     const handleUploadPhotos = () => {
-        ImagePicker.openPicker({
-           multiple:true,
-        }).then(images=>{
-            setUri(images);
-        });           
+      ImagePicker.openPicker({
+        multiple: true,
+      }).then(images => {
+        const formattedImages = images.map((image: any) => ({
+          uri: image.path,
+            width: image.width,
+            height: image.height,
+            mime: image.mime,
+            path: image.path,
+        }));
+        setUri(formattedImages);
+      });           
     }
 
+    // Remove image from selected image list
     const removeImage = (data:number) => {
          let newDataList;
          newDataList = uri.filter((item , index) => index!== data);   

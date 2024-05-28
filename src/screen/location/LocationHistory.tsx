@@ -32,7 +32,7 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
 
 
 
-
+    // format the date
     const dateConvert = (timeStamp : string) => {
       const date = new Date(timeStamp);
 

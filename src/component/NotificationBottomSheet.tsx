@@ -1,14 +1,15 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, Pressable, Animated, StatusBar, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, Pressable, Animated, StatusBar, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import NotificationFilter from './NotificationFilter';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { firebase } from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteAllNotificationOrNot } from '../redux/notifications/action';
+import { addNotificationTypes, deleteAllNotificationOrNot } from '../redux/notifications/action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import instance from '../axios/axiosInstance';
+import { SelectList } from 'react-native-dropdown-select-list';
 
 
 interface NotificationBottomSheetProps {
@@ -21,11 +22,25 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
     const userId = firebase.auth().currentUser?.uid; 
     const token = useSelector((state : any) => state.userProfile.token);
     const dispatch = useDispatch();
+    const [selected, setSelected] = React.useState("");
+    const notificationTypes = useSelector((state : any) => state.notifications.notificationTypes);
+  
+    const data = [
+      {key: '1', value: 'All'},
+      {key: '2', value: 'Emergency Contact'},
+      {key: '3', value: 'Live Location'},
+      {key: '4', value: 'Safe Arrival'},
+    ];
 
     useEffect(() => {
       slideUp()
-    })
+    } , [])
 
+    
+    
+    
+    
+    
 
     const slideUp = () => {
         Animated.timing(slide, {
@@ -52,6 +67,8 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
         },800);
     }
 
+
+    // Read All Notification
     const handleAllMarkAsNotification = async() => {
       const response = await instance.post('/markAllAsRead' , {userId});
 
@@ -70,6 +87,7 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
 
     } 
 
+    // Delete All Notification
     const handleDeleteAllNotificaion = async() => {
       const response = await instance.post('/deleteAllNotification', {userId});
   
@@ -81,39 +99,77 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
       }
     }
 
+
+    const handleFilterNotification = async() => {
+       dispatch(addNotificationTypes(selected));
+    }
+   
+
     return (
+      <Pressable style={styles.container} onPress={closeModal}>
+        <Pressable style={{width: '100%', height: '25%'}}>
+          <Animated.View
+            style={[styles.bottomSheet, {transform: [{translateY: slide}]}]}>
+             <ScrollView>
+                 
+            <View style={styles.notificationBottomSheet}>
 
-    <Pressable style={styles.container} onPress={closeModal}>
-      <Pressable style={{ width: '100%', height: '20%'}}>
-        <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
-        <View style={styles.notificationBottomSheet}>
+            
+              <View style={{flexDirection: 'row' , gap:5 , alignItems:'center'}}>
+                <NotificationFilter
+                  icon={'filter-list'}
+                  color={'black'}
+                  message={''}
+                  iconBackgroundColor={'lightblue'}
+                  textColor={'black'}
+                />
+                <SelectList
+                  setSelected={(val: string) => setSelected(val)}
+                  data={data}
+                  save="value"
+                  boxStyles={{borderWidth: 3, borderColor: 'lightblue' , width:'90%'}}
+                  dropdownStyles={{borderWidth: 3, borderColor: 'lightblue'}}
+                  inputStyles={{
+                    color: 'black',
+                    fontSize: 17,
+                    fontWeight: '600',
+                  }}
+                  dropdownTextStyles={{
+                    color: 'black',
+                    fontSize: 17,
+                    fontWeight: '600',
+                  }}
+                  maxHeight={100}
+                  defaultOption={notificationTypes}
+                  onSelect={handleFilterNotification}
+                />
+              </View>
 
-         <TouchableOpacity onPress={() => handleAllMarkAsNotification()}> 
-          <NotificationFilter
-            icon={'done-all'}
-            color={'black'}
-            message={'Mark all as read'}
-            iconBackgroundColor={'lightgray'}
-            textColor={'black'}
-          />
+              <TouchableOpacity onPress={() => handleAllMarkAsNotification()}>
+                <NotificationFilter
+                  icon={'done-all'}
+                  color={'black'}
+                  message={'Mark all as read'}
+                  iconBackgroundColor={'lightgray'}
+                  textColor={'black'}
+                />
+              </TouchableOpacity>
 
-         </TouchableOpacity>
-         
-         <TouchableOpacity onPress={() => handleDeleteAllNotificaion()}>
-          <NotificationFilter
-            icon={'delete'}
-            color={'red'}
-            message={'Delete all notification'}
-            iconBackgroundColor={'#FFD6D7'}
-            textColor={'red'}
-          />
-         </TouchableOpacity> 
-          
-        </View>
-        </Animated.View>
-      </Pressable>  
-    </Pressable>
-  );
+              <TouchableOpacity onPress={() => handleDeleteAllNotificaion()}>
+                <NotificationFilter
+                  icon={'delete'}
+                  color={'red'}
+                  message={'Delete all notification'}
+                  iconBackgroundColor={'#FFD6D7'}
+                  textColor={'red'}
+                />
+              </TouchableOpacity>
+            </View>
+            </ScrollView>
+          </Animated.View>
+        </Pressable>
+      </Pressable>
+    );
 };
 
 export default NotificationBottomSheet;

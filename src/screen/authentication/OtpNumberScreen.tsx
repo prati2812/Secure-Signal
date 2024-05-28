@@ -80,6 +80,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
     
   };
 
+  // Otp filled in boxes
   const otpContent = useMemo(
     () => (
       <View style={style.otpContainerView}>
@@ -96,6 +97,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
     [otp],
   );
 
+  // otp validation
   const otpValidation = (text: string) => {
     if(!text) {
       setIsError(true);

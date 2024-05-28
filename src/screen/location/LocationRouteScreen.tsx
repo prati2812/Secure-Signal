@@ -43,69 +43,71 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
   },[]);
   
 
-  
-  
-
   useEffect(() => {
-    setVisible(true);
     const currentLocation = () => {
       Geolocation.getCurrentPosition(
         position => {
-          console.log(position.coords.latitude , position.coords.longitude);
-          setOrigin({latitude:position.coords.latitude , longitude:position.coords.longitude});
+          setOrigin({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
         },
         error => {
           console.log(error.code, error.message);
         },
-        {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
       );
-    };  
-    currentLocation();
-    const fetchRouteData = async () => {
-      
-      const options = {
-        method: 'GET',
-        url: `${RAPID_API_BASE_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
-        params: {
-          alternatives: 'true'
-        },
-        headers: {
-          'X-RapidAPI-Key': X_RAPID_API_KEY,
-          'X-RapidAPI-Host': X_RAPID_API_HOST,
-        }
-      };
-
-      try {
-        const response = await axios.request(options);
-        setRouteData(response.data);
-      } catch (error) {
-        console.error(error);
-      }
     };
-    console.log("map-numberrrr" , mapNumber);
-    if(origin.latitude !== 0 || origin.longitude !== 0){
-      console.log("helllo");
-      
-      fetchRouteData();  
-    }
-    
-  }, [origin]);
-
-  
-
- 
+    currentLocation();
+  }, []);
 
   useEffect(() => {
-    if (routeData && routeData.routes && routeData.routes.length > 0) {
-      const routeGeometry = routeData.routes[0].geometry;
-      console.log("    ", routeData);
-      
-      const data = poyline.decode(routeGeometry);
-      setCoordinates(data);
-      setVisible(false);
-    }
-  }, [routeData]);
+    fetchRouteData();
+ },[destination])
 
+
+ useEffect(() => {
+     try{
+         if (routeData && routeData.routes && routeData.routes.length > 0) {
+             const routeGeometry = routeData.routes[0].geometry;
+             const data = poyline.decode(routeGeometry);
+             setCoordinates(data); 
+             console.log("======" , data);
+             
+         }
+     }
+     catch(error){
+         console.log(error);
+         
+     }
+     
+ }, [routeData]);
+
+  
+  const fetchRouteData = async () => {
+      
+    const options = {
+      method: 'GET',
+      url: `${RAPID_API_BASE_URL}/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
+      params: {
+        alternatives: 'true'
+      },
+      headers: {
+        'X-RapidAPI-Key': X_RAPID_API_KEY,
+        'X-RapidAPI-Host': X_RAPID_API_HOST
+      }
+    };
+
+    try {
+      const response = await axios.request(options);
+      setRouteData(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  
+
+  
   
    
 

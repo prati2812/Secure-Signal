@@ -39,15 +39,8 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
   const mapNumber = route.params?.mapNumber ?? undefined;
 
+  
  
-  const latitude = '';
-  const longtitude='';
-
-  
-      
-  
-  
-  
   
   const handleVictim = () => {
      setVictimButton(true);

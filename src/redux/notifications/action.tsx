@@ -8,6 +8,7 @@ export const ALL_NOTIFICATION_READ = 'ALL_NOTIFICATION_READ';
 export const DELETE_ALL_NOTIFICATION = 'DELETE_ALL_NOTIFICATION';
 export const FETCH_LIVE_LOCATION_NOTIFICATION = 'FETCH_LIVE_LOCATION_NOTIFICATION';
 export const FETCH_SAFE_ARRIVAL_NOTIFICATION = 'FETCH_SAFE_ARRIVAL_NOTIFICATION';
+export const NOTIFICATION_TYPES = 'NOTIFICATION_TYPES';
 
 
 export const fetchEmergencyContactNotification = (userId : string | undefined) => {
@@ -177,4 +178,10 @@ export const fetchSafeArrivalNotification = (userId: string | undefined) => {
 export const deleteAllNotificationOrNot = ( notificationDelete : boolean) => ({
     type:DELETE_ALL_NOTIFICATION,
     payload: notificationDelete,
+})
+
+
+export const addNotificationTypes = (notificationType:string | undefined) => ({
+    type: NOTIFICATION_TYPES,
+    payload: notificationType,
 })

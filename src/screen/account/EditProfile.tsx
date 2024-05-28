@@ -78,14 +78,14 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   },[name]);
 
 
+  // get FCM token from AsyncStorage
   const getToken = async() => {
     const notificationToken = await AsyncStorage.getItem('fcm_token');
     setNotificationToken(notificationToken);
   }
 
   
-
-
+  // Check App State if user click on close icon and then come from minimize
   const handleAppStateChange = async(nextAppState: any) => {
     setAppState(nextAppState);
     if (appState.match(/inactive|background/) && nextAppState === 'active') {
@@ -98,7 +98,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
 
 
-  
+  // Close or break operation
   const handleCloseApp = async() => {
     Alert.alert(
       'Exit App',
@@ -117,11 +117,13 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     );
   }
 
+  // Select User image
   const handleUserImage = async () =>{
       setImageSelectionSheetVisible(true);
   }
 
-
+  
+  // save userProfile data to the database
   const handleSaveProfile = async() => {
        
     dispatch({
@@ -167,6 +169,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   }
 
 
+  // username validation
   const userNamevalidation = (text : string) => {
     if(text.length !<= 2){
       setIsError(true);
