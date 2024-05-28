@@ -36,14 +36,17 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const [uri , setUri] = useState<ImageInfo[]>([]);
     const [complaint_location, setComplaintLocation] = useState({ latitude: 0, longitude: 0 });
     const [isIndicatorVisible, setIndicatorVisible] = useState(false);
-    const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation); 
+    const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
+    const nearestHospital = useSelector((state:any) => state.location.nearestHospital); 
     const policeStationId = nearestPoliceStation.nearestPoliceStation.id;
+    const hospitalId = nearestHospital.nearestHospital.id;
     const userName  = useSelector((state : any) => state.userProfile.userName);
 
     const token = useSelector((state : any) => state.userProfile.token);
     const complaintBy = route.params?.query;
     const userId = firebase.auth().currentUser?.uid;
 
+   
 
     useEffect(() => {  
       
@@ -110,6 +113,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
 
         complaintData.append('policeStationId' , policeStationId);
+        complaintData.append('hospitalId', hospitalId);
         complaintData.append('userId', userId);
         complaintData.append('complaintBy', complaintBy);
         complaintData.append('complaint', complaint);
@@ -140,7 +144,21 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
            else{
              console.log("fail");
              
-           } 
+           }
+           
+           if(isInjured === "Yes"){
+            const title = 'Complaint';
+            const body = 'Complaint sent by '
+            const response = await instance.post('/hospital/complaint/sendNotification' , {hospitalId , userName , title , body});
+      
+            if(response.status === 200){
+              console.log("complaint sent to hospital");
+            }
+            else{
+              console.log("fail");
+              
+            }
+           }
      
            setIndicatorVisible(false);
            navigation.navigate('HelpConfirmation');
@@ -164,6 +182,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         
     }
 
+    const isDisabled = !complaint && uri.length === 0;
 
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>
@@ -278,7 +297,8 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         </View>
 
         <View style={styles.helpSubmitBtnView}>
-              <Pressable onPress={()=> handleHelpConfirmation()}>
+              <Pressable onPress={()=> handleHelpConfirmation()}
+                disabled={isDisabled}>
               <View style={styles.helpSubmitBtn}>
                  {
                     isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>

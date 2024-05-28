@@ -1,8 +1,10 @@
-import { FETCH_LOCATIONS, NEAREST_POLICE_STATION_LOCATION } from "./action";
+import { FETCH_LOCATIONS, NEAREST_HOSPITAL_LOCATION, NEAREST_POLICE_STATION_LOCATION } from "./action";
+
 
 const initialState = {
     locations:[],
     nearestPoliceStation:[],
+    nearestHospital:[],
 };
 
 const locationReducer = (state=initialState , action: { type: any; payload: any; }) => {
@@ -17,6 +19,12 @@ const locationReducer = (state=initialState , action: { type: any; payload: any;
             return{
                 ...state,
                 nearestPoliceStation:action.payload,
+            }
+        
+        case NEAREST_HOSPITAL_LOCATION:
+            return{
+                ...state,
+                nearestHospital:action.payload,
             }    
 
         default:

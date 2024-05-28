@@ -36,6 +36,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const [query , setQuery] = useState('');
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
+  const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
   const mapNumber = route.params?.mapNumber ?? undefined;
 
  
@@ -118,13 +119,26 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               scrollEnabled={false}
               zoomEnabled={false}
               region={{
-                latitude: latitude ? latitude : 37.78825,
-                longitude: longtitude ? longtitude :  -122.4324,
+                latitude: mapNumber === 1 ? 
+                            nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
+                            nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825 : 
+                            nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825,
+                longitude: mapNumber === 1 ? 
+                           nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
+                           nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324 :
+                           nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324  ,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
               {
-                <Marker coordinate={{latitude: latitude ? latitude :37.78825, longitude: longtitude ? longtitude :-122.4324}}>
+                <Marker coordinate={{latitude: mapNumber === 1 ? 
+                                              nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
+                                              nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825 : 
+                                              nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825, 
+                                     longitude: mapNumber === 1 ? 
+                                                nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
+                                                nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324 :
+                                                nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324}}>
                   {mapNumber === 1 ? (
                     <Icon name="local-police" size={40} color={'#5F4C24'} />
                   ) : mapNumber === 2 ? (

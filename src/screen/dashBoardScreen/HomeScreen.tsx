@@ -17,7 +17,7 @@ import { allNotificationReadOrNot, deleteAllNotificationOrNot } from '../../redu
 import Geolocation from 'react-native-geolocation-service';
 import { startSubscriptionService } from '../../utils/SubscriptionService';
 import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscription/action';
-import { fetchLocation, findNearestPoliceStation } from '../../redux/location/action';
+import { fetchLocation, findNearestHospital, findNearestPoliceStation } from '../../redux/location/action';
 import instance from '../../axios/axiosInstance';
 import store from '../../redux/store';
 
@@ -55,6 +55,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
+  const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
   const [appState,setAppState] = useState(AppState.currentState);
   const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
@@ -86,7 +87,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     getCurrentLocation();  
     // Define a function to check if both nearestPoliceStation and notificationReadStatus are not null
     const checkValuesNotNull = () => {
-        if (nearestPoliceStation !== null && notificationReadStatus !== null) {
+        if (nearestPoliceStation !== null && notificationReadStatus !== null && nearestHospital !== null) {
             return true;
         }
         return false;
@@ -96,8 +97,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     if (!checkValuesNotNull()) {
         dispatchStore(allNotificationReadOrNot(userId));
         dispatchStore(findNearestPoliceStation(userId));
+        dispatchStore(findNearestHospital(userId));
     }
-  }, [nearestPoliceStation, notificationReadStatus]);
+  }, [nearestPoliceStation, notificationReadStatus , nearestHospital]);
 
   
 
@@ -646,13 +648,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 scrollEnabled={false}
                 zoomEnabled={false}
                 region={{
-                  latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825,
-                  longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324,
+                  latitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825,
+                  longitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324,
                   latitudeDelta: 0.015,
                   longitudeDelta: 0.0121,
                 }}>
-                <Marker coordinate={{latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825, 
-                                     longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324}}>
+                <Marker coordinate={{latitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825, 
+                                     longitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324}}>
                   <Icon name="local-hospital" size={40} color={'red'} />
                 </Marker>
               </MapView>
