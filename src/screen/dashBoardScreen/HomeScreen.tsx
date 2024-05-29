@@ -7,7 +7,7 @@ import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
 import { VolumeManager } from 'react-native-volume-manager';
 import { firebase } from '@react-native-firebase/auth';
-import {addToken, changeUserName} from '../../redux/userprofile/action';
+import {addToken, changeUserName, fetchUserComplaints} from '../../redux/userprofile/action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addMatchingContacts, addSelectedContact, updateContactList} from '../../redux/contacts/action';
 import axios from 'axios';
@@ -15,7 +15,6 @@ import Contact from '../../component/Contact';
 import HomeCustomHeader from '../../component/HomeCustomHeader';
 import { allNotificationReadOrNot, deleteAllNotificationOrNot } from '../../redux/notifications/action';
 import Geolocation from 'react-native-geolocation-service';
-import { startSubscriptionService } from '../../utils/SubscriptionService';
 import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscription/action';
 import { fetchLocation, findNearestHospital, findNearestPoliceStation } from '../../redux/location/action';
 import instance from '../../axios/axiosInstance';
@@ -76,6 +75,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     dispatchStore(changeUserName(userId));
     dispatchStore(addSelectedContact(userId));
     dispatchStore(fetchLocation(userId));
+    dispatchStore(fetchUserComplaints(userId));
     getCurrentLocation();   
   },[token]);
 

@@ -95,7 +95,7 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
   }
 
 
-
+  const isDisabled = isError || isIndicatorVisible;
 
   return (
     <View style={style.phoneNumberMain}>
@@ -136,7 +136,7 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
         <TouchableOpacity
           style={[style.sendBtnCode, isError && style.sendBtnCodeDisable]}
           onPress={async() => await handlePhoneNumber()}
-          disabled={isError}>  
+          disabled={isDisabled}>  
           <View style={style.btnView}>
             {
                isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/> 

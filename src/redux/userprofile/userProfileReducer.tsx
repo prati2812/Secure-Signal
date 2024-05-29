@@ -1,4 +1,4 @@
-import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD_USER_PHONE_NUMBER , ADD_TOKEN, IS_PROFILE_COMPLETED} from "./action";
+import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD_USER_PHONE_NUMBER , ADD_TOKEN, IS_PROFILE_COMPLETED, COMPLAINTS_DATA, COMPLAINT} from "./action";
 
 
 const initialState = {
@@ -9,6 +9,8 @@ const initialState = {
     phoneNumber:'',
     token:'',
     isProfileCompleted:false,
+    complaints:[],
+    complaint:Object,
 };
 
 const userProfileReducer = (state = initialState , action: { type: any; payload: any; }) => {
@@ -38,13 +40,23 @@ const userProfileReducer = (state = initialState , action: { type: any; payload:
                 ...state,
                 token:action.payload,
             }
+
+        case COMPLAINTS_DATA:
+            return{
+                ...state,
+                complaints:action.payload,
+            }
+        
+        case COMPLAINT:
+            return{
+                ...state,
+                complaint:action.payload,
+            }    
         case IS_PROFILE_COMPLETED:
             return{
                 ...state,
                 isProfileCompleted:action.payload,            
             }
-        
-            
         default:
             return state;    
     }

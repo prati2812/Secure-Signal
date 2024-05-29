@@ -45,7 +45,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const token = useSelector((state : any) => state.userProfile.token);
     const complaintBy = route.params?.query;
     const userId = firebase.auth().currentUser?.uid;
-
+    const phoneNumber = firebase.auth().currentUser?.phoneNumber;
    
 
     useEffect(() => {  
@@ -125,6 +125,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
         complaintData.append('policeStationId' , policeStationId);
         complaintData.append('hospitalId', hospitalId);
+        complaintData.append('phoneNumber', phoneNumber);
         complaintData.append('userId', userId);
         complaintData.append('complaintBy', complaintBy);
         complaintData.append('complaint', complaint);
@@ -193,7 +194,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         
     }
 
-    const isDisabled = !complaint && uri.length === 0;
+    const isDisabled = (!complaint && uri.length === 0) || isIndicatorVisible;
 
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>

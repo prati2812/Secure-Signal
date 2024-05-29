@@ -14,7 +14,8 @@ export const ADD_USER_ID = 'ADD_USER_ID';
 export const ADD_USER_PHONE_NUMBER = 'ADD_USER_PHONE_NUMBER';
 export const ADD_TOKEN = 'ADD_TOKEN';
 export const IS_PROFILE_COMPLETED = 'IS_PROFILE_COMPLETED';
-
+export const COMPLAINTS_DATA = 'COMPLAINTS_DATA';
+export const COMPLAINT = 'COMPLAINT';
 
 
 
@@ -71,6 +72,27 @@ export const changeUserName = (userId:string | undefined) => {
        
 };
 
+export const fetchUserComplaints = (userId:string | undefined) => {
+   return async (dispatch : Dispatch) => {
+     try{
+      const response = await instance.post("/user/fetchComplaint", {userId});
+                  
+        if (response.status === 200) {
+          const complaintsData = await response.data;
+         
+          console.log("=========",complaintsData);
+          dispatch({
+              type:COMPLAINTS_DATA,
+              payload:complaintsData,
+          })
+                          
+        }
+     }
+     catch(error){
+
+     }
+   }
+};
 
 export const addImageResponse = (response: object) => ({
        type: ADD_IMAGE_RESPONSE,

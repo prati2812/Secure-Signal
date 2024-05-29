@@ -28,6 +28,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const userProfile = useSelector((state: { userProfile: UserProfile }) => state.userProfile);
   const userPhoneNumber = useSelector((state:any) => state.userProfile.phoneNumber);
   const isProfileDeleted = useSelector((state:any) => state.userProfile.isProfileDeleted);
+  const complaintData = useSelector((state:any) => state.userProfile.complaints);
   const token = useSelector((state : any) => state.userProfile.token);
   const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
   const userId = firebase.auth().currentUser?.uid; 
@@ -85,6 +86,10 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Subscription')}>
             <CustomProfileOption optionName='subscription' icon='bolt' data={subScriptionType ? subScriptionType: ''}/>
           </TouchableOpacity>
+
+          <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('ComplaintList')}>
+            <CustomProfileOption optionName='Complaints' icon='description' data={complaintData.length}/>
+          </TouchableOpacity>   
         </View>
 
         

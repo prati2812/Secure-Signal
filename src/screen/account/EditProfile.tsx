@@ -181,6 +181,8 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   }
 
 
+  const isDisabled = isError || isIndicatorVisible;
+
   return (
     <>
     <SafeAreaView style={style.editProfileMain}>
@@ -234,7 +236,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
       <View style={style.saveProfileBtnView}>
         <TouchableOpacity
           style={[style.SaveProfileBtn , isError && style.SaveProfileBtnDisable]}
-          disabled={isError === true}
+          disabled={isDisabled}
           onPress={() => handleSaveProfile()}>
           <View style={style.btnView}>
             {

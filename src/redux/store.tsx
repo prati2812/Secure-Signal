@@ -6,6 +6,8 @@ import locationReducer from './location/locationReducer';
 import notificationReducer from './notifications/notificationReducer';
 import subscripionReducer from './subscription/subscriptionReducer';
 
+
+
 const thunkMiddleware = require('redux-thunk').thunk
 
 
