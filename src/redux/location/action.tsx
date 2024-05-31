@@ -28,10 +28,10 @@ export const fetchLocation = (userId:string | undefined) => {
 }
 
 
-export const findNearestPoliceStation = (userId:string | undefined) => {
+export const findNearestPoliceStation = (userId:string | undefined , currentLatitude:string | undefined , currentLongitude:string | undefined) => {
     return async(dispatch : Dispatch) => {
       
-      const response = await instance.post('/nearestPoliceStation',{userId});
+      const response = await instance.post('/nearestPoliceStation',{userId , currentLatitude , currentLongitude});
 
       if(response.status === 200){
             const responseData = await response.data;
@@ -49,10 +49,10 @@ export const findNearestPoliceStation = (userId:string | undefined) => {
     }
 }
     
-export const findNearestHospital = (userId:string | undefined) => {
+export const findNearestHospital = (userId:string | undefined , currentLatitude:string | undefined , currentLongitude:string | undefined) => {
    return async(dispatch : Dispatch) => {
      
-     const response = await instance.post('/nearestHospital',{userId});
+     const response = await instance.post('/nearestHospital',{userId , currentLatitude , currentLongitude});
 
      if(response.status === 200){
            const responseData = await response.data;

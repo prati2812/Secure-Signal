@@ -9,17 +9,18 @@ interface ComplaintsCardProps {
    message:string;
    time:string;
    color:string;
-   isRead:boolean;
-   handleDetails : Function
+   isRead?:boolean;
+   handleDetails : Function;
+   borderColor:string;
 }
 
-const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , color, isRead , handleDetails}) => {
+const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , color, isRead , handleDetails , borderColor}) => {
 
  
   
   return (
     <TouchableOpacity onPress={() => handleDetails()}>
-    <View style={[styles.notificationView]}>
+    <View style={[styles.notificationView , {borderColor:borderColor , borderWidth:2}]}>
                  <View style={styles.notificationIcon}>
                         <Icon name={icon} size={45} color={color} />
                  </View>

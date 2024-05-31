@@ -19,9 +19,13 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
   const [isError, setIsError] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
+  const [isResendEnabled, setIsResendEnabled] = useState(false); 
+  const [timeLeft, setTimeLeft] = useState(30); 
   const dispatch = useDispatch();
 
   const verificationId = useSelector((state : any) => state.verification.verificationId);
+  const phoneNumber = useSelector((state:any) =>  state.userProfile.phoneNumber);
+  
 
   const onPress = () => inputRef.current?.focus();
 
@@ -29,7 +33,26 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
     requestUserPermission();
   },[]);
 
+  useEffect(() => {
+    if (timeLeft === 0) {
+      setIsResendEnabled(true);
+      return;
+    }
 
+    const timerId = setTimeout(() => {
+      setTimeLeft(timeLeft - 1);
+    }, 1000);
+
+    return () => clearTimeout(timerId);
+  }, [timeLeft]);
+
+
+  const handleResendCode = async() => {
+    if (!isResendEnabled) return;
+     await auth().signInWithPhoneNumber(phoneNumber,true);
+    setTimeLeft(30);
+    setIsResendEnabled(false);
+  };
   
 
   // Otp Number Verification
@@ -157,11 +180,15 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
         </View>
       ) : null}
       <View style={style.otpNumberResendCodeStyle}>
+        <TouchableOpacity
+          onPress={handleResendCode}
+          disabled={!isResendEnabled}>
         <View style={style.otpNumberResendCodeText}>
-          <Text style={style.otpNumberResendCode}>Resend Code</Text>
+          <Text style={[style.otpNumberResendCode , isResendEnabled && {color:'#3ebb6e'}]}>Resend Code</Text>
         </View>
+        </TouchableOpacity>
         <View style={style.otpNumberResendCodeTextTimer}>
-          <Text style={style.otpNumberResendCodeTimer}>00:30</Text>
+          <Text style={[style.otpNumberResendCodeTimer , !isResendEnabled && {color:'#3ebb6e'}]}>{`00:${timeLeft < 10 ? `0${timeLeft}` : timeLeft}`}</Text>
         </View>
       </View>
       <View style={style.verifyCodeBtnView}>

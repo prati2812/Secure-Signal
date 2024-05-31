@@ -42,6 +42,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
   const [isExit , setExit] = useState(false);
   const [notificationToken , setNotificationToken] = useState<string | null>('');
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
 
@@ -52,22 +53,18 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const userId = firebase.auth().currentUser?.uid;
      
 
-  const [appState, setAppState] = useState(AppState.currentState);
+  
   
 
 
   useEffect(() => {
     getToken();
-    dispatchStore(changeUserName(userId));
+    dispatchStore(changeUserName(userId))
+    .then(() => setLoading(false))
+    .catch(() => setLoading(false));
   },[]);
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-
-    return () => {
-      subscription.remove();
-    };
-  },[appState]);
+ 
 
   useEffect(() => {
      getToken();   
@@ -85,17 +82,18 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   }
 
   
-  // Check App State if user click on close icon and then come from minimize
-  const handleAppStateChange = async(nextAppState: any) => {
-    setAppState(nextAppState);
-    if (appState.match(/inactive|background/) && nextAppState === 'active') {
-       if(isExit){
-          await AsyncStorage.clear();
-          navigation.navigate('PhoneNumber');
-       }
-    }
-  };
+  const closeApp = () => {
+    dispatch({
+      type: 'CHANGE_USER_NAME',
+      payload: null,
+    });
 
+    dispatch({
+      type: 'ADD_IMAGE_URI',
+      payload: null,
+    });
+    navigation.navigate('PhoneNumber')
+  }
 
 
   // Close or break operation
@@ -109,7 +107,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
           onPress: () => console.log('Cancel Pressed'),
           style: 'cancel',
         },
-        {text: 'Yes', onPress: () => {setExit(true), BackHandler.exitApp()} , },
+        {text: 'Yes', onPress: () => closeApp()},
       ],
       {
         cancelable: false,
@@ -155,7 +153,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
       AsyncStorage.setItem("profileExist", "true");
       dispatch(setProfileCompleted(true));  
       setIndicatorVisible(false);
-      navigation.navigate('TabNavigator');
+      navigation.navigate('HomeScreen');
     }
     else{
       setIndicatorVisible(false);
@@ -185,163 +183,172 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
   return (
     <>
-    <SafeAreaView style={style.editProfileMain}>
-      
-
-      <KeyboardAvoidingView 
-          style={{ flex: 1 }}
+      <SafeAreaView style={style.editProfileMain}>
+      {loading ? (
+              <View style={style.loadingContainer}>
+                <ActivityIndicator size="large" color={'#3ebb6e'} />
+              </View>
+            ) :(
+        <KeyboardAvoidingView
+          style={{flex: 1}}
           behavior={Platform.OS === 'android' ? 'height' : undefined}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={style.editProfileIconView}>
+              <TouchableOpacity
+                style={style.closeIcon}
+                onPress={() => handleCloseApp()}>
+                <Icon name="close" size={30} color={'black'} />
+              </TouchableOpacity>
+            </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}>      
+             
+              <>
+                <View style={style.editProfileTextView}>
+                  <Text style={style.editText}>Edit Profile</Text>
+                </View>
+                <Pressable
+                  onPress={() => handleUserImage()}
+                  style={{elevation: 15, alignItems: 'center'}}>
+                  <View style={style.editProfileImagePickerView}>
+                    <Image
+                      style={style.editProfileImagePicker}
+                      source={{
+                        uri: imageUri
+                          ? imageUri
+                          : 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                      }}></Image>
+                  </View>
+                </Pressable>
+                <View style={style.editTextInputView}>
+                  <View style={style.editTextInput}>
+                    <TextInput
+                      style={style.editUsername}
+                      placeholder="Enter your name"
+                      value={userName}
+                      onChangeText={userNamevalidation}
+                    />
+                  </View>
+                </View>
+                {isError ? (
+                  <HandleError title="please enter your name" />
+                ) : null}
 
-      <View 
-        style={style.editProfileIconView}>
-        <TouchableOpacity 
-          style={style.closeIcon} onPress={() => handleCloseApp()}>
-            <Icon name="close" size={30} color={'black'} />
-        </TouchableOpacity>
-      </View>
+                <View style={style.saveProfileBtnView}>
+                  <TouchableOpacity
+                    style={[
+                      style.SaveProfileBtn,
+                      isError && style.SaveProfileBtnDisable,
+                    ]}
+                    disabled={isDisabled}
+                    onPress={() => handleSaveProfile()}>
+                    <View style={style.btnView}>
+                      {isIndicatorVisible ? (
+                        <ActivityIndicator size={25} color={'white'} />
+                      ) : (
+                        <Text style={style.saveProfile}>Save Profile</Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </>
+           
+          </ScrollView>
+        </KeyboardAvoidingView>
+         )}
+      </SafeAreaView>
 
-      <View 
-        style={style.editProfileTextView}>
-           <Text style={style.editText}>
-                Edit Profile
-           </Text>
-      </View>
-
-      <Pressable onPress={() => handleUserImage()} style={{elevation:15, alignItems:'center'}}>
-      <View 
-        style={style.editProfileImagePickerView}>
-            <Image  
-               style={style.editProfileImagePicker}
-               source={{uri: imageUri ? imageUri : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}>              
-            </Image>
-      </View>
-      </Pressable>
-
-      <View style={style.editTextInputView}>
-        <View style={style.editTextInput}>
-          <TextInput
-            style={style.editUsername}
-            placeholder="Enter your name" 
-            value={userName}
-            onChangeText={userNamevalidation}/>
-        </View>
-      </View>
-      {
-          isError ?  <HandleError title='please enter your name'/> : null 
-      }
-
-      <View style={style.saveProfileBtnView}>
-        <TouchableOpacity
-          style={[style.SaveProfileBtn , isError && style.SaveProfileBtnDisable]}
-          disabled={isDisabled}
-          onPress={() => handleSaveProfile()}>
-          <View style={style.btnView}>
-            {
-               isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>  
-               :    <Text style={style.saveProfile}>
-               Save Profile
-             </Text>
-            }
-          
-          </View>
-        </TouchableOpacity>
-      </View>
- 
-      </ScrollView>
-     
-      </KeyboardAvoidingView>
-
-      
-    </SafeAreaView>
-
-     {isImageSelectionSheetVisible && (
+      {isImageSelectionSheetVisible && (
         <ImagePickerSheet
           setImageSelectionSheetVisible={setImageSelectionSheetVisible}
         />
-      )}  
-
+      )}
     </>
   );
 };
 
 const style = StyleSheet.create({
-  editProfileMain:{
-      flex:1,
-      backgroundColor:'#FFFFFF'
+  editProfileMain: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
-  editProfileIconView:{
-      marginTop:20,
+  editProfileIconView: {
+    marginTop: 20,
   },
-  closeIcon:{
-      paddingLeft:20,
+  closeIcon: {
+    paddingLeft: 20,
+    textAlign: 'center',
+    fontSize: 20,
+    color: 'black',
+    fontWeight: '700',
   },
-  editProfileTextView:{
-      marginTop:10,
+  editProfileTextView: {
+    marginTop: 10,
   },
-  editText:{
-      textAlign:'center',
-      fontSize:20,
-      color:'black',
-      fontWeight:'700',
+  editText: {
+    textAlign: 'center',
+    fontSize: 20,
+    color: 'black',
+    fontWeight: '700',
   },
-  editProfileImagePickerView:{
-      marginTop:10,
-      alignItems:'center',
-      justifyContent:'center',
-      backgroundColor:'lightblue',
-      width:200,
-      borderRadius:120,
-      elevation:3,
-      marginBottom:2,
-      overflow:'hidden'
+  editProfileImagePickerView: {
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'lightblue',
+    width: 200,
+    borderRadius: 120,
+    elevation: 3,
+    marginBottom: 2,
+    overflow: 'hidden',
   },
-  editProfileImagePicker:{
-      width:200,
-      height:200,
+  editProfileImagePicker: {
+    width: 200,
+    height: 200,
   },
-  editTextInputView:{
-      backgroundColor:'white',
-      padding:20,
+  editTextInputView: {
+    backgroundColor: 'white',
+    padding: 20,
   },
-  editTextInput:{
-      backgroundColor:'#F3FAFF',
-      margin:2,
-      padding:10,
-      borderRadius:15,
-      elevation:3,
+  editTextInput: {
+    backgroundColor: '#F3FAFF',
+    margin: 2,
+    padding: 10,
+    borderRadius: 15,
+    elevation: 3,
   },
-  editUsername:{
-      fontSize:20,
-      color:'black' 
+  editUsername: {
+    fontSize: 20,
+    color: 'black',
   },
-  saveProfileBtnView:{
-      flex:1,
-      justifyContent:'flex-end',
-      margin:20,
-      marginBottom:30,
+  saveProfileBtnView: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    margin: 20,
+    marginBottom: 30,
   },
-  SaveProfileBtn:{
-      backgroundColor:'#3ebb6e',
-      padding:13,
-      borderRadius:10,
-      elevation:3,
+  SaveProfileBtn: {
+    backgroundColor: '#3ebb6e',
+    padding: 13,
+    borderRadius: 10,
+    elevation: 3,
   },
-  SaveProfileBtnDisable:{
-      backgroundColor:'#93dbb5'
+  SaveProfileBtnDisable: {
+    backgroundColor: '#93dbb5',
   },
-  btnView:{
-      alignItems:'center',
-      margin:1
+  btnView: {
+    alignItems: 'center',
+    margin: 1,
   },
-  saveProfile:{
-      color:'white',
-      fontSize:18,
-      fontWeight:'700'
-  }
-
+  saveProfile: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default EditProfile;

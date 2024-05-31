@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Text, View, StyleSheet, Pressable, TouchableOpacity , StatusBar} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HelpIcon from '../../component/HelpIcon';
+import CustomHeader from '../../component/CustomHeader';
 
 
 
@@ -13,16 +14,27 @@ const HelpConfirmationScreen: React.FC<HelpConfirmationScreenProps> = ({navigati
   return (
     <SafeAreaView style={styles.main}>
         <StatusBar backgroundColor={'#3ebb6e'}/>
+        <CustomHeader
+          name={'Confirmation'}
+          backIcon={'keyboard-backspace'}
+          backCall={() => navigation.goBack()}
+        />
+
         <View style={styles.helpIconView}>
-          <HelpIcon/>
-          <Text style={styles.helpIconText}> Help is on the way</Text>
+
+           <View style={{alignItems:'center' , justifyContent:'center'}}>  
+           <HelpIcon/>
+           <Text style={styles.helpIconText}> Help is on the way</Text>
+           </View>
         </View>
     
+      <View style={{alignItems:'center'}}> 
       <TouchableOpacity 
         style={styles.confirmView} 
         onPress={() => navigation.navigate('TabNavigator')}> 
         <Text style={styles.confirmText}>Ok</Text>
       </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -31,11 +43,10 @@ const styles = StyleSheet.create({
    main: {
       flex:1,
       backgroundColor:'white',
-      alignItems:'center',
-      justifyContent:'center',
    },
 
    helpIconView:{
+      flex:1,
       height:285,
       backgroundColor:'white',
       padding:20,

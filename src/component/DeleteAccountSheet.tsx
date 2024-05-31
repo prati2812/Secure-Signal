@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import instance from '../axios/axiosInstance';
-import { addToken} from '../redux/userprofile/action';
+import { addToken, setProfileCompleted} from '../redux/userprofile/action';
 
 
 
@@ -64,12 +64,17 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
     
     if(response.status === 200){
       dispatch(addToken(''));
+      dispatch(setProfileCompleted(false));
       await AsyncStorage.clear();
       slideDown();
       setTimeout(() => {
         setDeleteAccountSheetVisible(false);
       }, 800);
       
+    }
+    else{
+       console.log("xvv");
+       
     }
     
       

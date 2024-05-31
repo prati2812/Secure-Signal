@@ -49,6 +49,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<Contact[]>([]);
   const [filteredMatchingContactData , setFilteredMatchingContactData] = useState<Contact[]>([]);
+  const [isSearchContact , setSearchContact] = useState(false);
   const [updatedContact , setUpdatedContact] = useState<Contact[]>([]);
   const [matchingUpdatedContact , setMatchingUpdatedContact] = useState<Contact[]>([]);
   const [isVisible, setVisible] = useState(false);
@@ -240,8 +241,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
            const textData = text.replace(/\s/g,'').toUpperCase();
          return itemName.indexOf(textData) > -1 || itemPhoneNo.indexOf(textData) > -1;
        })
-
-             
+       
+        if(newData){
+          setSearchContact(true);
+        }     
         setFilteredData(newData);
         setSearchQuery(text);  
     }
@@ -264,6 +267,9 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
           return itemName.indexOf(textData) > -1 || itemPhoneNo.indexOf(textData) > -1;
       })
       
+      if(newData){
+        setSearchContact(true);
+      } 
       setFilteredMatchingContactData(newData);
       setSearchQuery(text);
     }
@@ -448,7 +454,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     
   }
 
-
+  
  
   return (
     <View style={styles.mainContainer}>
@@ -518,7 +524,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       
       {
           matchingUpdatedContact.length > 0 &&  <>
-          <SectionList title={'App Contacts'} borderColor={'lightpink'} />
+          {!searchQuery && <SectionList title={'App Contacts'} borderColor={'lightpink'} />}
           <ScrollView
              showsVerticalScrollIndicator={false}
              style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
@@ -538,7 +544,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                 })
                  
                 :
-                 matchingUpdatedContact  && matchingUpdatedContact.map((item , key) => {
+                (searchQuery && isSearchContact) || matchedContacts &&  matchingUpdatedContact.map((item , key) => {
                    return (
                      <MatchingContact
                        contact={item}
@@ -568,7 +574,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
          updatedContact.length > 0 && 
          <>
           
-          <SectionList title={'Non App Contacts'} borderColor={'lightpink'} />
+          {!searchQuery && <SectionList title={'Non App Contacts'} borderColor={'lightpink'} />}
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 30}}
@@ -590,7 +596,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
             })
             :
    
-            updatedContact.map((item , key) => {
+            (searchQuery && isSearchContact) || updatedContact.map((item , key) => {
                return(
                  <Contact 
                    key={key} 

@@ -1,5 +1,5 @@
 import React, { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler, Alert} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler, Alert, Keyboard} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch, useSelector } from 'react-redux';
@@ -19,6 +19,10 @@ import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscripti
 import { fetchLocation, findNearestHospital, findNearestPoliceStation } from '../../redux/location/action';
 import instance from '../../axios/axiosInstance';
 import store from '../../redux/store';
+import { NavigationContainer } from '@react-navigation/native';
+import AppStack from '../../stack/AppStack';
+import AuthStack from '../../stack/AuthStack';
+import ProtectorBottomSheet from '../../component/ProtectorBottomSheet';
 
 
 
@@ -48,14 +52,14 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [isProtectorSheetVisible, setProtectorSheetVisible] = useState(false);
+  const [mapNumber , setMapNumber] = useState(1);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : any) => state.contacts.selectedContact);
-  const matchedContacts = useSelector((state : any) => state.contacts.matchingContacts);
   const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
-  const [appState,setAppState] = useState(AppState.currentState);
   const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
   const [volume , setVolume] = useState(-1);  
@@ -63,12 +67,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [volumUp, setVolumeUp] = useState(0);
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
-  const latitude = nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.policeStationLocation.latitude : 0.00;
-  const longitude = nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.policeStationLocation.longitude : 0.00;
   const locationData = useSelector((state: any) => state.location.locations);
   
   
-    
+  console.log(nearestHospital);
+  
+  
+   
+  
 
   useEffect(() => {
     getToken();
@@ -80,6 +86,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   },[token]);
 
  
+ 
 
   useEffect(() => {
     // Request location SMS permission
@@ -87,7 +94,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     getCurrentLocation();  
     // Define a function to check if both nearestPoliceStation and notificationReadStatus are not null
     const checkValuesNotNull = () => {
-        if (nearestPoliceStation !== null && notificationReadStatus !== null && nearestHospital !== null) {
+        if (nearestPoliceStation !== null && notificationReadStatus !== null && nearestHospital !== null && location !== null) {
             return true;
         }
         return false;
@@ -96,8 +103,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     // If both values are null, dispatch actions
     if (!checkValuesNotNull()) {
         dispatchStore(allNotificationReadOrNot(userId));
-        dispatchStore(findNearestPoliceStation(userId));
-        dispatchStore(findNearestHospital(userId));
+        dispatchStore(findNearestPoliceStation(userId , location.latitude.toString() , location.longitude.toString()));
+        dispatchStore(findNearestHospital(userId , location.latitude.toString() , location.longitude.toString()));
     }
   }, [nearestPoliceStation, notificationReadStatus , nearestHospital]);
 
@@ -156,10 +163,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }, [isSubscribed]);
 
-  
- 
-
-
   useEffect(() => {
     if(locationData){
       const interval = setInterval(() => { 
@@ -169,6 +172,76 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       return () => clearInterval(interval);  
     }
   }, [locationData]);
+
+  const initialRegion = {
+    latitude:
+      nearestPoliceStation &&                                         
+      nearestPoliceStation.nearestPoliceStation &&
+      nearestPoliceStation.nearestPoliceStation.length > 0 &&
+      nearestPoliceStation.nearestPoliceStation[0].policeStationLocation
+        ? nearestPoliceStation.nearestPoliceStation[0].policeStationLocation.latitude
+        : 37.78825,
+    longitude:
+      nearestPoliceStation &&
+      nearestPoliceStation.nearestPoliceStation &&
+      nearestPoliceStation.nearestPoliceStation.length > 0 &&
+      nearestPoliceStation.nearestPoliceStation[0].policeStationLocation
+        ? nearestPoliceStation.nearestPoliceStation[0].policeStationLocation.longtitude
+        : -122.4324,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.0121,
+  };
+  const [region, setRegion] = useState(initialRegion);
+ 
+
+  
+  useEffect(() => {
+    if (nearestPoliceStation && nearestPoliceStation.nearestPoliceStation && nearestPoliceStation.nearestPoliceStation.length > 0) {
+      const { latitude, longtitude } = nearestPoliceStation.nearestPoliceStation[0].policeStationLocation;
+      setRegion({
+        ...region,
+        latitude: latitude || 37.78825,
+        longitude: longtitude || -122.4324,
+      });
+    }
+  }, [nearestPoliceStation]);
+
+
+  const InitialRegion = {
+    latitude:
+      nearestHospital &&                                         
+      nearestHospital.nearestHospital &&
+      nearestHospital.nearestHospital.length > 0 &&
+      nearestHospital.nearestHospital[0].hospitalLocation
+        ? nearestHospital.nearestHospital[0].hospitalLocation.latitude
+        : 37.78825,
+    longitude:
+    nearestHospital &&                                         
+    nearestHospital.nearestHospital &&
+    nearestHospital.nearestHospital.length > 0 &&
+    nearestHospital.nearestHospital[0].hospitalLocation
+      ? nearestHospital.nearestHospital[0].hospitalLocation.longtitude
+        : -122.4324,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.0121,
+  };
+  const [hospitalregion, setHospitalRegion] = useState(InitialRegion);
+ 
+
+  
+  useEffect(() => {
+    if (nearestHospital && nearestHospital.nearestHospital && nearestHospital.nearestHospital.length > 0) {
+      const { latitude, longtitude } = nearestHospital.nearestHospital[0].hospitalLocation;
+      setHospitalRegion({
+        ...region,
+        latitude: latitude || 37.78825,
+        longitude: longtitude || -122.4324,
+      });
+    }
+  }, [nearestHospital]);
+
+
+ 
 
 
 
@@ -242,10 +315,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       
     }
     
-
-   
-          
-     let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
+    const smallestDistanceStation = nearestPoliceStation.nearestPoliceStation.reduce((prev: { distance: number; }, curr: { distance: number; }) => {
+      return (prev.distance < curr.distance) ? prev : curr;
+    });
+    let policeStationId = smallestDistanceStation.id;
+       
+           
      console.log("====",policeStationId);
       
       //send Live Location Notification to Nearest Police Station
@@ -341,11 +416,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         }
     }
     
-    
-    let policeStationId = nearestPoliceStation.nearestPoliceStation.id;
-
-  
-  
+    const smallestDistanceStation = nearestPoliceStation.nearestPoliceStation.reduce((prev: { distance: number; }, curr: { distance: number; }) => {
+      return (prev.distance < curr.distance) ? prev : curr;
+    });
+    let policeStationId = smallestDistanceStation.id;
     
     
     // Share Live Location to nearest police station.
@@ -556,7 +630,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   // Navigate to the HelpScreen
   const handleLocationMap = (mapNumber:number) => {
-    navigation.navigate('HelpScreen', { mapNumber: mapNumber});
+    setMapNumber(mapNumber);
+    setProtectorSheetVisible(true);
   }
 
   // Navigate to the Notification Screen
@@ -569,9 +644,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       navigation.navigate('EmergencyContactList');
   }
 
-  
+  const handleLocation = () =>{
+    navigation.navigate('Location');
+  }
 
   return (
+    <>
     <View style={style.homeMain}>
       <StatusBar backgroundColor={'#3ebb6e'} />
 
@@ -581,6 +659,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         icon="bell"
         call={handleNotification}
         isRead={notificationReadStatus}
+        mapIcon="map"
+        mapHistory={handleLocation}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -601,15 +681,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
               <Text style={style.contactText}>+</Text>
             </TouchableOpacity>
 
-            {selectedContacts && selectedContacts.map((item: { givenName: string | any[]; }, key: React.Key | null | undefined) => (
-                <TouchableOpacity key={key} style={style.contactSelectedView}>
-                    <Text style={style.contactText}>{item.givenName && item.givenName.length > 0 ? item.givenName[0] : ''}</Text>
-                </TouchableOpacity>
-                
-              ))
-            }
-
-
+            {selectedContacts &&
+              selectedContacts.map(
+                (
+                  item: {givenName: string | any[]},
+                  key: React.Key | null | undefined,
+                ) => (
+                  <View key={key}>
+                    <View style={style.contactSelectedView}>
+                      <Text style={style.contactText}>
+                        {item.givenName && item.givenName.length > 0
+                          ? item.givenName[0]
+                          : ''}
+                      </Text>
+                    </View>
+                    <View style={style.selectedContactNameView}>
+                      <Text style={style.selectedContactName}>
+                        {item.givenName}
+                      </Text>
+                    </View>
+                  </View>
+                ),
+              )}
           </ScrollView>
         </View>
 
@@ -627,16 +720,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 provider={PROVIDER_GOOGLE}
                 scrollEnabled={false}
                 zoomEnabled={false}
-                region={{
-                  latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825,
-                  longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324,
-                  latitudeDelta: 0.015,
-                  longitudeDelta: 0.0121,
-                }}>
-                <Marker coordinate={{latitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825, 
-                                     longitude: nearestPoliceStation && nearestPoliceStation.policeStationLocation ? nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324}}>
-                  <Icon name="local-police" size={40} color={'#5F4C24'} />
-                </Marker>
+                region={region}>
+                {nearestPoliceStation && nearestPoliceStation.nearestPoliceStation && 
+                nearestPoliceStation.nearestPoliceStation.map(
+                  (station: any) => (
+                    <Marker
+                      key={station.id}
+                      coordinate={{
+                        latitude:
+                          station && station.policeStationLocation
+                            ? station.policeStationLocation.latitude
+                            : 37.78825,
+                        longitude:
+                          station && station.policeStationLocation
+                            ? station.policeStationLocation.longtitude
+                            : -122.4324,
+                      }}>
+                      <Icon name="local-police" size={40} color={'#5F4C24'} />
+                    </Marker>
+                  ),
+                )}
               </MapView>
             </View>
           </View>
@@ -653,22 +756,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                 provider={PROVIDER_GOOGLE}
                 scrollEnabled={false}
                 zoomEnabled={false}
-                region={{
-                  latitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825,
-                  longitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324,
-                  latitudeDelta: 0.015,
-                  longitudeDelta: 0.0121,
-                }}>
-                <Marker coordinate={{latitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825, 
-                                     longitude: nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324}}>
-                  <Icon name="local-hospital" size={40} color={'red'} />
-                </Marker>
+                region={hospitalregion}>
+                {
+                  nearestHospital && nearestHospital.nearestHospital &&
+                   nearestHospital.nearestHospital.map((station: any)=> (
+                    <Marker
+                    key={station.id}
+                    coordinate={{
+                      latitude: station && station.hospitalLocation
+                          ?  station.hospitalLocation.latitude
+                          : 37.78825,
+                      longitude: station && station.hospitalLocation 
+                          ? station.hospitalLocation.longtitude
+                          : -122.4324,
+                    }}>
+                    <Icon name="local-hospital" size={40} color={'red'} />
+                  </Marker>
+                    
+                   ))
+                }
               </MapView>
             </View>
           </View>
         </View>
       </ScrollView>
     </View>
+      {
+       isProtectorSheetVisible && <ProtectorBottomSheet setProtectorSheetVisible={setProtectorSheetVisible}
+        navigation={navigation} mapNumber={mapNumber}/>
+      }
+    </>
   );
 };
 
@@ -757,6 +874,19 @@ const style = StyleSheet.create({
   nearStationMap: {
     flex: 1,
   },
+  selectedContactView:{
+    color:'black', 
+    fontSize:17
+  },
+  selectedContactName:{
+    color:'black', 
+    fontSize:15
+  },
+  selectedContactNameView:{
+    alignItems:'center' , 
+    justifyContent:'center'
+  }
+
 });
 
 

@@ -47,7 +47,8 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
           const imageUrl = `data:image/jpeg;base64,${base64Image}`;
 
           setImageData(imageUrl); 
-        
+          
+                  
           
         }
         else{
@@ -72,10 +73,9 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
           :
           <View style={styles.placeholder}>
            {
-               imageData &&
                
                       <Image
-                        source={{uri: (imageData !== null) ? imageData : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
+                        source={{uri: imageData ?  imageData  : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
                         style={{flex:1}}
                       />  
            }

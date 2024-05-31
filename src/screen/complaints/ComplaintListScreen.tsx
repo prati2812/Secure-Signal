@@ -1,10 +1,13 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, StatusBar, ActivityIndicator, FlatList } from 'react-native';
+import { Text, View, StyleSheet, StatusBar, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import ComplaintsCard from '../../component/ComplaintsCard';
-import { COMPLAINT } from '../../redux/userprofile/action';
+import { COMPLAINT, fetchUserComplaints } from '../../redux/userprofile/action';
 import { useState } from 'react';
+import { dispatchStore } from '../account/EditProfile';
+import { firebase } from '@react-native-firebase/auth';
+
 
 interface ComplaintListScreenProps {
    navigation:any;
@@ -13,6 +16,8 @@ interface ComplaintListScreenProps {
 const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) => {
   const complaints = useSelector((state:any) => state.userProfile.complaints);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const userId = firebase.auth().currentUser?.uid;
   
   const dispatch = useDispatch();
  
@@ -28,20 +33,24 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
   }
   
   const renderComplaint = ({ item }: { item: any }) => (
+   
     <ComplaintsCard
       icon={'person'}
       message={item.complaints.complaint.trim()}
-      time={
-        new Date(item.complaints.createdAt).toLocaleDateString('en-GB') +
+      time={new Date(item.complaints.createdAt).toLocaleDateString('en-GB') +
         ' ' +
-        new Date(item.complaints.createdAt).toLocaleTimeString()
-      }
+        new Date(item.complaints.createdAt).toLocaleTimeString()}
       color={'#3ebb6e'}
       isRead={true}
-      handleDetails={() => handleDetails(item)}
-    />
+      handleDetails={() => handleDetails(item)} 
+      borderColor={item.complaints.complaintStatus === "Completed" ? '#3ebb6e' : item.complaints.complaintStatus === "Not Completed" ? '#ff0000' : '#d1a500'}    />
   );
   
+  const onRefresh = () => {
+    setRefreshing(true);
+    dispatchStore(fetchUserComplaints(userId));
+    setRefreshing(false);
+  };
 
 
 
@@ -80,6 +89,13 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
               </Text>
             </View>
           }
+          refreshControl={
+            <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+            />
+          }
+          
           showsVerticalScrollIndicator={false}
         />
       )}

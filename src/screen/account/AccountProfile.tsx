@@ -54,7 +54,11 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={'#3ebb6e'} />
-      <CustomHeader name="Profile"/>
+      <CustomHeader 
+          name="Profile"  
+          backIcon={'keyboard-backspace'}
+          backCall={() => navigation.goBack()}/>
+
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.profileSection}>
@@ -85,10 +89,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
 
           <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Subscription')}>
             <CustomProfileOption optionName='subscription' icon='bolt' data={subScriptionType ? subScriptionType: ''}/>
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('ComplaintList')}>
-            <CustomProfileOption optionName='Complaints' icon='description' data={complaintData.length}/>
           </TouchableOpacity>   
         </View>
 

@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
+import ComplaintListScreen from "../screen/complaints/ComplaintListScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -29,6 +30,13 @@ const TabNavigator = () => {
                 <Tab.Screen name="UserDestination" component={UserDestination} options={{
                      tabBarIcon:({focused, color , size}) => (
                         <Icon name="add-location" 
+                              size={35}
+                              color={focused ? '#3ebb6e' : 'lightgray'}/>
+                     ),
+                }}/>
+                <Tab.Screen name="Complaints" component={ComplaintListScreen} options={{
+                     tabBarIcon:({focused, color , size}) => (
+                        <Icon name="description" 
                               size={35}
                               color={focused ? '#3ebb6e' : 'lightgray'}/>
                      ),

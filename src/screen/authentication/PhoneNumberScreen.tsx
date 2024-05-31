@@ -100,11 +100,6 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
   return (
     <View style={style.phoneNumberMain}>
       <StatusBar backgroundColor={'white'}/>
-      <View style={style.iconArrowBackView}>
-        <Text style={style.iconArrowBack}>
-          <Icon name="keyboard-backspace" size={40} />
-        </Text>
-      </View>
       <View style={style.phoneNumberView}>
         <Text style={style.phoneNumberText}>
           Enter your phone number
@@ -166,7 +161,7 @@ const style  = StyleSheet.create({
      color:'black'  
   },
   phoneNumberView:{
-      marginTop:10,
+      marginTop:30,
       alignItems:'center',
       justifyContent:'center',
   },

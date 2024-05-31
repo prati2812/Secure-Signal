@@ -11,6 +11,7 @@ import {
   BackHandler,
   NativeEventEmitter,
   NativeModules,
+  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,6 +19,7 @@ import IconFont from 'react-native-vector-icons/FontAwesome';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import { useSelector } from 'react-redux';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import CustomHeader from '../../component/CustomHeader';
 
 
 const width = Dimensions.get('window').width;
@@ -37,8 +39,12 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const imageUri = useSelector((state:any) => state.userProfile.imageUri);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
+  const protectorData = useSelector((state:any) => state.protector.protectorData);
   const mapNumber = route.params?.mapNumber ?? undefined;
-
+  
+ 
+  console.log(protectorData);
+  
   
  
   
@@ -56,47 +62,28 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
 
   const handleHelpButton = () => {
     if(query){
-      navigation.navigate('HelpDescription' , {query});
+      navigation.navigate('HelpDescription' , {query , mapNumber});
     }
   }
 
   const handleLocationMap = () => {
     if(mapNumber !== undefined){
       navigation.navigate('LocationRouting' , {mapNumber});
+      // Linking.openURL('geo:21.145345,72.7567583;u=35');
     }
   }
    
     
   return (
     <SafeAreaView style={styles.helpScreenMain}>
-      <StatusBar backgroundColor={'white'} />
+      <StatusBar backgroundColor={'#3ebb6e'} />
+      <CustomHeader
+          name={'Complaint'}
+          backIcon={'keyboard-backspace'}
+          backCall={() => navigation.goBack()}
+        />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile */}
-        <View style={styles.backPressBtnContainer}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <View style={styles.backPressBtnView}>
-              <Text>
-                <Icon name="arrow-back" size={35} color={'black'} />
-              </Text>
-            </View>
-          </Pressable>
-
-          <View style={styles.profileBtnView}>
-            <Pressable onPress={() => navigation.navigate('Profile')}>
-              <Image
-                resizeMode="cover"
-                source={{
-                  uri: imageUri
-                    ? imageUri
-                    : 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-                }}
-                style={styles.profileImage}
-              />
-            </Pressable>
-          </View>
-        </View>
-
         <View style={styles.whatHappenedView}>
           <Text style={styles.whatHappenedText}>What {'\n'}happened ?</Text>
         </View>
@@ -113,25 +100,25 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               zoomEnabled={false}
               region={{
                 latitude: mapNumber === 1 ? 
-                            nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
-                            nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825 : 
-                            nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825,
+                            protectorData && protectorData.policeStationLocation ? 
+                            protectorData.policeStationLocation.latitude : 37.78825 : 
+                            protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.latitude : 37.78825,
                 longitude: mapNumber === 1 ? 
-                           nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
-                           nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324 :
-                           nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324  ,
+                           protectorData && protectorData.policeStationLocation ? 
+                           protectorData.policeStationLocation.longtitude : -122.4324 :
+                           protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.longtitude : -122.4324  ,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
               {
                 <Marker coordinate={{latitude: mapNumber === 1 ? 
-                                              nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
-                                              nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude : 37.78825 : 
-                                              nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.latitude : 37.78825, 
+                                              protectorData && protectorData.policeStationLocation ? 
+                                              protectorData.policeStationLocation.latitude : 37.78825 : 
+                                              protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.latitude : 37.78825, 
                                      longitude: mapNumber === 1 ? 
-                                                nearestPoliceStation && nearestPoliceStation.policeStationLocation ? 
-                                                nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude : -122.4324 :
-                                                nearestHospital && nearestHospital.hospitalLocation ? nearestHospital.nearestHospital.hospitalLocation.longtitude : -122.4324}}>
+                                                protectorData && protectorData.policeStationLocation ? 
+                                                protectorData.policeStationLocation.longtitude : -122.4324 :
+                                                protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.longtitude : -122.4324}}>
                   {mapNumber === 1 ? (
                     <Icon name="local-police" size={40} color={'#5F4C24'} />
                   ) : mapNumber === 2 ? (
@@ -186,7 +173,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
 
         <Pressable onPress={() => handleHelpButton()}>
           <View style={styles.helpBtnView}>
-            <View style={styles.helpBtn}>
+            <View style={[styles.helpBtn , !query && {backgroundColor:'#FDA993'}]}>
               <Text>
                 <IconFont name="bell" size={30} color={'white'} />
               </Text>
@@ -204,42 +191,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  backPressBtnContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 10,
-  },
-  backPressBtnView: {
-    marginTop: 1,
-    width: 55,
-    height: 55,
-    backgroundColor: 'white',
-    marginLeft: 15,
-    borderRadius: 15,
-    elevation: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  profileBtnView: {
-    marginTop: 1,
-    width: 70,
-    height: 70,
-    backgroundColor: 'white',
-    marginRight: 15,
-    borderRadius: 47,
-    elevation: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  profileImage: {
-    width: '100%',
-    height: '100%',
-    alignSelf: 'center',
-    aspectRatio: 1,
-  },
   whatHappenedView: {
-    marginTop: 10,
+    marginTop: 20,
+    marginLeft:10,
   },
   whatHappenedText: {
     marginLeft: 24,
@@ -298,7 +252,7 @@ const styles = StyleSheet.create({
     color:'white',
   },
   helpBtnView:{
-    marginTop:12,
+    marginTop:'15%',
     marginBottom:10,
   },
   helpBtn:{

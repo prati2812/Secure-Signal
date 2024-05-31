@@ -19,6 +19,7 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
   const [isVisible, setVisible] = useState(false);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
+  const protectorData = useSelector((state:any) => state.protector.protectorData);
   const route  = useRoute();
   const mapNumber = (route.params as { mapNumber?: number })?.mapNumber;
 
@@ -26,8 +27,8 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
      
     if(mapNumber === 1){
       if(nearestPoliceStation !== null){
-        const latitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.latitude;
-        const longtitude = nearestPoliceStation.nearestPoliceStation.policeStationLocation.longtitude;
+        const latitude = protectorData.policeStationLocation.latitude;
+        const longtitude = protectorData.policeStationLocation.longtitude;
         setDestination({latitude:latitude , longitude:longtitude});
        
       }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, StatusBar, ScrollView, Image, Pressable } from 'react-native';
+import { Text, View, StyleSheet, StatusBar, ScrollView, Image, Pressable, Linking } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import base64 from 'base64-js';
@@ -7,6 +7,10 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Modal } from 'react-native-paper';
 import CustomHeader from '../../component/CustomHeader';
+import instance from '../../axios/axiosInstance';
+import { firebase } from '@react-native-firebase/auth';
+
+
 
 
 interface ComplaintScreenProps {
@@ -20,6 +24,26 @@ const ComplaintScreen:React.FC<ComplaintScreenProps> = ({navigation}) => {
  const [isCompleted , setCompletedButton] = useState(false);
  const [isNotCompleted , setNotCompletedButton] = useState(false);
  const [isStatus , setStatus] = useState('');
+ const userId = firebase.auth().currentUser?.uid;
+ const policeStationId = complaintData.complaints.nearestPoliceStationId;
+ const hospitalId = complaintData.complaints.nearestHospitalId;
+ const complaintId = complaintData.complaints.complaintId;
+ const isInjured = complaintData.complaints.isInjured;
+ 
+
+ 
+ useEffect(() => {
+    const status =  complaintData.complaints.complaintStatus;
+    if(status === "Completed"){
+       setCompletedButton(true);
+       setStatus(status);
+    }
+    else if(status === "Not Completed"){
+       setNotCompletedButton(true);
+       setStatus(status);
+    }
+ },[])
+
 
 const showModal = (imageUrl : string) => {
   setVisible(true)
@@ -35,12 +59,29 @@ const handleCompleted = () => {
 const handleNotCompleted = () => {
    setNotCompletedButton(true);
    setCompletedButton(false);
-   setStatus("NotCompleted");
+   setStatus("Not Completed");
 }
 
-const handleSave = () => {
+const handleSave = async() => {
+    const newStatus = isStatus;
+    const response = await instance.post("/user/updateComplaint" , 
+     {userId, policeStationId,hospitalId,complaintId,isInjured , newStatus});
+
     
+    if(response.status === 200){
+       navigation.goBack();
+    }
+    else{
+      console.log("problem occured");
+      
+    } 
+
 }
+
+const handleMap = () => {
+  Linking.openURL(`geo:${complaintData.complaints.complaintLocation.latitude},${complaintData.complaints.complaintLocation.longtitude};u=35`);
+}
+ 
 
 const hideModal = () => setVisible(false);
  
@@ -125,7 +166,7 @@ const hideModal = () => setVisible(false);
 
           <View style={styles.complaintMessageView}>
             <Text style={styles.complaintTitle}>{`Incident Location : `}</Text>
-            <View style={{marginTop: 10}}>
+            <Pressable style={{marginTop: 10}} onPress={() => handleMap()}>
                 <View
                   style={{
                     width: '100%',
@@ -139,25 +180,21 @@ const hideModal = () => setVisible(false);
                     scrollEnabled={false}
                     zoomEnabled={true}
                     region={{
-                      latitude:
-                        complaintData.complaints.complaintLocation.latitude,
-                      longitude:
-                        complaintData.complaints.complaintLocation.longtitude,
+                      latitude:complaintData.complaints.complaintLocation.latitude,
+                      longitude:complaintData.complaints.complaintLocation.longtitude,
                       latitudeDelta: 0.015,
                       longitudeDelta: 0.0121,
                     }}>
                     <Marker
                       coordinate={{
-                        latitude:
-                          complaintData.complaints.complaintLocation.latitude,
-                        longitude:
-                          complaintData.complaints.complaintLocation.longtitude,
+                        latitude:complaintData.complaints.complaintLocation.latitude,
+                        longitude:complaintData.complaints.complaintLocation.longtitude,
                       }}>
                       <Icon name="location-pin" size={40} color={'#5F4C24'} />
                     </Marker>
                   </MapView>
                 </View>
-            </View>
+            </Pressable>
           </View>
 
           <View style={styles.questionOptionSelectionView}>
@@ -245,12 +282,12 @@ const styles = StyleSheet.create({
         gap:10 , 
         alignItems:'center' ,  
         flexWrap:'wrap', 
-        marginLeft:'auto', 
+        marginLeft:10, 
         marginTop:10,
     },
     complaintImage:{
         height:150, 
-        width:150 , 
+        width:150,
         marginTop:10, 
         backgroundColor:'lightblue' , 
         borderRadius:10,

@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
 import Geolocation from 'react-native-geolocation-service';
 import instance from '../../axios/axiosInstance';
+import CustomHeader from '../../component/CustomHeader';
 
 
 
@@ -38,15 +39,18 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const [isIndicatorVisible, setIndicatorVisible] = useState(false);
     const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
     const nearestHospital = useSelector((state:any) => state.location.nearestHospital); 
-    const policeStationId = nearestPoliceStation.nearestPoliceStation.id;
-    const hospitalId = nearestHospital.nearestHospital.id;
     const userName  = useSelector((state : any) => state.userProfile.userName);
+    const protectorData = useSelector((state:any) => state.protector.protectorData);
 
     const token = useSelector((state : any) => state.userProfile.token);
     const complaintBy = route.params?.query;
     const userId = firebase.auth().currentUser?.uid;
     const phoneNumber = firebase.auth().currentUser?.phoneNumber;
-   
+    const mapNumber = route.params?.mapNumber;
+    
+        
+    
+    
 
     useEffect(() => {  
       
@@ -94,7 +98,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
             mime: image.mime,
             path: image.path,
         }));
-        setUri(formattedImages);
+        setUri(prevUris => [...prevUris, ...formattedImages]);
       });           
     }
 
@@ -122,7 +126,30 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
           }      
         } 
 
+        let policeStationId;
+        if(mapNumber === 1){
+           policeStationId = protectorData.id;
+        }
+        else{
+          const smallestDistanceStation = nearestPoliceStation.nearestPoliceStation.reduce((prev: { distance: number; }, curr: { distance: number; }) => {
+            return (prev.distance < curr.distance) ? prev : curr;
+          });
+          policeStationId = smallestDistanceStation.id;
+            
+        } 
 
+        let hospitalId;
+        if(mapNumber === 2){
+             hospitalId = protectorData.id;
+        }
+        else{
+             const smallestDistance = nearestHospital.nearestHospital.reduce((prev: { distance: number; }, curr: { distance: number; }) => {
+               return (prev.distance < curr.distance) ? prev : curr;
+             });
+             hospitalId = smallestDistance.id; 
+        }
+        console.log(policeStationId , hospitalId);
+        
         complaintData.append('policeStationId' , policeStationId);
         complaintData.append('hospitalId', hospitalId);
         complaintData.append('phoneNumber', phoneNumber);
@@ -141,11 +168,18 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         const response = await instance.post('/uploadComplaints', complaintData);
 
         if(response.status === 200){
-        
-        
-          let policeStationId = nearestPoliceStation.nearestPoliceStation.id; 
-          console.log(policeStationId);
-           
+          
+          let policeStationId;
+          if(mapNumber === 1){
+             policeStationId = protectorData.id;
+          }
+          else{
+            const smallestDistanceStation = nearestPoliceStation.nearestPoliceStation.reduce((prev: { distance: number; }, curr: { distance: number; }) => {
+              return (prev.distance < curr.distance) ? prev : curr;
+            });
+            policeStationId = smallestDistanceStation.id;
+              
+          } 
            const title = 'Complaint';
            const body = 'Complaint sent by '
            const response = await instance.post('/sendComplaintNotification' , {policeStationId , userName , title , body});
@@ -159,6 +193,18 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
            }
            
            if(isInjured === "Yes"){
+          
+             let hospitalId;
+             if(mapNumber === 2){
+                  hospitalId = protectorData.id;
+             }
+             else{
+                  const smallestDistance = nearestHospital.nearestHospital.reduce((prev: { distance: number; }, curr: { distance: number; }) => {
+                    return (prev.distance < curr.distance) ? prev : curr;
+                  });
+                  hospitalId = smallestDistance.id; 
+             }
+
             const title = 'Complaint';
             const body = 'Complaint sent by '
             const response = await instance.post('/hospital/complaint/sendNotification' , {hospitalId , userName , title , body});
@@ -198,19 +244,12 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>
-
-      <View style={styles.backPressBtnContainer}>
-          <Pressable onPress={() => navigation.goBack()}>
-              <View style={styles.backPressBtnView}>
-          
-                <Text>
-                  <Icon name="arrow-back" size={35} color={'black'} />
-                </Text>
-              </View>
-          </Pressable>  
-          <Text style={styles.queryText}>{complaintBy}</Text>
-      </View>
-
+      <CustomHeader
+          name={complaintBy}
+          backIcon={'keyboard-backspace'}
+          backCall={() => navigation.goBack()}
+        />  
+    
       <ScrollView showsVerticalScrollIndicator={false}>
 
         <View style={styles.whatHappenedView}>
@@ -274,7 +313,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
                 style={styles.uploadPhotoView} 
                 onPress={() => handleUploadPhotos()}>
                   <Text style={styles.uploadPhotoText}>
-                       Upload a photo
+                       Select photos
                   </Text>
              </TouchableOpacity>
         </TouchableOpacity>
@@ -311,7 +350,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         <View style={styles.helpSubmitBtnView}>
               <Pressable onPress={()=> handleHelpConfirmation()}
                 disabled={isDisabled}>
-              <View style={styles.helpSubmitBtn}>
+              <View style={[styles.helpSubmitBtn , isDisabled && {backgroundColor:'#FDA993'}]}>
                  {
                     isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>
                     :   <Text style={styles.helpSubmitText}>
@@ -378,7 +417,7 @@ const styles = StyleSheet.create({
         color:'black',
       },
       whatHappenedView:{
-        marginTop:10,
+        marginTop:30,
         marginLeft:15, 
       },
       whatHappenedText:{

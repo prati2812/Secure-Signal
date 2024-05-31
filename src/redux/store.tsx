@@ -5,6 +5,7 @@ import verificationReducer from './credential/verificationReducer';
 import locationReducer from './location/locationReducer';
 import notificationReducer from './notifications/notificationReducer';
 import subscripionReducer from './subscription/subscriptionReducer';
+import protectorReducer from './protector/protectorReducer';
 
 
 
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   location:locationReducer,
   notifications:notificationReducer,
   subscription:subscripionReducer,
+  protector:protectorReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
