@@ -83,6 +83,23 @@ const handleMap = () => {
 }
  
 
+const shouldDisplayComponent = (complaintData: { complaints: { isInjured: any; policeStationStatus: any; hospitalStatus: any; }; }) => {
+  const { isInjured, policeStationStatus, hospitalStatus } = complaintData.complaints;
+
+  if (isInjured === 'No' && policeStationStatus === 'Completed') {
+    return true;
+  }
+
+  if (isInjured === 'Yes' && policeStationStatus === 'Completed' && hospitalStatus === 'Completed') {
+    return true;
+  }
+
+  return false;
+};
+
+
+const displayContent = shouldDisplayComponent(complaintData);
+
 const hideModal = () => setVisible(false);
  
  
@@ -197,7 +214,9 @@ const hideModal = () => setVisible(false);
             </Pressable>
           </View>
 
-          <View style={styles.questionOptionSelectionView}>
+        
+        { displayContent &&
+           <View style={styles.questionOptionSelectionView}>
              
              <Pressable onPress={() => handleCompleted()} style={{flex:1}}>
               <View style={[styles.questionOptionView , isCompleted && styles.activateOptionView]}>
@@ -215,10 +234,8 @@ const hideModal = () => setVisible(false);
               </View>
               </Pressable>
 
-          </View>   
-
-
-
+          </View>    
+        }     
 
         </ScrollView>
 

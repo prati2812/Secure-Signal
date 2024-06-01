@@ -31,6 +31,78 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
     navigation.navigate('Complaint');
     
   }
+
+
+  const getStatusIcon = (item: { complaints: { isInjured: any; complaintStatus: any; policeStationStatus: any; hospitalStatus: any; }; }) => {
+    const { isInjured, complaintStatus, policeStationStatus, hospitalStatus } = item.complaints;
+    
+
+    if (complaintStatus === 'Completed') {
+      return 'thumbs-up';
+    }
+  
+    if (complaintStatus === 'NotCompleted') {
+      return 'thumbs-down';
+    }
+  
+    if(complaintStatus === "pending" && isInjured === "No"){
+        if(!policeStationStatus){
+           return 'clock';
+        }
+        else if(policeStationStatus && (policeStationStatus === "Completed" || policeStationStatus === "Not Completed")){
+           return 'thumbs-down'; 
+        }
+    }
+    if(complaintStatus === "pending" && isInjured === "Yes"){
+       if(!policeStationStatus && !hospitalStatus){
+          return 'clock';
+       }
+       else if((policeStationStatus || hospitalStatus) && 
+            ((policeStationStatus === "Completed" || policeStationStatus === "Not Completed") || 
+              (hospitalStatus === "Completed" || hospitalStatus === "Not Completed"))){
+                 return 'thumbs-down';
+       }
+
+    }
+  
+    return 'clock'; 
+  };
+
+  const getStatusColor = (item: { complaints: { isInjured: any; complaintStatus: any; policeStationStatus: any; hospitalStatus: any; }; }) => {
+    const { isInjured, complaintStatus, policeStationStatus, hospitalStatus } = item.complaints;
+    
+
+    if (complaintStatus === 'Completed') {
+      return 'green';
+    }
+  
+    if (complaintStatus === 'NotCompleted') {
+      return 'red';
+    }
+  
+    if(complaintStatus === "pending" && isInjured === "No"){
+        if(!policeStationStatus){
+           return '#e1ad01';
+        }
+        else if(policeStationStatus && (policeStationStatus === "Completed" || policeStationStatus === "Not Completed")){
+           return 'red'; 
+        }
+    }
+    if(complaintStatus === "pending" && isInjured === "Yes"){
+       if(!policeStationStatus && !hospitalStatus){
+          return '#e1ad01';
+       }
+       else if((policeStationStatus || hospitalStatus) && 
+            ((policeStationStatus === "Completed" || policeStationStatus === "Not Completed") || 
+              (hospitalStatus === "Completed" || hospitalStatus === "Not Completed"))){
+                 return 'red';
+       }
+
+    }
+  
+    return '#e1ad01'; 
+  };
+
   
   const renderComplaint = ({ item }: { item: any }) => (
    
@@ -43,7 +115,8 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
       color={'#3ebb6e'}
       isRead={true}
       handleDetails={() => handleDetails(item)} 
-      borderColor={item.complaints.complaintStatus === "Completed" ? '#3ebb6e' : item.complaints.complaintStatus === "Not Completed" ? '#ff0000' : '#d1a500'}    />
+      statusIcon={getStatusIcon(item)}
+      statusIconColor={getStatusColor(item)}/>
   );
   
   const onRefresh = () => {

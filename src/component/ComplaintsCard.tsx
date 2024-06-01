@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontIcon from 'react-native-vector-icons/FontAwesome5';
 import { useSelector } from 'react-redux';
 
 interface ComplaintsCardProps {
@@ -11,16 +12,17 @@ interface ComplaintsCardProps {
    color:string;
    isRead?:boolean;
    handleDetails : Function;
-   borderColor:string;
+   statusIcon?:string;
+   statusIconColor?:string;
 }
 
-const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , color, isRead , handleDetails , borderColor}) => {
+const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , color, isRead , handleDetails , statusIcon , statusIconColor}) => {
 
  
   
   return (
     <TouchableOpacity onPress={() => handleDetails()}>
-    <View style={[styles.notificationView , {borderColor:borderColor , borderWidth:2}]}>
+    <View style={[styles.notificationView]}>
                  <View style={styles.notificationIcon}>
                         <Icon name={icon} size={45} color={color} />
                  </View>
@@ -32,10 +34,10 @@ const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , col
                               {time}
                        </Text>
                  </View>
-
                  {
-                    isRead === false && <View style={{borderWidth:7, borderColor:'green' , borderRadius:10,}}></View>
+                       statusIcon && <FontIcon name={statusIcon} size={35}  color={statusIconColor}/>
                  }
+
                 
     </View>
     </TouchableOpacity>
