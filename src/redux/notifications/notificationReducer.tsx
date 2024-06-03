@@ -1,4 +1,4 @@
-import { ALL_NOTIFICATION_READ, DELETE_ALL_NOTIFICATION, FETCH_EMERGENCY_CONTACTS_NOTIFICATION, FETCH_LIVE_LOCATION_NOTIFICATION, FETCH_SAFE_ARRIVAL_NOTIFICATION, NOTIFICATION_TYPES } from "./action";
+import { ALL_NOTIFICATION_READ, DELETE_ALL_NOTIFICATION, FETCH_EMERGENCY_CONTACTS_NOTIFICATION, FETCH_HOSPITAL_STATUS_NOTIFICATION, FETCH_LIVE_LOCATION_NOTIFICATION, FETCH_POLICE_STATION_STATUS_NOTIFICATION, FETCH_SAFE_ARRIVAL_NOTIFICATION, NOTIFICATION_TYPES } from "./action";
 
 
 
@@ -8,6 +8,8 @@ const initialState = {
     deleteAllNotificationOrNot : false,
     fetchLiveLocationNotification:[],
     fetchSafeArrivalNotification:[],
+    fetchHospitalStatusNotification:[],
+    fetchPoliceStationStatusNotification:[],
     notificationTypes:"All",
 };
 
@@ -37,6 +39,18 @@ const notificationReducer = (state=initialState , action: { type: any; payload: 
                 ...state,
                 fetchSafeArrivalNotification: action.payload,
             }
+
+        case FETCH_HOSPITAL_STATUS_NOTIFICATION:
+            return{
+                ...state,
+                fetchHospitalStatusNotification: action.payload,
+            }
+            
+        case FETCH_POLICE_STATION_STATUS_NOTIFICATION:
+            return{
+                ...state,
+                fetchPoliceStationStatusNotification: action.payload,
+            }    
 
         case NOTIFICATION_TYPES:
             return{

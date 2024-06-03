@@ -7,6 +7,8 @@ import { COMPLAINT, fetchUserComplaints } from '../../redux/userprofile/action';
 import { useState } from 'react';
 import { dispatchStore } from '../account/EditProfile';
 import { firebase } from '@react-native-firebase/auth';
+import { FAB } from 'react-native-paper';
+import ComplaintFilterBottomSheet from '../../component/ComplaintFilterBottomSheet';
 
 
 interface ComplaintListScreenProps {
@@ -15,8 +17,10 @@ interface ComplaintListScreenProps {
 
 const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) => {
   const complaints = useSelector((state:any) => state.userProfile.complaints);
+  const complaintStatus = useSelector((state:any) => state.userProfile.complaintStatus);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isComplaintBottomSheetVisible , setComplaintBottomSheetVisible] = useState(false);
   const userId = firebase.auth().currentUser?.uid;
   
   const dispatch = useDispatch();
@@ -126,9 +130,27 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
   };
 
 
+  const filteredComplaints = complaints.filter((item: { complaints: {
+    hospitalStatus: any;
+    policeStationStatus: any; complaintStatus:any; 
+}; }) => {
+    if (complaintStatus === 'All') return true;
+    else if(complaintStatus === "Accepted"){
+      return item.complaints.complaintStatus === "Completed" && complaintStatus === "Accepted";
+    }
+    else if(complaintStatus === "Rejected"){
+      return (item.complaints.complaintStatus === "Not Completed" || item.complaints.complaintStatus === "pending") && (item.complaints.policeStationStatus || item.complaints.hospitalStatus) && complaintStatus === "Rejected";
+    }
+    else if(complaintStatus === "Pending"){
+      return item.complaints.complaintStatus === "pending" && (!item.complaints.policeStationStatus && !item.complaints.hospitalStatus) && complaintStatus === "Pending";
+    } 
+    
+  
+  });
 
 
   return (
+    <>
     <View style={styles.container}>
       <StatusBar backgroundColor={'#3ebb6e'} />
       <CustomHeader
@@ -143,36 +165,41 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
           <ActivityIndicator size="large" color={'#3ebb6e'} />
         </View>
       ) : (
-        <FlatList
-          data={complaints.sort(
-            (
-              a: {complaints: {createdAt: string}},
-              b: {complaints: {createdAt: string}},
-            ) =>
-              new Date(b.complaints.createdAt).getTime() -
-              new Date(a.complaints.createdAt).getTime(),
-          )}
-          renderItem={renderComplaint}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={{paddingTop: 20, paddingBottom: 10}}
-          ListEmptyComponent={
-            <View style={{alignItems: 'center'}}>
-              <Text style={{fontSize: 25, color: 'black', fontWeight: '700'}}>
+        <><FlatList
+            data={filteredComplaints.sort(
+              (
+                a: { complaints: { createdAt: string; }; },
+                b: { complaints: { createdAt: string; }; }
+              ) => new Date(b.complaints.createdAt).getTime() -
+                new Date(a.complaints.createdAt).getTime()
+            )}
+            renderItem={renderComplaint}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={{ paddingTop: 20, paddingBottom: 10 }}
+            ListEmptyComponent={<View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 25, color: 'black', fontWeight: '700' }}>
                 No Complaint
               </Text>
-            </View>
-          }
-          refreshControl={
-            <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-            />
-          }
-          
-          showsVerticalScrollIndicator={false}
-        />
+            </View>}
+            refreshControl={<RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh} />}
+
+            showsVerticalScrollIndicator={false} />
+            
+            
+            <FAB
+              style={styles.fab}
+              icon="filter-outline"
+              color='white'
+              onPress={() => setComplaintBottomSheetVisible(true)} />
+            </>
       )}
     </View>
+    {
+       isComplaintBottomSheetVisible && <ComplaintFilterBottomSheet setComplaintBottomSheetVisible={setComplaintBottomSheetVisible} />
+    }
+    </>
   );
 };
 
@@ -187,6 +214,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    backgroundColor:'#3ebb6e',
+    borderRadius:30,
   },
 });
 

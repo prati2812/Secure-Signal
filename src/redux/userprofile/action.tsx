@@ -16,7 +16,7 @@ export const ADD_TOKEN = 'ADD_TOKEN';
 export const IS_PROFILE_COMPLETED = 'IS_PROFILE_COMPLETED';
 export const COMPLAINTS_DATA = 'COMPLAINTS_DATA';
 export const COMPLAINT = 'COMPLAINT';
-
+export const COMPLAINT_STATUS_TYPES = 'COMPLAINT_STATUS_TYPES';
 
 
 export const changeUserName = (userId:string | undefined) => {
@@ -111,3 +111,7 @@ export const setProfileCompleted = (isProfile: boolean | null) => ({
      payload:isProfile,
 })
 
+export const addComplaintStatusType = (complaintStatus: string | null) => ({
+    type: COMPLAINT_STATUS_TYPES,
+    payload: complaintStatus,
+})

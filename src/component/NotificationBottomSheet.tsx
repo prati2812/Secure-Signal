@@ -30,6 +30,8 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
       {key: '2', value: 'Emergency Contact'},
       {key: '3', value: 'Live Location'},
       {key: '4', value: 'Safe Arrival'},
+      {key: '5', value: 'Hospital'},
+      {key: '6', value: 'Police Station'},
     ];
 
     useEffect(() => {

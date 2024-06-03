@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import NotificationBottomSheet from '../../component/NotificationBottomSheet';
-import { fetchEmergencyContactNotification, fetchLiveLocationNotification, fetchSafeArrivalNotification } from '../../redux/notifications/action';
+import { allNotificationReadOrNot, fetchEmergencyContactNotification, fetchHospitalStatusNotification, fetchLiveLocationNotification, fetchPoliceStationStatusNotification, fetchSafeArrivalNotification } from '../../redux/notifications/action';
 import { useDispatch, useSelector } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
@@ -30,6 +30,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   const emergencyContactNotification = useSelector((state : any) => state.notifications.fetchSelectedContactNotification);
   const liveLocationNotification = useSelector((state:any) => state.notifications.fetchLiveLocationNotification);
   const safeArrivalNotification = useSelector((state:any) => state.notifications.fetchSafeArrivalNotification);
+  const hospitalStatusNotification = useSelector((state:any) => state.notifications.fetchHospitalStatusNotification);
+  const policeStationStatusNotification = useSelector((state:any) => state.notifications.fetchPoliceStationStatusNotification);
   const notificationTypes = useSelector((state : any) => state.notifications.notificationTypes);
 
 
@@ -38,6 +40,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
     dispatchStore(fetchEmergencyContactNotification(userId)); 
     dispatchStore(fetchLiveLocationNotification(userId));
     dispatchStore(fetchSafeArrivalNotification(userId));
+    dispatchStore(fetchHospitalStatusNotification(userId));
+    dispatchStore(fetchPoliceStationStatusNotification(userId));
   },[read]); 
 
   useEffect(() => {
@@ -62,6 +66,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
     if(response.status === 200){
        console.log("successfully Read");
+       dispatchStore(allNotificationReadOrNot(userId));
        setRead(!read);
        
     }
@@ -74,6 +79,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
     const response = await instance.post('/liveLocationNotificationMarkAsRead' , {userId , notificationId});
     if(response.status === 200){
       console.log("Live Location Notification Successfully Read");
+      dispatchStore(allNotificationReadOrNot(userId));
       setRead(!read);  
       navigation.navigate("LiveLocationRoute" , {senderId});
       
@@ -88,6 +94,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
     if(response.status === 200){
        console.log("successfully Read");
+       dispatchStore(allNotificationReadOrNot(userId));
        setRead(!read);
        
     }
@@ -95,6 +102,28 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   }
   
   
+  const handleHospitalStatusNotificationRead = async(notification_id : String) => {
+    let notificationId = notification_id;
+    const response = await instance.post('/hospitalComplaintStatusMarksAsRead' , {userId , notificationId});
+    if(response.status === 200){
+      console.log("Hospital Complaint Status Notification Successfully Read");
+      dispatchStore(allNotificationReadOrNot(userId));
+      setRead(!read);  
+    }
+  }
+
+  const handlePoliceStationStatusNotificationRead = async(notification_id : String) => {
+    let notificationId = notification_id;
+    const response = await instance.post('/policeStationComplaintStatusMarkAsRead' , {userId , notificationId});
+    if(response.status === 200){
+      console.log("Police Station Complaint Status Notification Successfully Read");
+      dispatchStore(allNotificationReadOrNot(userId));
+      setRead(!read);  
+    }
+  }
+  
+
+
   
   return (
     <>
@@ -109,7 +138,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
           backCall={() => navigation.goBack()}
         />
 
-        {(emergencyContactNotification.length > 0  || liveLocationNotification.length > 0 || safeArrivalNotification.length > 0)  && notificationDeleteStatus === false ? (
+        {(emergencyContactNotification.length > 0  || liveLocationNotification.length > 0 || safeArrivalNotification.length > 0 || hospitalStatusNotification.length > 0 || policeStationStatusNotification.length > 0)  && notificationDeleteStatus === false ? (
           <ScrollView
             contentContainerStyle={{paddingTop: 15}}
             showsVerticalScrollIndicator={false}>
@@ -193,6 +222,63 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                            />
                          );
                     },) 
+              }
+              {
+                (notificationTypes === "All" || notificationTypes === "Hospital") && hospitalStatusNotification.length > 0 &&
+                 hospitalStatusNotification.map(
+                  (
+                    item: {
+                      notification_id: String;
+                      isRead: boolean;
+                      senderName: any;
+                      timeStamp: string;
+                      senderId:string;
+                    },
+                    key: React.Key | null | undefined,
+                  ) => {
+                    return (
+                      <NotificationCard
+                        key={key}
+                        icon={'local-hospital'}
+                        message={`Complaint status updated by a ${item.senderName}.`}
+                        time={item.timeStamp}
+                        color={'#008ECC'}
+                        isRead={notificationReadStatus !== null && notificationReadStatus === true ? true : item.isRead}
+                        handleIsRead={() =>
+                          handleHospitalStatusNotificationRead(item.notification_id)
+                        }
+                      />
+                    );
+                   },) 
+                 
+              }
+              {
+                (notificationTypes === "All" || notificationTypes === "Police Station") && policeStationStatusNotification.length > 0 &&
+                policeStationStatusNotification.map(
+                  (
+                    item: {
+                      notification_id: String;
+                      isRead: boolean;
+                      senderName: any;
+                      timeStamp: string;
+                      senderId:string;
+                    },
+                    key: React.Key | null | undefined,
+                  ) => {
+                    return (
+                      <NotificationCard
+                        key={key}
+                        icon={'local-police'}
+                        message={`Complaint status updated by a ${item.senderName}.`}
+                        time={item.timeStamp}
+                        color={'#af952e'}
+                        isRead={notificationReadStatus !== null && notificationReadStatus === true ? true : item.isRead}
+                        handleIsRead={() =>
+                          handlePoliceStationStatusNotificationRead(item.notification_id)
+                        }
+                      />
+                    );
+                   },) 
               }
           </ScrollView>
         ) : (

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, StatusBar, ScrollView, Image, Pressable, Linking } from 'react-native';
+import { Text, View, StyleSheet, StatusBar, ScrollView, Image, Pressable, Linking, ActivityIndicator } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import base64 from 'base64-js';
@@ -8,8 +8,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Modal } from 'react-native-paper';
 import CustomHeader from '../../component/CustomHeader';
 import instance from '../../axios/axiosInstance';
-import { firebase } from '@react-native-firebase/auth';
-
+import { firebase } from '@react-native-firebase/auth' ;
+import storage from '@react-native-firebase/storage';
+import FastImage from 'react-native-fast-image';
 
 
 
@@ -24,6 +25,8 @@ const ComplaintScreen:React.FC<ComplaintScreenProps> = ({navigation}) => {
  const [isCompleted , setCompletedButton] = useState(false);
  const [isNotCompleted , setNotCompletedButton] = useState(false);
  const [isStatus , setStatus] = useState('');
+ const [imageUris, setImageUris] = React.useState<string[]>([]);
+ const [loading , setLoading] = React.useState(true);
  const userId = firebase.auth().currentUser?.uid;
  const policeStationId = complaintData.complaints.nearestPoliceStationId;
  const hospitalId = complaintData.complaints.nearestHospitalId;
@@ -43,6 +46,36 @@ const ComplaintScreen:React.FC<ComplaintScreenProps> = ({navigation}) => {
        setStatus(status);
     }
  },[])
+
+ useEffect(() => {
+   imageDownload();
+ },[]);
+
+
+ const imageDownload = async() => {
+  try {
+    const imagePaths = complaintData.complaints.complaintImage.map((image: string) =>
+      image.replace('https://storage.googleapis.com/signal-55ec5.appspot.com/',''),
+    );
+
+   
+    
+
+    const imageUriPromises = imagePaths.map(async (filePath: string | undefined) => {
+      const url = await storage().ref(filePath).getDownloadURL(); 
+      return url;
+    });
+
+    const imageUris = await Promise.all(imageUriPromises);
+    setImageUris(imageUris);
+    setLoading(false);
+  } catch (error) {
+    setLoading(false);
+  } 
+   
+
+ }
+ 
 
 
 const showModal = (imageUrl : string) => {
@@ -115,6 +148,12 @@ const hideModal = () => setVisible(false);
           call={handleSave}
         />
 
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={'#3ebb6e'} />
+        </View>
+      ) : ( 
+
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{paddingTop: 20, paddingBottom: 20}}>
@@ -145,38 +184,21 @@ const hideModal = () => setVisible(false);
             </View>
           </View>
 
-          {complaintData.complaintsImageBuffer !== undefined && (
+          {complaintData.complaints.complaintImage && (
             <View style={styles.complaintMessageView}>
               <Text style={styles.complaintTitle}>{`Incident Photos : `}</Text>
               <View style={styles.complaintImageView}>
-                {complaintData.complaintsImageBuffer !== undefined &&
-                  complaintData.complaintsImageBuffer.map(
-                    (item: any, index: number) => {
-                      const base64Image = base64.fromByteArray(
-                        item.imageBuffer.data,
-                      );
-                      const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-
-                      return (
-                        <Pressable
-                          key={index}
-                          onPress={() => showModal(imageUrl)}>
-                          <View style={styles.complaintImage} key={index}>
-                            <Image
-                              key={index}
-                              source={{
-                                uri: imageUrl
-                                  ? imageUrl
-                                  : 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-                              }}
-                              style={{flex: 1}}
-                              resizeMode="cover"
-                            />
-                          </View>
-                        </Pressable>
-                      );
-                    },
-                  )}
+                {imageUris.map((uri, index) => (
+                  <Pressable key={index} onPress={() => showModal(uri)}>
+                    <View style={styles.complaintImage}>
+                      <FastImage
+                        source={{uri}}
+                        style={{flex: 1}}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  </Pressable>
+                ))}
               </View>
             </View>
           )}
@@ -238,7 +260,7 @@ const hideModal = () => setVisible(false);
         }     
 
         </ScrollView>
-
+      )} 
        
       </View>
       {
@@ -342,6 +364,11 @@ const styles = StyleSheet.create({
     },
     activateOption:{
       color:'white'
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     
 });

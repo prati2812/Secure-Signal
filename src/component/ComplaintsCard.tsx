@@ -14,15 +14,16 @@ interface ComplaintsCardProps {
    handleDetails : Function;
    statusIcon?:string;
    statusIconColor?:string;
+   borderColor?:string;
 }
 
-const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , color, isRead , handleDetails , statusIcon , statusIconColor}) => {
+const ComplaintsCard:React.FC<ComplaintsCardProps> = ({icon,message , time , color, isRead , handleDetails , statusIcon , statusIconColor , borderColor}) => {
 
  
   
   return (
     <TouchableOpacity onPress={() => handleDetails()}>
-    <View style={[styles.notificationView]}>
+    <View style={[styles.notificationView , borderColor !== undefined && {borderColor:borderColor}]}>
                  <View style={styles.notificationIcon}>
                         <Icon name={icon} size={45} color={color} />
                  </View>

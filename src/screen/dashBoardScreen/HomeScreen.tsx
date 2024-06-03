@@ -69,9 +69,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
   const locationData = useSelector((state: any) => state.location.locations);
   
-  
-  console.log(nearestHospital);
-  
+
+    
   
    
   

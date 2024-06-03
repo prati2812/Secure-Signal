@@ -8,6 +8,8 @@ export const ALL_NOTIFICATION_READ = 'ALL_NOTIFICATION_READ';
 export const DELETE_ALL_NOTIFICATION = 'DELETE_ALL_NOTIFICATION';
 export const FETCH_LIVE_LOCATION_NOTIFICATION = 'FETCH_LIVE_LOCATION_NOTIFICATION';
 export const FETCH_SAFE_ARRIVAL_NOTIFICATION = 'FETCH_SAFE_ARRIVAL_NOTIFICATION';
+export const FETCH_POLICE_STATION_STATUS_NOTIFICATION = 'FETCH_POLICE_STATION_STATUS_NOTIFICATION';
+export const FETCH_HOSPITAL_STATUS_NOTIFICATION = 'FETCH_HOSPITAL_STATUS_NOTIFICATION';
 export const NOTIFICATION_TYPES = 'NOTIFICATION_TYPES';
 
 
@@ -37,19 +39,11 @@ export const allNotificationReadOrNot = (userId: string | undefined) => {
       const data = response.data;
       
       if (response.data.length === 0) {   
-        // dispatch({
-        //   type: ALL_NOTIFICATION_READ,
-        //   payload: true,
-        // });
          isAllRead = true;
       } else {         
         for (let i = 0; i < data.length; i++) {
           const read = data[i].isRead;
           if(read === false){
-            // dispatch({
-            //   type: ALL_NOTIFICATION_READ,
-            //   payload: false,
-            // });
             isAllRead = false;
             break;
           }
@@ -125,9 +119,57 @@ export const allNotificationReadOrNot = (userId: string | undefined) => {
       });
 
 
+      let isHospitalComplaintNotificationRead = false;
+      await instance.post('/fetchHospitalStatusNotification' , {userId})
+                    .then(response => {
+                       if(response.status === 200){
+                         const data = response.data;
+
+                         if(response.data.length === 0){
+                            isHospitalComplaintNotificationRead = true;
+                         }else{
+                           for(let i=0; i < data.length; i++){
+                             const read = data[i].isRead;
+                             if(read === false){
+                               isHospitalComplaintNotificationRead = false;
+                               break;
+                             }
+                             else{
+                               isHospitalComplaintNotificationRead = read;
+                             }
+
+                           }
+                         }
+                       }
+                    });
+                    
+      
+      let isPoliceStationComplaintNotificationRead = false;
+      await instance.post('/fetchPoliceStationStatusNotification' , {userId})
+           .then(response => {
+              if(response.status === 200){
+                 const data = response.data;
+                 if(response.data.length === 0){
+                   isPoliceStationComplaintNotificationRead = true;
+                 }else{
+                   for(let i=0; i < data.length; i++){
+                     const read = data[i].isRead;
+                     if(read === false){
+                       isPoliceStationComplaintNotificationRead = false;
+                       break;
+                     }
+                     else{
+                        isPoliceStationComplaintNotificationRead = read;
+                     }
+                   }
+                 }
+              }
+           })                
 
 
-    if(isAllLiveNotificationRead === false || isAllRead === false || isAllSafeArrivalNotificationRead === false){
+
+
+    if(isAllLiveNotificationRead === false || isAllRead === false || isAllSafeArrivalNotificationRead === false || isHospitalComplaintNotificationRead === false || isPoliceStationComplaintNotificationRead === false){
       dispatch({
         type: ALL_NOTIFICATION_READ,
         payload: false,
@@ -174,11 +216,45 @@ export const fetchSafeArrivalNotification = (userId: string | undefined) => {
   } 
 }
 
+export const fetchHospitalStatusNotification = (userId: string | undefined) => {
+  return async(dispatch:Dispatch) => {
+    const response = await instance.post('/fetchHospitalStatusNotification' , {userId});
+     
+     if(response.status === 200){
+        dispatch({
+          type: FETCH_HOSPITAL_STATUS_NOTIFICATION,
+          payload: response.data,
+        });
+     }
+     else{
+       console.log("someting went to occured");
+       
+     }
+  } 
+}
+
+
+export const fetchPoliceStationStatusNotification = (userId:string | undefined) => {
+  return async(dispatch:Dispatch) => {
+    const response = await instance.post('/fetchPoliceStationStatusNotification' , {userId});
+     
+     if(response.status === 200){
+        dispatch({
+          type: FETCH_POLICE_STATION_STATUS_NOTIFICATION,
+          payload: response.data,
+        });
+     }
+     else{
+       console.log("someting went to occured");
+     }
+  }
+}
 
 export const deleteAllNotificationOrNot = ( notificationDelete : boolean) => ({
     type:DELETE_ALL_NOTIFICATION,
     payload: notificationDelete,
 })
+
 
 
 export const addNotificationTypes = (notificationType:string | undefined) => ({
