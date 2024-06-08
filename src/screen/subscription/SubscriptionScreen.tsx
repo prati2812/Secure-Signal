@@ -24,13 +24,14 @@ interface SubscriptionScreenProps {
 const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
     const [selectedSubscription, setSelectedSubscription] = useState<string | null>(null);
     const [selectedSubscriptionPrice , setSelectedSubscriptionPrice] = useState('');
-    const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
+    const [isPress , setPress] = useState(false);
     const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
     const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
     const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
-    const token = useSelector((state : any) => state.userProfile.token);
     const userId = firebase.auth().currentUser?.uid;
-    const dispatch = useDispatch();    
+    
+    
+    
     
     
     // Select the subscription
@@ -43,11 +44,12 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
 
     // purchase the subscription
     const handleSubscribeBtn = async () => {
-     
+      setPress(true);
       if(subScriptionType){
           
           Alert.alert("Alert" , 
              `You already subscribed ${subScriptionType} subscription`); 
+          setPress(false);   
       }
       else{
         try {
@@ -125,6 +127,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
             onSelect={handleSelectSubscription}
             selected={selectedSubscription === 'Monthly'}
             onPress={handleSubscribeBtn}
+            disabled={isPress}
           />
 
           <SubscriptionCard
@@ -134,6 +137,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
             onSelect={handleSelectSubscription}
             selected={selectedSubscription === 'Quarterly'}
             onPress={handleSubscribeBtn}
+            disabled={isPress}
           />
 
           <SubscriptionCard
@@ -143,6 +147,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
             onSelect={handleSelectSubscription}
             selected={selectedSubscription === 'Yearly'}
             onPress={handleSubscribeBtn}
+            disabled={isPress}
           />
         </ScrollView>
 

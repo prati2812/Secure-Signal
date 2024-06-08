@@ -21,7 +21,7 @@ const Contact:React.FC<ContactProps> = ({contact , isSelected , handleSelected})
   
   return (
      
-    <Pressable onLongPress={() => handleSelected(contact)}>
+    <Pressable onPress={() => handleSelected(contact)}>
       <View style={[styles.contactContainer]}>
         {
           isSelected ?

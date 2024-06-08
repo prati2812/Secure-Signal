@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert} from "react-native";
+import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image, Dimensions, Pressable} from "react-native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import HandleError from "../../hook/useError";
+import HandleError from "../../component/useError";
 import auth, { firebase } from '@react-native-firebase/auth';
 import { useDispatch } from "react-redux";
 import { addVerificationId } from "../../redux/credential/action";
@@ -12,6 +12,9 @@ interface PhoneNumberScreenProps {
   navigation: any; 
 }
 
+const width = Dimensions.get('screen').width;
+const height = Dimensions.get('screen').height;
+
 const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => {
   const regex = /[.,+\-' ']/;
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -20,70 +23,19 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
   const dispatch = useDispatch();
 
 
-
-
-  // Phone Number Verification
-  const handlePhoneNumber = async () => {
-    try {
-      if (!phoneNumber) {
-        setIsError(true);
-        setPhoneNumber(phoneNumber);
-        return false;
-      }
-
-      let phoneNo = '+91' + phoneNumber;
-      dispatch({
-        type: 'ADD_USER_PHONE_NUMBER',
-        payload: phoneNo,
-      });
-
-      setIndicatorVisible(true);
-      try {
-        firebase.auth().settings.appVerificationDisabledForTesting = true;
-        const confirmation = await auth().signInWithPhoneNumber(phoneNo);
-        console.log(confirmation.verificationId);
-
-        dispatch(addVerificationId(confirmation.verificationId));
-
-        setIndicatorVisible(false);
-        navigation.navigate('OtpNumber');
-      } catch (error) {
-        setIndicatorVisible(false);
-        Alert.alert(
-          'Error',
-          'Please try again later',
-          [
-            {
-              text: 'Ohk',
-            },
-          ],
-          {
-            cancelable: false,
-          },
-        );
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-
   // Phone number validation
   const phoneNumberValidation = (text:string) => {
     if (!text) {
       setIsError(true);
       setPhoneNumber(text);
-      return false;
     } 
     else if (text.length < 10) {
       setIsError(true);
       setPhoneNumber(text);
-      return false;
     } 
     else if(regex.test(text)) {
        setIsError(true);
        setPhoneNumber(text);
-       return false;
     }
     else{
       setPhoneNumber(text);
@@ -94,144 +46,200 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
   
   }
 
+  // Phone Number Verification
+  const handlePhoneNumber = async () => {
+    if(!isError){
+      try {
 
-  const isDisabled = isError || isIndicatorVisible;
+        let phoneNo = '+91' + phoneNumber;
+        dispatch({
+          type: 'ADD_USER_PHONE_NUMBER',
+          payload: phoneNo,
+        });
+  
+        setIndicatorVisible(true);
+        try {
+          const confirmation = await auth().signInWithPhoneNumber(phoneNo);
+          console.log("========",confirmation.verificationId);
+  
+          dispatch(addVerificationId(confirmation.verificationId));
+  
+          setIndicatorVisible(false);
+          navigation.navigate('OtpNumber');
+        } catch (error) {
+          setIndicatorVisible(false);
+          Alert.alert(
+            'Error',
+            `${error}`,
+            [
+              {
+                text: 'Ohk',
+              },
+            ],
+            {
+              cancelable: false,
+            },
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      } 
+    }
+    
+    
+  };
+
+
+  const isDisabled = isError || isIndicatorVisible || !phoneNumber;
 
   return (
-    <View style={style.phoneNumberMain}>
-      <StatusBar backgroundColor={'white'}/>
-      <View style={style.phoneNumberView}>
-        <Text style={style.phoneNumberText}>
-          Enter your phone number
-        </Text>
+    <View style={[styles.container]}>
+      <StatusBar backgroundColor={'#3ebb6e'}/>  
+     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.select({ios: 0, android: 500})}>   
+      <View style={{alignItems: 'center' , flex:1 , justifyContent:'center'}}>
+        <Image
+          style={{width: width / 1.2, height: height / 3 , resizeMode:'cover'}}
+          source={require('../../assets/image/phoneNumber.png')}
+        />
       </View>
-      <View style={style.phoneNumebrTextInputView}>
-        <View style={style.phoneNumberTextInput}>
-          <TextInput
-            style={style.phoneNumber}
-            placeholder="Phone number"
-            keyboardType="numeric"
-            value={phoneNumber}
-            onChangeText={phoneNumberValidation}
-            maxLength={10} />
-        </View>
-      </View>
-      {isError && phoneNumber.length <= 10 && phoneNumber.length >= 1  && regex.test(phoneNumber) ?
-        <HandleError title="please enter valid phone number" />
-        : isError ? <HandleError title="please enter phone number" /> : null
-      }
-      <View style={style.informationView}>
-        <Text style={style.informationText}>
+      <Pressable style={{width: '100%', height: '67%'}}>
+        <View style={styles.bottomSheet}>
+          <View style={styles.phoneNumberView}>
+            <Text style={styles.phoneNumberText}>Enter your phone number</Text>
+          </View>
+          <View style={styles.phoneNumebrTextInputView}>
+            <View style={styles.phoneNumberTextInput}>
+              <TextInput
+                style={styles.phoneNumber}
+                placeholder="Phone number"
+                keyboardType="numeric"
+                maxLength={10}
+                value={phoneNumber}
+                onChangeText={phoneNumberValidation}
+                onSubmitEditing={handlePhoneNumber}
+              />
+            </View>
+          </View>
+          {isError && phoneNumber.length <= 10 && phoneNumber.length >= 1  && regex.test(phoneNumber)?
+          <HandleError title="Please enter valid phone number" />
+            : isError ? <HandleError title="Please enter phone number" /> : null
+          }  
+
+      <View style={styles.informationView}>
+        <Text style={styles.informationText}>
           We'll send you a verification code. Message and
           data rates may apply.
         </Text>
       </View>
       
-      <View style={style.sendCodeBtnView}>
-        <TouchableOpacity
-          style={[style.sendBtnCode, isError && style.sendBtnCodeDisable]}
-          onPress={async() => await handlePhoneNumber()}
-          disabled={isDisabled}>  
-          <View style={style.btnView}>
+      <View style={styles.sendCodeBtnView}>
+         <TouchableOpacity style={[styles.sendBtnCode, isError && styles.sendBtnCodeDisable ]}
+                disabled={isDisabled}
+                onPress={ () => handlePhoneNumber()}>
+         <View style={styles.btnView}>
             {
                isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/> 
-               :   <Text style={style.sendCode}>
+               :   <Text style={styles.sendCode}>
                       Send Code
                   </Text>
             }
-           
           </View>
-        </TouchableOpacity>
+         </TouchableOpacity>
       </View>
+
+        </View>
+      </Pressable>
+      </KeyboardAvoidingView>
     </View>
-  )
+  )  
 }
 
-const style  = StyleSheet.create({
-  phoneNumberMain:{
-       flex:1,
-       backgroundColor:'#FFFFFF',
-  },
-  iconArrowBackView:{
-     marginTop:20,
-  },
-  iconArrowBack:{
-     justifyContent:'center',
-     marginLeft:10,
-     color:'black'  
-  },
-  phoneNumberView:{
-      marginTop:30,
-      alignItems:'center',
-      justifyContent:'center',
-  },
-  phoneNumberText:{
-     fontSize:25,
-     color:'black',
-     fontWeight:'500',
-     padding:10,
-     textAlign:'center'
-  },
-  phoneNumebrTextInputView:{
-     backgroundColor:'white',
-     padding:20
-  },
-  phoneNumberTextInput:{
-     backgroundColor:'#F3FAFF',
-     margin:2,
-     padding:10,
-     borderRadius:15,
+const styles  = StyleSheet.create({
+  
+  container: {
+    position:'absolute',
+    flex:1,
+    backgroundColor:'#3ebb6e',
+    width:'100%',
+    height:'100%',
+    top: 0,
+    left: 0,
+    justifyContent:'flex-end',
+},
+bottomSheet:{
+    width:'100%',
+    height:'100%',
+    backgroundColor:'white',   
+    borderTopRightRadius:45,
+    borderTopLeftRadius:45,
+},
+phoneNumberView:{
+    marginTop:30,
+    alignItems:'center',
+    justifyContent:'center',
+},
+phoneNumberText:{
+   fontSize:25,
+   color:'black',
+   fontWeight:'500',
+   padding:10,
+   textAlign:'center'
+},
+phoneNumebrTextInputView:{
+    backgroundColor:'white',
+    padding:20
+ },
+ phoneNumberTextInput:{
+    backgroundColor:'#F3FAFF',
+    margin:2,
+    padding:10,
+    borderRadius:15,
+    elevation:3,
+ },
+ phoneNumber:{
+    fontSize:20,
+    color:'black'  
+ },
+ informationView:{
+    margin:-10,
+    justifyContent:'center', 
+ },
+ informationText:{
+    color:'black',
+    fontSize:16,
+    paddingLeft:35,
+    paddingRight:35,
+    fontWeight:'400'
+ },
+ sendCodeBtnView:{
+     flex:1,
+     justifyContent:'flex-end',
+     margin:20,
+     marginBottom:10,
+ },
+ sendBtnCode:{
+     backgroundColor:'#3ebb6e',
+     padding:13,
+     borderRadius:10,
      elevation:3,
-  },
-  phoneNumber:{
-     fontSize:20,
-     color:'black'  
-  },
-  errorPhoneNumberView:{
-     paddingLeft:25,
-     marginTop:-33,
-     padding:10, 
-  }, 
-  errorPhoneNumber:{
-    color:'red',
-    marginLeft:2,
-  }, 
-  informationView:{
-     margin:-10,
-     justifyContent:'center', 
-  },
-  informationText:{
-     color:'black',
-     fontSize:16,
-     paddingLeft:35,
-     paddingRight:35,
-     fontWeight:'400'
-  },
-  sendCodeBtnView:{
-      flex:1,
-      justifyContent:'flex-end',
-      margin:20,
-      marginBottom:30,
-  },
-  sendBtnCode:{
-      backgroundColor:'#3ebb6e',
-      padding:13,
-      borderRadius:10,
-      elevation:3,
-  },
-  sendBtnCodeDisable:{
-    backgroundColor: '#74d198', 
-  },
-  btnView:{
-     color:'white',
-     alignItems:'center',
-     margin:1
-  },
-  sendCode:{
-     color:'white',
-     fontSize:18,
-     fontWeight:'700'
-  },
+ },
+ sendBtnCodeDisable:{
+     backgroundColor: '#74d198', 
+ },
+ btnView:{
+    color:'white',
+    alignItems:'center',
+    margin:1
+ },
+ sendCode:{
+    color:'white',
+    fontSize:18,
+    fontWeight:'700'
+ },
+
+
+  
+
 
 });
 

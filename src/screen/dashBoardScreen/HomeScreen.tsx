@@ -1,5 +1,5 @@
 import React, { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler, Alert, Keyboard} from 'react-native';
+import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler, Alert, Keyboard, ActivityIndicator} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect, useDispatch, useSelector } from 'react-redux';
@@ -23,12 +23,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import AppStack from '../../stack/AppStack';
 import AuthStack from '../../stack/AuthStack';
 import ProtectorBottomSheet from '../../component/ProtectorBottomSheet';
+import OptionSelection from '../../component/OptionSection';
+import PoliceStationMap from '../../component/PoliceStationMap';
+import HospitalMap from '../../component/HospitalMap';
+import { Searchbar } from 'react-native-paper';
+import { RAPID_API_FIND_PLACE_BASE_URL, RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_FIND_PLACE_HOST, X_RAPID_API_FIND_PLACE_KEY, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
+import TravellingLocationMap from '../../component/TravellingLocationMap';
+import InfoCard from '../../component/InfoCard';
+
 
 
 
 const sleep = (time: number | undefined) => new Promise<void>((resolve) => setTimeout(() => resolve(), time));
 const width =  Dimensions.get('window').width;
-
+const height = Dimensions.get('screen').height;
 
 
 
@@ -53,6 +61,10 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isProtectorSheetVisible, setProtectorSheetVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [selectedOption , setSelectedOption] = useState('Police Station');
+  const [selectedStation , setSelectedStation] = useState(null);
+  const [isInfoSheetVisible , setInfoSheetVisible] = useState(false);
   const [mapNumber , setMapNumber] = useState(1);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : any) => state.contacts.selectedContact);
@@ -60,32 +72,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
-  const userId = firebase.auth().currentUser?.uid; 
-  const dispatch = useDispatch();
-  const [volume , setVolume] = useState(-1);  
-  const [token , setToken] = useState<string | null>(null);
+  const userId = firebase.auth().currentUser?.uid;   
   const [volumUp, setVolumeUp] = useState(0);
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
   const locationData = useSelector((state: any) => state.location.locations);
   
-
-    
-  
-   
-  
-
   useEffect(() => {
-    getToken();
-    dispatchStore(changeUserName(userId));
+    dispatchStore(changeUserName(userId))
+    .then(setLoading(false))
+    .catch(setLoading(false));
     dispatchStore(addSelectedContact(userId));
     dispatchStore(fetchLocation(userId));
     dispatchStore(fetchUserComplaints(userId));
     getCurrentLocation();   
-  },[token]);
+  },[]);
 
- 
- 
 
   useEffect(() => {
     // Request location SMS permission
@@ -106,8 +108,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         dispatchStore(findNearestHospital(userId , location.latitude.toString() , location.longitude.toString()));
     }
   }, [nearestPoliceStation, notificationReadStatus , nearestHospital]);
-
-  
 
   useEffect(() => {
   
@@ -148,19 +148,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   },[volumUp , volumeDown]);
 
   useEffect(() => {
-    if (isSubscribed === true) {
+    let interval: any;
+  
+    if (isSubscribed) {
       
-      const interval = setInterval(() => {
-      
-        checkSubscriptionStatus();
+      interval = setInterval(() => {
+        
+        try {
+          checkSubscriptionStatus();
+        } catch (error) {
+          
+        }
       }, 1000);
-
-      return () => clearInterval(interval);
-    }
-    else{
+    } else {
+      
       navigation.navigate('Subscription');
     }
+  
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [isSubscribed]);
+  
 
   useEffect(() => {
     if(locationData){
@@ -225,9 +236,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     longitudeDelta: 0.0121,
   };
   const [hospitalregion, setHospitalRegion] = useState(InitialRegion);
- 
-
-  
+   
   useEffect(() => {
     if (nearestHospital && nearestHospital.nearestHospital && nearestHospital.nearestHospital.length > 0) {
       const { latitude, longtitude } = nearestHospital.nearestHospital[0].hospitalLocation;
@@ -239,14 +248,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
   }, [nearestHospital]);
 
-
- 
-
-
-
-
-
-  
   // check subscription status
   const checkSubscriptionStatus = () => {
     let date = new Date();
@@ -259,9 +260,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     }
     
   }
-
-
-  
 
   // Start Background Service
   const backgroundService = async() => {
@@ -481,19 +479,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
       }
    }
   }
- 
-
-  // Get token
-  const getToken = async() => {
-    const value = await AsyncStorage.getItem('token');
-    if(value !== null){
-      setToken(value);
-      dispatch(addToken(value));
-    }
-    
-  }
-  
-  
+   
   // Get Notification token and send the notification
   const getNotificationToken = async(travellingLocation: string) => {
     const title = 'Safe Arrival Notification';
@@ -628,9 +614,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
   // Navigate to the HelpScreen
-  const handleLocationMap = (mapNumber:number) => {
-    setMapNumber(mapNumber);
-    setProtectorSheetVisible(true);
+  const handleLocationMap = (mapNumber:number , station : any) => {
+    // setMapNumber(mapNumber);
+    // setProtectorSheetVisible(true);
+    console.log(mapNumber);
+    
+    console.log("---------" , station);
+    
   }
 
   // Navigate to the Notification Screen
@@ -644,146 +634,210 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
   const handleLocation = () =>{
-    navigation.navigate('Location');
+    navigation.navigate('TopTabNavigator');
   }
+
+  const handleSelectedOption = (title:string) => {
+      setSelectedOption(title);
+  }
+
+  const handleMarkerClick = (station:any) => {
+     setSelectedStation(station);
+     setInfoSheetVisible(true);   
+     console.log(station);
+     
+  }
+  
+
 
   return (
     <>
-    <View style={style.homeMain}>
-      <StatusBar backgroundColor={'#3ebb6e'} />
+      <View style={style.homeMain}>
+        <StatusBar backgroundColor={'#3ebb6e'} />
 
-      {/* custom header */}
-      <HomeCustomHeader
-        name="Secure Signal"
-        icon="bell"
-        call={handleNotification}
-        isRead={notificationReadStatus}
-        mapIcon="map"
-        mapHistory={handleLocation}
-      />
+        {/* custom header */}
+        <HomeCustomHeader
+          name="Secure Signal"
+          icon="bell"
+          call={handleNotification}
+          isRead={notificationReadStatus}
+          accountIcon="account-circle"
+          accountClick={handleLocation}
+          contactIcon={'account-plus'}
+        />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={style.usernameText}>
+        {loading ? (
+          <View style={style.loadingContainer}>
+            <ActivityIndicator size="large" color={'green'} />
+          </View>
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* <View style={style.usernameText}>
           <Text style={style.username}>Hello {userName}</Text>
-        </View>
+        </View> */}
 
-        {/* Guardians Contact List */}
-        <View style={style.caretakerView}>
-          <Text style={style.caretakerText}>My Caretaker</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={style.caretakerScrollView}>
-            <TouchableOpacity
-              style={style.contactView}
-              onPress={() => handleContactList()}>
-              <Text style={style.contactText}>+</Text>
-            </TouchableOpacity>
+            {/* Guardians Contact List */}
+            <View style={style.caretakerView}>
+              <Text style={style.caretakerText}>My Caretaker</Text>
 
-            {selectedContacts &&
-              selectedContacts.map(
-                (
-                  item: {givenName: string | any[]},
-                  key: React.Key | null | undefined,
-                ) => (
-                  <View key={key}>
-                    <View style={style.contactSelectedView}>
-                      <Text style={style.contactText}>
-                        {item.givenName && item.givenName.length > 0
-                          ? item.givenName[0]
-                          : ''}
-                      </Text>
+              <View style={{flexDirection: 'row', gap: -10}}>
+                <View style={style.contactViewContainer}>
+                  <TouchableOpacity
+                    style={style.contactView}
+                    onPress={() => handleContactList()}>
+                    <View
+                      style={{alignItems: 'center', justifyContent: 'center'}}>
+                      <Text style={style.contactText}>+</Text>
                     </View>
-                    <View style={style.selectedContactNameView}>
-                      <Text style={style.selectedContactName}>
-                        {item.givenName}
-                      </Text>
-                    </View>
-                  </View>
-                ),
-              )}
-          </ScrollView>
-        </View>
+                  </TouchableOpacity>
+                </View>
 
-        {/* Near Police Station */}
-        <View style={style.nearEmergencyStationView}>
-          <Text style={style.nearEmergencyStationViewText}>
-            Near Police Station
-          </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{flexGrow: 1}}
+                  style={style.caretakerScrollView}>
+                  {selectedContacts &&
+                    selectedContacts.map(
+                      (
+                        item: {givenName: string | any[]},
+                        key: React.Key | null | undefined,
+                      ) => (
+                        <View key={key}>
+                          <View
+                            style={{
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}>
+                            <View style={style.contactSelectedView}>
+                              <Text style={style.contactText}>
+                                {item.givenName && item.givenName.length > 0
+                                  ? item.givenName[0]
+                                  : ''}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={style.selectedContactNameView}>
+                            <Text style={style.selectedContactName}>
+                              {item.givenName}
+                            </Text>
+                          </View>
+                        </View>
+                      ),
+                    )}
+                </ScrollView>
+              </View>
+            </View>
 
-          <View style={style.nearEmergencyStationMapView}>
-            <View style={style.mapContainer}>
-              <MapView
-                onPress={() => handleLocationMap(1)}
-                style={style.nearStationMap}
-                provider={PROVIDER_GOOGLE}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                region={region}>
-                {nearestPoliceStation && nearestPoliceStation.nearestPoliceStation && 
-                nearestPoliceStation.nearestPoliceStation.map(
-                  (station: any) => (
-                    <Marker
-                      key={station.id}
-                      coordinate={{
-                        latitude:
-                          station && station.policeStationLocation
-                            ? station.policeStationLocation.latitude
-                            : 37.78825,
-                        longitude:
-                          station && station.policeStationLocation
-                            ? station.policeStationLocation.longtitude
-                            : -122.4324,
+            <View style={{flexDirection: 'row', marginTop: 20}}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  gap: 10,
+                  paddingLeft: 5,
+                  paddingRight: 5,
+                  paddingBottom: 5,
+                  alignItems: 'center',
+                }}
+                style={{marginLeft: 5, marginRight: 5}}>
+                <OptionSelection
+                  title="Police Station"
+                  onSelect={handleSelectedOption}
+                  selected={selectedOption === 'Police Station'}
+                />
+
+                <OptionSelection
+                  title="Hospital"
+                  onSelect={handleSelectedOption}
+                  selected={selectedOption === 'Hospital'}
+                />
+
+                <OptionSelection
+                  title="Travelling Location"
+                  onSelect={handleSelectedOption}
+                  selected={selectedOption === 'Travelling Location'}
+                />
+              </ScrollView>
+            </View>
+
+            {selectedOption && (
+              <View
+                style={{
+                  margin: 10,
+                  height: height / 1.75,
+                }}>
+                <View style={style.mapContainer}>
+                  {selectedOption === 'Travelling Location' ? (
+                    <TravellingLocationMap />
+                  ) : (
+                    <MapView
+                      style={style.nearStationMap}
+                      provider={PROVIDER_GOOGLE}
+                      scrollEnabled={true}
+                      showsTraffic={true}
+                      zoomEnabled={false}
+                      region={{
+                        latitude: location ? location.latitude : 37.78825,
+                        longitude: location ? location.longitude : -122.4324,
+                        latitudeDelta: 0.035,
+                        longitudeDelta: 0.0121,
                       }}>
-                      <Icon name="local-police" size={40} color={'#5F4C24'} />
-                    </Marker>
-                  ),
-                )}
-              </MapView>
-            </View>
-          </View>
-        </View>
+                      <Marker
+                        coordinate={{
+                          latitude: location ? location.latitude : 37.78825,
+                          longitude: location ? location.longitude : -122.4324,
+                        }}
+                      />
+                      {selectedOption === 'Police Station' ? (
+                        <>
+                          <PoliceStationMap onMarkerPress={handleMarkerClick} />
+                        </>
+                      ) : (
+                        selectedOption === 'Hospital' && <HospitalMap onMarkerPress={handleMarkerClick}/>
+                      )}
+                    </MapView>
+                  )}
 
-        {/* Near Hospital */}
-        <View style={style.nearEmergencyStationView}>
-          <Text style={style.nearEmergencyStationViewText}>Near Hospital</Text>
-          <View style={style.nearEmergencyStationMapView}>
-            <View style={style.mapContainer}>
-              <MapView
-                onPress={() => handleLocationMap(2)}
-                style={style.nearStationMap}
-                provider={PROVIDER_GOOGLE}
-                scrollEnabled={false}
-                zoomEnabled={false}
-                region={hospitalregion}>
-                {
-                  nearestHospital && nearestHospital.nearestHospital &&
-                   nearestHospital.nearestHospital.map((station: any)=> (
-                    <Marker
-                    key={station.id}
-                    coordinate={{
-                      latitude: station && station.hospitalLocation
-                          ?  station.hospitalLocation.latitude
-                          : 37.78825,
-                      longitude: station && station.hospitalLocation 
-                          ? station.hospitalLocation.longtitude
-                          : -122.4324,
-                    }}>
-                    <Icon name="local-hospital" size={40} color={'red'} />
-                  </Marker>
-                    
-                   ))
-                }
-              </MapView>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
-      {
-       isProtectorSheetVisible && <ProtectorBottomSheet setProtectorSheetVisible={setProtectorSheetVisible}
-        navigation={navigation} mapNumber={mapNumber}/>
-      }
+                  {  
+                     (selectedOption === 'Police Station') && selectedStation?.policeStationProfile &&
+                     isInfoSheetVisible && <InfoCard 
+                                            setInfoSheetVisible={setInfoSheetVisible} 
+                                            station={selectedStation} 
+                                            navigation={navigation}
+                                            userName={selectedStation.policeStationProfile.userName}
+                                            phoneNumber={selectedStation.policeStationProfile.phoneNumber}
+                                            distance={selectedStation.distance.toFixed(2)}
+                                            icon={'local-police'}
+                                            color={'#5F4C24'}/>                                              
+                  }
+                  {
+                     (selectedOption === 'Hospital') && selectedStation?.hospitalProfile && isInfoSheetVisible && <InfoCard 
+                                            setInfoSheetVisible={setInfoSheetVisible} 
+                                            station={selectedStation} 
+                                            navigation={navigation}
+                                            userName={selectedStation.hospitalProfile.userName}
+                                            phoneNumber={selectedStation.hospitalProfile.phoneNumber}
+                                            distance={selectedStation.distance.toFixed(2)}
+                                            icon={'local-hospital'}
+                                            color={'#008ECC'}/>
+                  }
+                 
+                  
+
+                </View>
+              </View>
+            )}
+          </ScrollView>
+        )}
+      </View>
+      {isProtectorSheetVisible && (
+        <ProtectorBottomSheet
+          setProtectorSheetVisible={setProtectorSheetVisible}
+          navigation={navigation}
+          mapNumber={mapNumber}
+        />
+      )}
     </>
   );
 };
@@ -817,6 +871,12 @@ const style = StyleSheet.create({
     marginTop: 10,
     marginLeft: 10,
     marginRight: 10,
+    flexGrow:1,
+  },
+  contactViewContainer:{
+    marginTop: 10,
+    marginLeft: 10,
+    marginRight: 10,
   },
   contactView: {
     backgroundColor: '#25a5be',
@@ -827,7 +887,6 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 7,
-    flex: 1,
     elevation:8,
   },
   contactSelectedView:{
@@ -836,18 +895,18 @@ const style = StyleSheet.create({
     height: 60,
     borderRadius: 33,
     marginTop: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
     margin: 7,
     flex: 1,
     elevation:8,
+    alignItems:'center',
+    justifyContent:'center',
   },
   contactText: {
     fontSize: 35,
-    textAlign: 'center',
+    paddingBottom:5,
   },
   nearEmergencyStationView: {
-    marginTop: 10,
+    marginTop: 30,
     marginBottom:10,
   },
   nearEmergencyStationViewText: {
@@ -866,9 +925,8 @@ const style = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden', 
     backgroundColor:'black',
-    marginLeft:18,
-    marginRight:18,
     elevation:5,
+    borderColor:'green'
   },
   nearStationMap: {
     flex: 1,
@@ -884,7 +942,33 @@ const style = StyleSheet.create({
   selectedContactNameView:{
     alignItems:'center' , 
     justifyContent:'center'
-  }
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchBar: {
+    backgroundColor: 'white',
+    marginLeft: 15,
+    marginRight: 15,
+    marginTop: 15,
+    marginBottom:15,
+    padding:1,
+    position:'relative'
+  },
+  autoSuggestion: {
+    position:'absolute',
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop:height/12,
+    gap:5,
+  },
+  autoSuggestionText: {
+    fontSize: 17,
+    color: 'black',
+    fontWeight: '400',
+  },
 
 });
 

@@ -3,8 +3,8 @@ import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD
 
 
 const initialState = {
-    imageUri:'',
-    userName:'',
+    imageUri:null,
+    userName:null,
     imageResponse:Object,
     userId:Object,
     phoneNumber:'',

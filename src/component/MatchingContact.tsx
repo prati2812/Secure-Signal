@@ -63,7 +63,7 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
       
     
   return (
-    <Pressable onLongPress={() => handleMatchingSelected(contact)}>
+    <Pressable onPress={() => handleMatchingSelected(contact)}>
       <View style={[styles.contactContainer]}>
         {
           isSelected ?

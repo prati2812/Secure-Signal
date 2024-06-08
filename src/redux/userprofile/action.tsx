@@ -20,15 +20,13 @@ export const COMPLAINT_STATUS_TYPES = 'COMPLAINT_STATUS_TYPES';
 
 
 export const changeUserName = (userId:string | undefined) => {
-  return async (dispatch:Dispatch) => {
+  return async (dispatch:Dispatch) => { 
       try {
         const response = await instance.post('/fetchUserDetails', {userId});
 
         if (response.status === 200) {
           const {userData, imageBuffer} = await response.data;
-
-          const base64Image = base64.fromByteArray(imageBuffer.data);
-          const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+           
 
           const {
             phoneNumber,
@@ -38,6 +36,10 @@ export const changeUserName = (userId:string | undefined) => {
             subscriptionEndTime,
           } = userData;
 
+
+          
+          
+
           dispatch({
             type: CHANGE_USER_NAME,
             payload: userName,
@@ -46,27 +48,52 @@ export const changeUserName = (userId:string | undefined) => {
             type: ADD_USER_PHONE_NUMBER,
             payload: phoneNumber,
           });
-          dispatch({
-            type: IS_SUBSCRIBED,
-            payload: isSubscribed,
-          });
-          dispatch({
-            type: SUBSCRIPTION_TYPE,
-            payload: subScriptionType,
-          });
-          dispatch({
-            type: SUBSCRIPTION_END_TIME,
-            payload: subscriptionEndTime,
-          });
 
-          dispatch({
-            type: ADD_IMAGE_URI,
-            payload: imageUrl,
-          });
+
+          if(isSubscribed && subscriptionEndTime && subScriptionType){
+            dispatch({
+              type: IS_SUBSCRIBED,
+              payload: isSubscribed,
+            });
+            dispatch({
+              type: SUBSCRIPTION_TYPE,
+              payload: subScriptionType,
+            });
+            dispatch({
+              type: SUBSCRIPTION_END_TIME,
+              payload: subscriptionEndTime,
+            });  
+          }
+          else{
+            dispatch({
+              type: IS_SUBSCRIBED,
+              payload: false,
+            });
+            
+  
+          }
+
+
+          if(imageBuffer){
+            const base64Image = base64.fromByteArray(imageBuffer.data);
+            const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+            dispatch({
+              type: ADD_IMAGE_URI,
+              payload: imageUrl,
+            });
+          }
+          
+          
+
+          
+          
         } else {
           console.log('Something occured');
         }
-      } catch (error) {}
+      } catch (error) {
+         console.log("errror" , error);
+         
+      }
       
     }  
        
@@ -80,7 +107,6 @@ export const fetchUserComplaints = (userId:string | undefined) => {
         if (response.status === 200) {
           const complaintsData = await response.data;
          
-          console.log("=========",complaintsData);
           dispatch({
               type:COMPLAINTS_DATA,
               payload:complaintsData,

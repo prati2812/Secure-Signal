@@ -153,11 +153,7 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
     <>
     <View style={styles.container}>
       <StatusBar backgroundColor={'#3ebb6e'} />
-      <CustomHeader
-        name="Complaints"
-        backIcon="keyboard-backspace"
-        backCall={() => navigation.goBack()}
-      />
+     
 
       
       {loading ? (
@@ -217,9 +213,9 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: 20,
     right: 0,
-    bottom: 0,
+    bottom: 25,
     backgroundColor:'#3ebb6e',
     borderRadius:30,
   },

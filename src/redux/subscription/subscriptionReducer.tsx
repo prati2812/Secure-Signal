@@ -2,8 +2,8 @@ import { IS_SUBSCRIBED, SUBSCRIPTION_END_TIME, SUBSCRIPTION_TYPE } from "./actio
 
 const initialState = {
     isSubscribed:Boolean,
-    subScriptionType:String,
-    subScriptionEndTime:String,
+    subScriptionType:'',
+    subScriptionEndTime:'',
 }
 
 const subscripionReducer = (state = initialState , action: { type: any; payload: any; }) => {

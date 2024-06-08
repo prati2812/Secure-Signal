@@ -1,5 +1,5 @@
 import React, {Dispatch, useEffect, useRef , useState} from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable, ActivityIndicator } from 'react-native';
+import { Text, View, StyleSheet, Image, TouchableOpacity , TextInput, Animated, Pressable, ActivityIndicator, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePickerSheet from './ImagePickerSheet';
 import { useSelector , useDispatch } from 'react-redux';
@@ -14,6 +14,9 @@ import store from '../redux/store';
 interface BottomSheetProps {
   setBottomSheetVisible:any;
 }
+
+
+const height = Dimensions.get('screen').height;
 
 const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
 
@@ -121,7 +124,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
   return (
     <>
       <Pressable style={styles.container} onPress={closeModal}>
-        <Pressable style={{width: '100%', height: '45%'}}>
+        <Pressable style={{width: '100%', height: height/2.6}}>
           <Animated.View
             style={[styles.bottomSheet, {transform: [{translateY: slide}]}]}>
             <View style={styles.editProfileView}>

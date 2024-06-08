@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchLocation } from '../../redux/location/action';
 import store from '../../redux/store';
 import PushNotification from '../../assets/icons/PushNotification';
+import { FAB } from 'react-native-paper';
 
 
 interface LocationHistoryProps {
@@ -48,23 +49,12 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
 
 
 
-    const handleSetting = () => {
-        setBottomSheetVisible(true);
-    }  
-
+   
 
   return (
     <>
     <View style={styles.container}>
          <StatusBar backgroundColor={'#3ebb6e'}/>
-
-         <CustomHeader 
-             name={'Locations'} 
-             icon={'cog-outline'} 
-             call={handleSetting}
-             backIcon={'keyboard-backspace'}
-             backCall={() => navigation.goBack()}/>
-
           {
              locationData.length > 0 ? (
               <ScrollView
@@ -86,10 +76,9 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
                  )
               })
             
-          }     
- 
+          }
+
             
- 
  
            </ScrollView>
              ) : (
@@ -98,6 +87,12 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
                  </View>
              )
           }
+
+            <FAB
+              style={styles.fab}
+              icon="filter-outline"
+              color='white'
+              onPress={() => setBottomSheetVisible(true)} />  
           
     </View>
     
@@ -112,7 +107,15 @@ const styles = StyleSheet.create({
     container: {
         flex:1,
         backgroundColor:'white'
-    }
+    },
+    fab: {
+      position: 'absolute',
+      margin: 20,
+      right: 0,
+      bottom: 25,
+      backgroundColor:'#3ebb6e',
+      borderRadius:30,
+    },
 });
   
 

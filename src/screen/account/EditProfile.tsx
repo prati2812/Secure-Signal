@@ -17,7 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
-import HandleError from '../../hook/useError';
+import HandleError from '../../component/useError';
 import { Dispatch, useEffect, useState } from 'react';
 import ImagePickerSheet from '../../component/ImagePickerSheet';
 import { useSelector , useDispatch} from 'react-redux';
@@ -60,7 +60,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   useEffect(() => {
     getToken();
     dispatchStore(changeUserName(userId))
-    .then(() => setLoading(false))
+    .then(() => profileExist())
     .catch(() => setLoading(false));
   },[]);
 
@@ -72,6 +72,9 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
   useEffect(() => {
     setUserName(name);
+    console.log("==========" , name);
+    
+    profileExist();
   },[name]);
 
 
@@ -81,6 +84,22 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     setNotificationToken(notificationToken);
   }
 
+
+  const profileExist = () => {
+    
+    if(name){
+      console.log("--------------", name);
+      
+      AsyncStorage.setItem("profileExist", "true");
+      dispatch(setProfileCompleted(true));
+      navigation.navigate('HomeScreen');  
+      setLoading(false);  
+    }
+    else if(name === undefined){
+      setLoading(false);
+    }
+    
+  }
   
   const closeApp = () => {
     dispatch({
@@ -124,43 +143,48 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   // save userProfile data to the database
   const handleSaveProfile = async() => {
        
-    dispatch({
-      type: 'CHANGE_USER_NAME',
-      payload: userName,
-    })
 
-    const formData = new FormData();
-    if (imageResponse && imageResponse.assets && imageResponse.assets.length > 0){
-      formData.append('image' , {
-        uri: imageResponse.assets[0].uri,
-        type: imageResponse.assets[0].type,
-        name: imageResponse.assets[0].fileName,
-      }); 
-    }
+    if(!isError){
+      dispatch({
+        type: 'CHANGE_USER_NAME',
+        payload: userName,
+      })
+  
+      const formData = new FormData();
+      if (imageResponse && imageResponse.assets && imageResponse.assets.length > 0){
+        formData.append('image' , {
+          uri: imageResponse.assets[0].uri,
+          type: imageResponse.assets[0].type,
+          name: imageResponse.assets[0].fileName,
+        }); 
+      }
+      
+      formData.append('phoneNumber', phoneNumber);
+      formData.append('userName', userName);
+      formData.append('userId', userId);
+      formData.append('notificationToken', notificationToken);
+      
+      console.log(formData);
+  
+      setIndicatorVisible(true);
+  
+      const response = await instance.post('/uploadImage',formData);
+  
+      if(response.status === 201){
+        AsyncStorage.setItem("profileExist", "true");
+        dispatch(setProfileCompleted(true));  
+        setIndicatorVisible(false);
+        navigation.navigate('HomeScreen');
+      }
+      else{
+        setIndicatorVisible(false);
+        Alert.alert("Error" , 
+               "Something went to wrong, Please try again later");
+      }
     
-    formData.append('phoneNumber', phoneNumber);
-    formData.append('userName', userName);
-    formData.append('userId', userId);
-    formData.append('notificationToken', notificationToken);
+    }
+
     
-    console.log(formData);
-
-    setIndicatorVisible(true);
-
-    const response = await instance.post('/uploadImage',formData);
-
-    if(response.status === 201){
-      AsyncStorage.setItem("profileExist", "true");
-      dispatch(setProfileCompleted(true));  
-      setIndicatorVisible(false);
-      navigation.navigate('HomeScreen');
-    }
-    else{
-      setIndicatorVisible(false);
-      Alert.alert("Error" , 
-             "Something went to wrong, Please try again later");
-    }
-
       
      
      
@@ -172,7 +196,6 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
     if(text.length !<= 2){
       setIsError(true);
       setUserName(text);
-      return false;
     } 
     setUserName(text);
     setIsError(false);
@@ -226,6 +249,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
                       placeholder="Enter your name"
                       value={userName}
                       onChangeText={userNamevalidation}
+                      onSubmitEditing={handleSaveProfile}
                     />
                   </View>
                 </View>

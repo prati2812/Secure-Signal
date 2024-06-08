@@ -460,7 +460,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     <View style={styles.mainContainer}>
       <CustomHeader name="Contact List" icon={''} 
           backIcon={'keyboard-backspace'}
-          backCall={() => navigation.navigate('TabNavigator')}/>
+          backCall={() => navigation.navigate('HomeScreen')}/>
 
       {/* Search Bar */}
       <Searchbar
@@ -470,6 +470,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
         value={searchQuery}
         style={styles.searchBar}
         elevation={1}
+        cursorColor={'gray'}
       />
 
       {
@@ -481,32 +482,43 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     
       {/* Selected Contacts list */}
       <View>
-        { isVisible===false && selectedContacts.length > 0  && (
+        { selectedContacts.length > 0  && (
           <View style={styles.guardiansView}>
             <Text style={styles.guardiansText}>Guardians</Text>
 
-            <ScrollView horizontal 
-                showsHorizontalScrollIndicator={false} 
-                contentContainerStyle={{paddingRight:17}}>
+            <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{paddingRight:17 , flexGrow:1}}
+                style={{flexDirection:'row'}}>
               <>{
                  selectedContacts && selectedContacts.map((item: Contact , key: any) => {
                   return (
                     <View style={styles.selectedContactView} key={key}>
+                      
+                      <View>
                       <View style={styles.placeHolder}>
                         <Text style={styles.placeHolderText}>
                           {item.givenName && item.givenName.length > 0 ? item.givenName[0] : ''}
                         </Text>
                       </View>
-                      <View style={styles.selectedContactNameView}>
-                        <Text style={styles.selectedContactName}>
-                          {item.givenName}
-                        </Text>
-                      </View>
+
                       <TouchableOpacity
                         style={styles.closeIcon} onPress={() => handleDeleteSelectedContact(item)}>
                         <Icon name="close" size={20} color={'white'} />
                       </TouchableOpacity>
+                      </View>
+
+
+                      <View style={styles.selectedContactNameView}>
+                        <Text style={styles.selectedContactName}>
+                          {item.givenName}
+                        </Text>
+                      </View> 
+
                     </View>
+
+
                   );})
               }
               </>
@@ -625,7 +637,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
      
 
      {/* Selected Contact List */}
-      { (selectedContacts && isVisible && isSelected > 0) && (
+      {  isSelected > 0 && (
         <TouchableOpacity
           style={styles.guardiansBtnView} onPress={() => handleSetasGuardian()}>
           <View style={styles.guardiansBtn}>
@@ -696,6 +708,7 @@ const styles = StyleSheet.create({
         marginLeft:17,
         alignItems:'center', 
         justifyContent:'center',
+        position:'relative',
     },
     placeHolder:{
         width: 55,

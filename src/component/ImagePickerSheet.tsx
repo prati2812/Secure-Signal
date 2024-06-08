@@ -1,5 +1,5 @@
 import React,{useEffect} from 'react';
-import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid, StatusBar } from 'react-native';
+import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid, StatusBar, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CameraOptions, ImageLibraryOptions, MediaType, launchCamera , launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch } from 'react-redux';
@@ -10,6 +10,8 @@ interface ImagePickerSheetProps {
   setImageSelectionSheetVisible:any;
  
 }
+
+const height = Dimensions.get('screen').height;
 
 const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionSheetVisible}) => {
     const [imageUri , setImageUri] = React.useState('');

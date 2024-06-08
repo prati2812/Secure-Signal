@@ -54,12 +54,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={'#3ebb6e'} />
-      <CustomHeader 
-          name="Profile"  
-          backIcon={'keyboard-backspace'}
-          backCall={() => navigation.goBack()}/>
-
-
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.profileSection}>
           <View style={styles.profileImageContainer}>

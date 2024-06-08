@@ -7,16 +7,21 @@ interface HomeCustomHeaderProps{
     icon?:string,
     call?:any,
     isRead:boolean,
-    mapIcon?:string,
-    mapHistory?:any,
+    accountIcon?:string,
+    accountClick?:any,
+    contactIcon?:any,
+    contactClick?:any,
 }
 
-const HomeCustomHeader:React.FC<HomeCustomHeaderProps> = ({name , icon , call , isRead , mapIcon , mapHistory}) => (
+const HomeCustomHeader:React.FC<HomeCustomHeaderProps> = ({name , icon , call , isRead , accountIcon , accountClick, contactIcon , contactClick}) => (
     
   <Appbar.Header style={styles.appHeader}>
     <Appbar.Content title={name} color='white' titleStyle={styles.apptitle} />
     {
-          mapIcon && <Appbar.Action icon={mapIcon} onPress={mapHistory} color='white' size={30}/>  
+        contactIcon &&
+        <>
+            <Appbar.Action icon={contactIcon} color='white' size={30}/>
+        </>
     }
     {icon && 
        <>
@@ -24,6 +29,10 @@ const HomeCustomHeader:React.FC<HomeCustomHeaderProps> = ({name , icon , call , 
        { isRead === false &&  <View style={styles.bellIcon}></View>}
        </>  
     }
+    {
+          accountIcon && <Appbar.Action icon={accountIcon} onPress={accountClick} color='white' size={30}/>  
+    }
+    
   
     
     

@@ -12,9 +12,10 @@ interface SubscriptionCardProps {
    onSelect: (subscriptionType: string , price:string) => void;
    selected:boolean,
    onPress:any;
+   disabled?:boolean,
 }
 
-const SubscriptionCard:React.FC<SubscriptionCardProps> = ({subscriptionType , price , details , onSelect, selected , onPress}) => {
+const SubscriptionCard:React.FC<SubscriptionCardProps> = ({subscriptionType , price , details , onSelect, selected , onPress , disabled}) => {
   const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed); 
   const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
 
@@ -39,7 +40,8 @@ const SubscriptionCard:React.FC<SubscriptionCardProps> = ({subscriptionType , pr
          selected && 
          <TouchableOpacity
          onPress={onPress} 
-         style={[styles.subscriptionCardBtnView]}>
+         style={[styles.subscriptionCardBtnView , disabled && {backgroundColor:'#D87085'}]}
+         disabled={disabled}>
               <Text style={styles.subscriptionCardBtnText}>Subscribe Now</Text>
          </TouchableOpacity>
        }

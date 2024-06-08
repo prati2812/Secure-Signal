@@ -3,7 +3,7 @@ import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler } from 'react-native';
+import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler, Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import instance from '../axios/axiosInstance';
 import { addToken, setProfileCompleted} from '../redux/userprofile/action';
@@ -14,6 +14,8 @@ interface DeleteAccountSheetProps {
     setDeleteAccountSheetVisible:any;
     call?:any;
 }
+
+const height = Dimensions.get('screen').height;
 
 const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountSheetVisible , call}) => {
   const slide = React.useRef(new Animated.Value(300)).current;
@@ -51,7 +53,9 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
   
   const handleDeleteAccount = async() => {
      const response = await instance.post("/deleteUserAccount", {userId});
-  
+   
+     console.log("======",userId);
+     
   //  if(response.status === 200){
   //     await AsyncStorage.clear();
   //     BackHandler.exitApp();
@@ -68,14 +72,11 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
       await AsyncStorage.clear();
       slideDown();
       setTimeout(() => {
-        setDeleteAccountSheetVisible(false);
+        setDeleteAccountSheetVisible(false);  
       }, 800);
       
     }
-    else{
-       console.log("xvv");
-       
-    }
+    
     
       
       
@@ -84,7 +85,7 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
 
   return (
     <Pressable style={styles.container} onPress={closeModal}>
-      <Pressable style={{width: '100%', height: '25%'}}>
+      <Pressable style={{width: '100%', height: height / 4.5}}>
         <Animated.View
           style={[
             styles.bottomSheet,

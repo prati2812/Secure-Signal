@@ -14,6 +14,8 @@ import { useSelector } from "react-redux";
 import LiveLocationRouteScreen from "../screen/location/LiveLocationRouteScreen";
 import ComplaintListScreen from "../screen/complaints/ComplaintListScreen";
 import ComplaintScreen from "../screen/complaints/ComplaintScreen";
+import TopTabNavigator from "../navigator/TopTabNavigator";
+import HomeScreen from "../screen/dashBoardScreen/HomeScreen";
 
 
 
@@ -31,7 +33,7 @@ const NavigationStack: React.FC = () => {
     return (
       
         <Stack.Navigator>
-          <Stack.Screen name="TabNavigator" component={TabNavigator} options={{headerShown: false}}/>
+          <Stack.Screen name="HomeScreen" component={HomeScreen} options={{headerShown:false}} />
           <Stack.Screen name="HelpScreen" component={HelpScreen} options={{headerShown: false}} />
           <Stack.Screen name="HelpDescription" component={HelpDescriptionScreen} options={{headerShown:false}}/>
           <Stack.Screen name="HelpConfirmation" component={HelpConfirmationScreen} options={{headerShown:false}}/>
@@ -43,6 +45,7 @@ const NavigationStack: React.FC = () => {
           <Stack.Screen name="LiveLocationRoute" component={LiveLocationRouteScreen} options={{headerShown:false}} />
           <Stack.Screen name="ComplaintList" component={ComplaintListScreen} options={{headerShown:false}} />
           <Stack.Screen name="Complaint"  component={ComplaintScreen} options={{headerShown:false}}/>
+          <Stack.Screen name="TopTabNavigator" component={TopTabNavigator} options={{headerShown:false}} />
            
         </Stack.Navigator>
     
