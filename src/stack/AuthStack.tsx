@@ -18,7 +18,7 @@ const AuthStack: React.FC = () => {
           <Stack.Screen name="PhoneNumber" component={PhoneNumberScreen} options={{ headerShown: false }} />
           <Stack.Screen name="OtpNumber" component={OtpNumberScreen} options={{ headerShown: false }} />
           <Stack.Screen name="EditProfile" component={EditProfile} options={{headerShown: false}}/>
-          <Stack.Screen name="HomeScreen" component={NavigationStack} options={{headerShown: false}}/>
+          <Stack.Screen name="NavigationStack" component={NavigationStack} options={{headerShown: false}}/>
         
         </Stack.Navigator>
     

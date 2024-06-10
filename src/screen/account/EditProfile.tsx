@@ -92,7 +92,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
       
       AsyncStorage.setItem("profileExist", "true");
       dispatch(setProfileCompleted(true));
-      navigation.navigate('HomeScreen');  
+      navigation.navigate('NavigationStack');  
       setLoading(false);  
     }
     else if(name === undefined){

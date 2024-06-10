@@ -85,7 +85,7 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
 
   return (
     <Pressable style={styles.container} onPress={closeModal}>
-      <Pressable style={{width: '100%', height: height / 4.5}}>
+      <Pressable style={{width: '100%', height: height / 4.3}}>
         <Animated.View
           style={[
             styles.bottomSheet,

@@ -17,19 +17,12 @@ const SectionList : React.FC<SectionListProps> = ({title , borderColor}) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
-        borderRadius:25,
-        elevation:5,
-        overflow:'hidden',
-        marginTop:15,
-        padding:10,
-        borderWidth:2,
         marginLeft:20,
         marginRight:20,
 
     },
     sectionTitle:{
-        fontSize:20,
+        fontSize:18,
         padding:10,
         color:'black',
         fontWeight:'700',

@@ -22,12 +22,20 @@ const InfoCard:React.FC<InfoCardProps> = ({setInfoSheetVisible , station , navig
          return null;
       }
      
+      console.log("-----------",station);
+      
 
        
      
      const handleComplaintNavigation = () => {
         dispatch(addProtectorData(station));
-        navigation.navigate('HelpScreen');
+        if(station.policeStationLocation){
+          navigation.navigate('HelpScreen' , {mapNumber: 1});  
+        }
+        else if(station.hospitalLocation){
+          navigation.navigate('HelpScreen' , {mapNumber: 2}); 
+        }
+        
      }
         
       return (
@@ -35,7 +43,7 @@ const InfoCard:React.FC<InfoCardProps> = ({setInfoSheetVisible , station , navig
         <View
         style={{
           backgroundColor: 'white',
-          height: '22%',
+          height: '15%',
           position: 'absolute',
           bottom: 0,
           left: 0,
@@ -53,7 +61,10 @@ const InfoCard:React.FC<InfoCardProps> = ({setInfoSheetVisible , station , navig
               
                 <View style={{flexDirection:'row' , gap:-5}}>
                      <View style={{justifyContent:'center'}}>
-                     <Icon name={icon} size={30} color={color}/>
+                      {
+                         icon && <Icon name={icon} size={30} color={color}/>
+                      }
+                     
                      </View>
                        
                      <View style={{marginLeft:15}}>

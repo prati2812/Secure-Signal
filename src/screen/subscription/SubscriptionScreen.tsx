@@ -116,7 +116,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
         <CustomHeader
           name={'Subscriptions'}
           backIcon={'keyboard-backspace'}
-          backCall={() => navigation.navigate('TabNavigator')}
+          backCall={() => navigation.goBack()}
         />
 
         <ScrollView style={{marginTop: 30}}>

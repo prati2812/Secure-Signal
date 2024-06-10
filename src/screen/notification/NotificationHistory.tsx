@@ -132,7 +132,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
         <CustomHeader
           name={'Notification'}
-          icon={'cog-outline'}
+          icon={'dots-vertical'}
           call={handleSetting}
           backIcon={'keyboard-backspace'}
           backCall={() => navigation.goBack()}

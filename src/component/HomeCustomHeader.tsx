@@ -20,7 +20,7 @@ const HomeCustomHeader:React.FC<HomeCustomHeaderProps> = ({name , icon , call , 
     {
         contactIcon &&
         <>
-            <Appbar.Action icon={contactIcon} color='white' size={30}/>
+            <Appbar.Action icon={contactIcon}  onPress={contactClick} color='white' size={30}/>
         </>
     }
     {icon && 

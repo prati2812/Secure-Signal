@@ -224,7 +224,7 @@ const style = StyleSheet.create({
         backgroundColor: 'white',
         marginLeft: 15,
         marginRight: 15,
-        marginTop: 15,
+        marginTop:70,
       },
       mapContainer: {
         flex: 1,
@@ -236,7 +236,7 @@ const style = StyleSheet.create({
         position:'absolute',
         marginLeft: 20,
         marginRight: 20,
-        marginTop: height/12,
+        marginTop: height/6,
         gap:5,
       },
       autoSuggestionText: {

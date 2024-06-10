@@ -68,12 +68,13 @@ const styles = StyleSheet.create({
     flex:1,
   },
   notificationMessage: {
-    fontSize: 20,
+    fontSize: 18,
     color: 'black',
     fontWeight: '500',
   },
   notificationTime: {
     fontWeight: '600',
+    fontSize:13,
   },
 });
 

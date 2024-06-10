@@ -365,6 +365,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
     if(response.status === 201){
         sendNotification();
+        navigation.navigate('HomeScreen');
     }
     else{
        console.log("something went to wrong");
@@ -443,7 +444,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   const handleDeleteSelectedContact = async(contact: Contact) => {
     console.log("=======" , contact);   
     dispatchStore(removeSelectedContact(userId, contact));
-    
+    setSelected(isSelected-1);
     
     
      // Filter out the deleted contact from the unselected contacts
@@ -539,7 +540,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
           {!searchQuery && <SectionList title={'App Contacts'} borderColor={'lightpink'} />}
           <ScrollView
              showsVerticalScrollIndicator={false}
-             style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
+             style={{paddingTop: 10, paddingLeft: 12, paddingRight: 12}}>
              {
                 // Search Matching Contact item from Search Bar.
                 filteredMatchingContactData.length > 0 ? filteredMatchingContactData.map((item,key) => {
@@ -590,7 +591,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{paddingBottom: 30}}
-            style={{paddingTop: 20, paddingLeft: 12, paddingRight: 12}}>
+            style={{paddingTop: 10, paddingLeft: 12, paddingRight: 12}}>
            {  
         
             // Select Contact through searchbar  
@@ -699,7 +700,7 @@ const styles = StyleSheet.create({
     },
     guardiansText:{
         paddingLeft: 10,
-        fontSize: 20,
+        fontSize: 18,
         color: 'black',
         fontWeight: '700',
     },
@@ -720,7 +721,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     placeHolderText:{
-        fontSize: 30, 
+        fontSize: 27, 
         color: 'black'
     },
     selectedContactNameView:{
@@ -730,7 +731,7 @@ const styles = StyleSheet.create({
     },
     selectedContactName:{
         color:'black' , 
-        fontSize:17
+        fontSize:14
     },
     closeIcon:{
         top:-2, 

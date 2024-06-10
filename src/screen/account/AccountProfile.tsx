@@ -10,6 +10,7 @@ import { firebase } from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native'
 import AppStack from '../../stack/AppStack';
+import { addToken, setProfileCompleted } from '../../redux/userprofile/action';
 
 
 
@@ -49,6 +50,12 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
     setDeleteAccountSheetVisible(true);
   };
 
+  const handleLogout = async() => {
+    await AsyncStorage.clear();
+    dispatch(addToken(''));
+    dispatch(setProfileCompleted(false));
+    
+  } 
  
 
   return (
@@ -63,9 +70,6 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
               resizeMode='cover'
             />
           </View>
-
-          <Text style={styles.profileName}>{userName}</Text>
-          <Text style={styles.phoneNumber}>{userPhoneNumber}</Text>
 
           <TouchableOpacity style={styles.editProfileButton} onPress={openBottomSheet}>
             <View style={styles.editProfileButtonContent}>
@@ -86,6 +90,13 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           </TouchableOpacity>   
         </View>
 
+        
+        <TouchableOpacity style={[styles.deleteAccountButton , {backgroundColor:'white' , borderColor:'red' , borderWidth:1}]} onPress={() => handleLogout()}>
+          <View style={styles.deleteAccountButtonContent}>
+            <Icon name='logout' size={25} color={'red'} />
+            <Text style={[styles.deleteAccountButtonText , {color:'red'}]}>Log out</Text>
+          </View>
+        </TouchableOpacity>
         
         <TouchableOpacity style={styles.deleteAccountButton} onPress={openDeleteAccountSheet}>
           <View style={styles.deleteAccountButtonContent}>

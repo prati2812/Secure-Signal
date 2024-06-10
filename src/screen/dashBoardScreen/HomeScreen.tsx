@@ -30,6 +30,7 @@ import { Searchbar } from 'react-native-paper';
 import { RAPID_API_FIND_PLACE_BASE_URL, RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_FIND_PLACE_HOST, X_RAPID_API_FIND_PLACE_KEY, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
 import TravellingLocationMap from '../../component/TravellingLocationMap';
 import InfoCard from '../../component/InfoCard';
+import WarningSheet from '../../component/WarningSheet';
 
 
 
@@ -61,6 +62,7 @@ interface HomeScreenProps {
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isProtectorSheetVisible, setProtectorSheetVisible] = useState(false);
+  const [isWarningSheetVisble, setWarningSheetVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedOption , setSelectedOption] = useState('Police Station');
   const [selectedStation , setSelectedStation] = useState(null);
@@ -138,10 +140,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     if(volumUp === 3){
        sendSMS();
        backgroundService();
+       setWarningSheetVisible(true);
        setVolumeUp(0);
     }
     if(volumeDown === 3){
      stop();
+     setWarningSheetVisible(false);
      setVolumeDown(0);
     }
  
@@ -369,6 +373,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   // stop background service
   const stop = async() => {
      await BackgroundService.stop();
+     
   }
 
   // Background Service is Running
@@ -663,7 +668,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           isRead={notificationReadStatus}
           accountIcon="account-circle"
           accountClick={handleLocation}
-          contactIcon={'account-plus'}
+          contactIcon="account-plus"
+          contactClick={handleContactList}
         />
 
         {loading ? (
@@ -671,164 +677,100 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             <ActivityIndicator size="large" color={'green'} />
           </View>
         ) : (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* <View style={style.usernameText}>
-          <Text style={style.username}>Hello {userName}</Text>
-        </View> */}
-
-            {/* Guardians Contact List */}
-            <View style={style.caretakerView}>
-              <Text style={style.caretakerText}>My Caretaker</Text>
-
-              <View style={{flexDirection: 'row', gap: -10}}>
-                <View style={style.contactViewContainer}>
-                  <TouchableOpacity
-                    style={style.contactView}
-                    onPress={() => handleContactList()}>
-                    <View
-                      style={{alignItems: 'center', justifyContent: 'center'}}>
-                      <Text style={style.contactText}>+</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{flexGrow: 1}}
-                  style={style.caretakerScrollView}>
-                  {selectedContacts &&
-                    selectedContacts.map(
-                      (
-                        item: {givenName: string | any[]},
-                        key: React.Key | null | undefined,
-                      ) => (
-                        <View key={key}>
-                          <View
-                            style={{
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}>
-                            <View style={style.contactSelectedView}>
-                              <Text style={style.contactText}>
-                                {item.givenName && item.givenName.length > 0
-                                  ? item.givenName[0]
-                                  : ''}
-                              </Text>
-                            </View>
-                          </View>
-                          <View style={style.selectedContactNameView}>
-                            <Text style={style.selectedContactName}>
-                              {item.givenName}
-                            </Text>
-                          </View>
-                        </View>
-                      ),
-                    )}
-                </ScrollView>
-              </View>
-            </View>
-
-            <View style={{flexDirection: 'row', marginTop: 20}}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  gap: 10,
-                  paddingLeft: 5,
-                  paddingRight: 5,
-                  paddingBottom: 5,
-                  alignItems: 'center',
-                }}
-                style={{marginLeft: 5, marginRight: 5}}>
-                <OptionSelection
-                  title="Police Station"
-                  onSelect={handleSelectedOption}
-                  selected={selectedOption === 'Police Station'}
-                />
-
-                <OptionSelection
-                  title="Hospital"
-                  onSelect={handleSelectedOption}
-                  selected={selectedOption === 'Hospital'}
-                />
-
-                <OptionSelection
-                  title="Travelling Location"
-                  onSelect={handleSelectedOption}
-                  selected={selectedOption === 'Travelling Location'}
-                />
-              </ScrollView>
-            </View>
-
-            {selectedOption && (
-              <View
-                style={{
-                  margin: 10,
-                  height: height / 1.75,
-                }}>
-                <View style={style.mapContainer}>
-                  {selectedOption === 'Travelling Location' ? (
+           <View style={{flex:1}}>
+             {selectedOption === 'Travelling Location' ? (
                     <TravellingLocationMap />
                   ) : (
-                    <MapView
-                      style={style.nearStationMap}
-                      provider={PROVIDER_GOOGLE}
-                      scrollEnabled={true}
-                      showsTraffic={true}
-                      zoomEnabled={false}
-                      region={{
+                 <><MapView
+                    style={style.nearStationMap}
+                    provider={PROVIDER_GOOGLE}
+                    scrollEnabled={true}
+                    showsTraffic={true}
+                    zoomEnabled={true}
+                    region={{
+                      latitude: location ? location.latitude : 37.78825,
+                      longitude: location ? location.longitude : -122.4324,
+                      latitudeDelta: 0.035,
+                      longitudeDelta: 0.0121,
+                    }}>
+                    <Marker
+                      coordinate={{
                         latitude: location ? location.latitude : 37.78825,
                         longitude: location ? location.longitude : -122.4324,
-                        latitudeDelta: 0.035,
-                        longitudeDelta: 0.0121,
-                      }}>
-                      <Marker
-                        coordinate={{
-                          latitude: location ? location.latitude : 37.78825,
-                          longitude: location ? location.longitude : -122.4324,
-                        }}
+                      }} />
+                    {selectedOption === 'Police Station' ? (
+                      <>
+                        <PoliceStationMap onMarkerPress={handleMarkerClick} />
+                      </>
+                    ) : (
+                      selectedOption === 'Hospital' && (
+                        <HospitalMap onMarkerPress={handleMarkerClick} />
+                      )
+                    )}
+                  </MapView>
+                  </>     
+              )}
+              {selectedOption === 'Police Station' &&
+                    selectedStation?.policeStationProfile &&
+                    isInfoSheetVisible && (
+                      <InfoCard
+                        setInfoSheetVisible={setInfoSheetVisible}
+                        station={selectedStation}
+                        navigation={navigation}
+                        userName={selectedStation.policeStationProfile.userName}
+                        phoneNumber={
+                          selectedStation.policeStationProfile.phoneNumber
+                        }
+                        distance={selectedStation.distance.toFixed(2)}
+                        icon={'local-police'}
+                        color={'#5F4C24'}
                       />
-                      {selectedOption === 'Police Station' ? (
-                        <>
-                          <PoliceStationMap onMarkerPress={handleMarkerClick} />
-                        </>
-                      ) : (
-                        selectedOption === 'Hospital' && <HospitalMap onMarkerPress={handleMarkerClick}/>
-                      )}
-                    </MapView>
-                  )}
+                    )}
+                  {selectedOption === 'Hospital' &&
+                    selectedStation?.hospitalProfile &&
+                    isInfoSheetVisible && (
+                      <InfoCard
+                        setInfoSheetVisible={setInfoSheetVisible}
+                        station={selectedStation}
+                        navigation={navigation}
+                        userName={selectedStation.hospitalProfile.userName}
+                        phoneNumber={
+                          selectedStation.hospitalProfile.phoneNumber
+                        }
+                        distance={selectedStation.distance.toFixed(2)}
+                        icon={'local-hospital'}
+                        color={'#008ECC'}
+                      />
+                    )}
+              <View style={{ flexDirection: 'row', position: 'absolute' }}>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{
+                          gap: 10,
+                          paddingLeft: 5,
+                          paddingRight: 5,
+                          paddingBottom: 5,
+                          alignItems: 'center',
+                        }}
+                        style={{}}>
+                        <OptionSelection
+                          title="Police Station"
+                          onSelect={handleSelectedOption}
+                          selected={selectedOption === 'Police Station'} />
 
-                  {  
-                     (selectedOption === 'Police Station') && selectedStation?.policeStationProfile &&
-                     isInfoSheetVisible && <InfoCard 
-                                            setInfoSheetVisible={setInfoSheetVisible} 
-                                            station={selectedStation} 
-                                            navigation={navigation}
-                                            userName={selectedStation.policeStationProfile.userName}
-                                            phoneNumber={selectedStation.policeStationProfile.phoneNumber}
-                                            distance={selectedStation.distance.toFixed(2)}
-                                            icon={'local-police'}
-                                            color={'#5F4C24'}/>                                              
-                  }
-                  {
-                     (selectedOption === 'Hospital') && selectedStation?.hospitalProfile && isInfoSheetVisible && <InfoCard 
-                                            setInfoSheetVisible={setInfoSheetVisible} 
-                                            station={selectedStation} 
-                                            navigation={navigation}
-                                            userName={selectedStation.hospitalProfile.userName}
-                                            phoneNumber={selectedStation.hospitalProfile.phoneNumber}
-                                            distance={selectedStation.distance.toFixed(2)}
-                                            icon={'local-hospital'}
-                                            color={'#008ECC'}/>
-                  }
-                 
-                  
+                        <OptionSelection
+                          title="Hospital"
+                          onSelect={handleSelectedOption}
+                          selected={selectedOption === 'Hospital'} />
 
-                </View>
-              </View>
-            )}
-          </ScrollView>
+                        <OptionSelection
+                          title="Travelling Location"
+                          onSelect={handleSelectedOption}
+                          selected={selectedOption === 'Travelling Location'} />
+                      </ScrollView>
+                    </View>    
+           </View>  
         )}
       </View>
       {isProtectorSheetVisible && (
@@ -838,6 +780,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           mapNumber={mapNumber}
         />
       )}
+      {
+         isWarningSheetVisble &&(
+            <WarningSheet setWarningSheetVisible={setWarningSheetVisible}/>
+         )
+      }
     </>
   );
 };
@@ -922,7 +869,6 @@ const style = StyleSheet.create({
   },
   mapContainer:{
     flex: 1,
-    borderRadius: 20,
     overflow: 'hidden', 
     backgroundColor:'black',
     elevation:5,

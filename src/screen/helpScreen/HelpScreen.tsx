@@ -43,7 +43,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const mapNumber = route.params?.mapNumber ?? undefined;
   
  
-  console.log(protectorData);
+  console.log("-----------",protectorData);
   
   
  

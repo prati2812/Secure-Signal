@@ -268,6 +268,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
                 style={styles.multiLineTextInput}
                 onChangeText={(text) => setComplaint(text)}
                 value={complaint}
+                cursorColor='black'
               />
         </View>
 
@@ -430,14 +431,14 @@ const styles = StyleSheet.create({
         marginTop:10,
         marginLeft:15,
         marginRight:15,
-        backgroundColor:'lightgray',
+        backgroundColor:'#f4fff0',
         height:150,
         borderRadius:25,
         overflow:'hidden',
         elevation:5,
       },
       multiLineTextInput:{
-        backgroundColor:'lightgray' , 
+        backgroundColor:'#f4fff0' , 
       },
       uploadDataView:{
          marginTop:15, 

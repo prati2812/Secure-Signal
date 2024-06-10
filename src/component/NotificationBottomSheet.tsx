@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Text, View, StyleSheet, Pressable, Animated, StatusBar, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import NotificationFilter from './NotificationFilter';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { firebase } from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
@@ -105,11 +105,14 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
     const handleFilterNotification = async() => {
        dispatch(addNotificationTypes(selected));
     }
+
    
+
+    
 
     return (
       <Pressable style={styles.container} onPress={closeModal}>
-        <Pressable style={{width: '100%', height: '25%'}}>
+        <Pressable style={{width: '100%', height: '40%'}}>
           <Animated.View
             style={[styles.bottomSheet, {transform: [{translateY: slide}]}]}>
              <ScrollView>
@@ -125,6 +128,7 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
                   iconBackgroundColor={'lightblue'}
                   textColor={'black'}
                 />
+                
                 <SelectList
                   setSelected={(val: string) => setSelected(val)}
                   data={data}
@@ -144,7 +148,10 @@ const NotificationBottomSheet: React.FC<NotificationBottomSheetProps> = ({  setB
                   maxHeight={100}
                   defaultOption={notificationTypes}
                   onSelect={handleFilterNotification}
+                  
                 />
+                
+                
               </View>
 
               <TouchableOpacity onPress={() => handleAllMarkAsNotification()}>

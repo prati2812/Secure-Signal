@@ -33,8 +33,7 @@ const style = StyleSheet.create({
     backgroundColor: 'white',
     padding: 12,
     borderRadius: 20,
-    borderColor: '#3ebb6e',
-    borderWidth: 3,
+    borderColor: 'white',
     elevation: 5,
   },
   editProfileButtonContent: {

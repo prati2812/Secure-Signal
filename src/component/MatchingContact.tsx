@@ -87,9 +87,6 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
 
         <View style={styles.contactDetails}>
           <Text style={styles.contactName}>{contact.givenName}</Text>
-          <Text style={styles.contactNumber}>
-            {contact.phoneNumbers[0]?.number}
-          </Text>
         </View>
       </View>
     </Pressable>
@@ -123,7 +120,7 @@ const styles = StyleSheet.create({
 
       },
       txt: {
-        fontSize: 30,
+        fontSize: 27,
         color:'black',
       },
       contactDetails: {
@@ -133,7 +130,7 @@ const styles = StyleSheet.create({
       },
       contactName: {
         color:'black',
-        fontSize: 22,
+        fontSize: 18,
       },
       contactNumber: {
         color: '#888',

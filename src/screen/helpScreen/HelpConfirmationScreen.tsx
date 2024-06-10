@@ -31,7 +31,7 @@ const HelpConfirmationScreen: React.FC<HelpConfirmationScreenProps> = ({navigati
       <View style={{alignItems:'center'}}> 
       <TouchableOpacity 
         style={styles.confirmView} 
-        onPress={() => navigation.navigate('TabNavigator')}> 
+        onPress={() => navigation.navigate('HomeScreen')}> 
         <Text style={styles.confirmText}>Ok</Text>
       </TouchableOpacity>
       </View>
