@@ -1,16 +1,12 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, ScrollView, Alert, TextInput, Button } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Alert} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import SubscriptionCard from '../../component/SubscriptionCard';
 import { Dispatch, useState } from 'react';
-import PaymentCard from '../../component/PaymentCard';
-import { initPaymentSheet, presentPaymentSheet, useStripe , Address , BillingDetails, useConfirmPayment, CardField} from '@stripe/stripe-react-native';
-import axios from 'axios';
+import { initPaymentSheet, presentPaymentSheet} from '@stripe/stripe-react-native';
 import { firebase } from '@react-native-firebase/auth';
-import { useDispatch, useSelector } from 'react-redux';
-import CrossLine from '../../component/CrossLine';
+import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
-import { IS_SUBSCRIBED } from '../../redux/subscription/action';
 import instance from '../../axios/axiosInstance';
 import { changeUserName } from '../../redux/userprofile/action';
 import store from '../../redux/store';
@@ -164,10 +160,6 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
         }
         
       </View>
-
-      {/* {isBottomSheetVisible && (
-        <PaymentCard setBottomSheetVisible={setBottomSheetVisible} price={selectedSubscriptionPrice} />
-      )} */}
     </>
   );
 };

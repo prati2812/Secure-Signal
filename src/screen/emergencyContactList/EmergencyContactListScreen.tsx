@@ -1,5 +1,5 @@
 import React,{useEffect , useState , Dispatch} from 'react';
-import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity ,ActivityIndicator} from 'react-native';
+import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import { Searchbar } from 'react-native-paper';
 import Contacts  from 'react-native-contacts';
@@ -8,16 +8,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch , useSelector } from 'react-redux';
 import { removeSelectedContact , addContact, addMatchingContacts} from '../../redux/contacts/action';
 import { firebase } from '@react-native-firebase/auth';
-import axios from 'axios';
 import SectionList from '../../component/SectionList';
 import MatchingContact from '../../component/MatchingContact';
 import instance from '../../axios/axiosInstance';
 import store from '../../redux/store';
-
-
-
-
-
 
 
 interface Contact {
@@ -68,9 +62,6 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   const contacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.contacts);
   const matchedContacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.matchingContacts);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
-  const token = useSelector((state : any) => state.userProfile.token);
-  
-
   
 
   useEffect(() => {                  
@@ -476,7 +467,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
       {
           contacts.length === 0 && 
-            <View style={{marginTop:20 , flex:1 , alignItems:'center'}}>
+            <View style={{marginTop:20 , flex:1 , alignItems:'center' , justifyContent:'center'}}>
                 <Text style={{fontSize:30}}>No Contacts</Text>
             </View>
       }  

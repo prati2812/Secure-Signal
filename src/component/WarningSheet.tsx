@@ -51,7 +51,7 @@ const WarningSheet:React.FC<WarningSheetProps> = ({setWarningSheetVisible}) => {
     <>
     <Pressable style={styles.container}>
         <View style={{position:'absolute' , top:0, left:0, right:0 , alignItems:'center',marginTop: height/4}}>
-                <Text style={{fontSize:20}}>Live Location is Sharing,{/n} if you do not want share your live location please tap volume down button 3 times</Text>
+                <Text style={{fontSize:20 , fontWeight:'600' , color:'white'}}>Live Location is Sharing,if you do not want share your live location please tap volume down button 3 times</Text>
         </View>
       
     </Pressable>

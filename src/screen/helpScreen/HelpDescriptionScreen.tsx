@@ -1,10 +1,9 @@
 import { firebase } from '@react-native-firebase/auth';
-import { useRoute } from '@react-navigation/native';
-import axios from 'axios';
+
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Text, View, StyleSheet , Pressable , Image, ScrollView, TouchableOpacity, ActivityIndicator} from 'react-native';
-import ImagePicker, { openPicker } from 'react-native-image-crop-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 import { TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -12,6 +11,8 @@ import { useSelector } from 'react-redux';
 import Geolocation from 'react-native-geolocation-service';
 import instance from '../../axios/axiosInstance';
 import CustomHeader from '../../component/CustomHeader';
+import { dispatchStore } from '../account/EditProfile';
+import { fetchUserComplaints } from '../../redux/userprofile/action';
 
 
 
@@ -29,10 +30,11 @@ interface HelpDescriptionScreenProps {
 }
 
 const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation,route}) => {
-
-    const [isYes , setYesButton] = useState(false);
-    const [isNo , setNoButton] = useState(true);
-    const [isInjured , setInjured] = useState('No');
+    const [complaintIsInjured , setComplaintIsInjured] = useState({
+       isYes:false,
+       isNo:true,
+       isInjured:'No'
+    });  
     const [complaint, setComplaint] = useState('');
     const [uri , setUri] = useState<ImageInfo[]>([]);
     const [complaint_location, setComplaintLocation] = useState({ latitude: 0, longitude: 0 });
@@ -42,7 +44,6 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     const userName  = useSelector((state : any) => state.userProfile.userName);
     const protectorData = useSelector((state:any) => state.protector.protectorData);
 
-    const token = useSelector((state : any) => state.userProfile.token);
     const complaintBy = route.params?.query;
     const userId = firebase.auth().currentUser?.uid;
     const phoneNumber = firebase.auth().currentUser?.phoneNumber;
@@ -73,18 +74,23 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
     };  
 
 
-    const handleYes = () => {
-        setYesButton(true);
-        setNoButton(false);
-        setInjured('Yes');
+    const hanldeInjured = (injured:string) => {
+         if(injured === "No"){
+           setComplaintIsInjured({
+            isYes:false,
+            isNo:true,
+            isInjured:'No'
+           })
+         }
+         else if(injured === "Yes"){
+           setComplaintIsInjured({
+            isYes:true,
+            isNo:false,
+            isInjured:'Yes'
+           })
+         }
     }
-
-    const handleNo = () => {
-        setYesButton(false);
-        setNoButton(true);
-        setInjured('No');
-    }
-
+   
 
     // Select Images
     const handleUploadPhotos = () => {
@@ -104,9 +110,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
     // Remove image from selected image list
     const removeImage = (data:number) => {
-         let newDataList;
-         newDataList = uri.filter((item , index) => index!== data);   
-         setUri(newDataList);      
+         setUri(uri.filter((item , index) => index!== data));      
     }
 
     const handleHelpConfirmation = async() => {
@@ -156,7 +160,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         complaintData.append('userId', userId);
         complaintData.append('complaintBy', complaintBy);
         complaintData.append('complaint', complaint);
-        complaintData.append('isInjured', isInjured);
+        complaintData.append('isInjured', complaintIsInjured.isInjured);
         complaintData.append(
           'complaint_location',
           JSON.stringify({"latitude": complaint_location.latitude , "longtitude": complaint_location.longitude}),
@@ -192,7 +196,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
              
            }
            
-           if(isInjured === "Yes"){
+           if(complaintIsInjured.isInjured === "Yes"){
           
              let hospitalId;
              if(mapNumber === 2){
@@ -219,6 +223,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
            }
      
            setIndicatorVisible(false);
+           dispatchStore(fetchUserComplaints(userId));
            navigation.navigate('HelpConfirmation');
         }
         else{
@@ -310,13 +315,12 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
          {/* Upload a photos */}
         <TouchableOpacity style={styles.uploadDataView}
             onPress={()=> handleUploadPhotos()}>
-             <TouchableOpacity
-                style={styles.uploadPhotoView} 
-                onPress={() => handleUploadPhotos()}>
+             <View
+                style={styles.uploadPhotoView}>
                   <Text style={styles.uploadPhotoText}>
                        Select photos
                   </Text>
-             </TouchableOpacity>
+             </View>
         </TouchableOpacity>
 
          {/* Divider  */}
@@ -330,17 +334,17 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
 
         <View style={styles.questionOptionSelectionView}>
              
-             <Pressable onPress={() => handleYes()} style={{flex:1}}>
-              <View style={[styles.questionOptionView , isYes && styles.activateOptionView]}>
-                   <Text style={[styles.option , isYes && styles.activateOption]}>
+             <Pressable onPress={() => hanldeInjured("Yes")} style={{flex:1}}>
+              <View style={[styles.questionOptionView , complaintIsInjured.isYes && styles.activateOptionView]}>
+                   <Text style={[styles.option , complaintIsInjured.isYes && styles.activateOption]}>
                          Yes
                    </Text>
               </View>
               </Pressable>
 
-              <Pressable onPress={()=> handleNo()} style={{flex:1}}>
-              <View style={[styles.questionOptionView , isNo && styles.activateOptionView]}>
-                   <Text style={[styles.option , isNo && styles.activateOption]}>
+              <Pressable onPress={()=> hanldeInjured("No")} style={{flex:1}}>
+              <View style={[styles.questionOptionView , complaintIsInjured.isNo && styles.activateOptionView]}>
+                   <Text style={[styles.option , complaintIsInjured.isNo && styles.activateOption]}>
                          No 
                    </Text>
               </View>

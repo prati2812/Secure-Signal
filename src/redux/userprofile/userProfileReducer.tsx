@@ -1,4 +1,4 @@
-import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD_USER_PHONE_NUMBER , ADD_TOKEN, IS_PROFILE_COMPLETED, COMPLAINTS_DATA, COMPLAINT, COMPLAINT_STATUS_TYPES} from "./action";
+import { ADD_IMAGE_URI , CHANGE_USER_NAME, ADD_IMAGE_RESPONSE , ADD_USER_ID, ADD_USER_PHONE_NUMBER , ADD_TOKEN, IS_PROFILE_COMPLETED, COMPLAINTS_DATA, COMPLAINT, COMPLAINT_STATUS_TYPES, IS_DELETED} from "./action";
 
 
 
@@ -13,6 +13,7 @@ const initialState = {
     complaints:[],
     complaint:Object,
     complaintStatus:'All',
+    isDeleted:Boolean,
 };
 
 const userProfileReducer = (state = initialState , action: { type: any; payload: any; }) => {
@@ -64,6 +65,12 @@ const userProfileReducer = (state = initialState , action: { type: any; payload:
             return{
                 ...state,
                complaintStatus:action.payload,
+            }
+            
+        case IS_DELETED: 
+            return{
+                ...state,
+                isDeleted:action.payload,
             }    
         default:
             return state;    

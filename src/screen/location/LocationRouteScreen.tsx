@@ -16,7 +16,6 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
   const [destination, setDestination] = useState({ latitude: 22.3072, longitude: 73.1812 });
   const [routeData, setRouteData] = useState<{ routes: any[] } | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number][]>([]);
-  const [isVisible, setVisible] = useState(false);
   const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
   const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
   const protectorData = useSelector((state:any) => state.protector.protectorData);

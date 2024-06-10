@@ -11,10 +11,9 @@ interface ImagePickerSheetProps {
  
 }
 
-const height = Dimensions.get('screen').height;
+
 
 const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionSheetVisible}) => {
-    const [imageUri , setImageUri] = React.useState('');
     const slide = React.useRef(new Animated.Value(300)).current;
     const dispatch = useDispatch();
 
@@ -78,7 +77,6 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
           const res = await launchCamera(options);
           
           if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
-            setImageUri(res.assets[0].uri);
             dispatch({
               type: ADD_IMAGE_URI,
               payload: res.assets[0].uri,
@@ -99,7 +97,6 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
           };
           const res = await launchImageLibrary(options);
           if (!res.didCancel && res.assets && res.assets.length > 0  && res.assets[0].uri) {
-            setImageUri(res.assets[0].uri);
             dispatch({
               type: ADD_IMAGE_URI,
               payload: res.assets[0].uri,

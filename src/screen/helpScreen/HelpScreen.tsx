@@ -33,35 +33,35 @@ interface HelpScreenProps {
 
 const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   
-  const [isVictim , setVictimButton] = useState(false);
-  const [isWitness , setWitnessButton] = useState(false);
-  const [query , setQuery] = useState('');
-  const imageUri = useSelector((state:any) => state.userProfile.imageUri);
-  const nearestPoliceStation = useSelector((state:any) => state.location.nearestPoliceStation);
-  const nearestHospital = useSelector((state:any) => state.location.nearestHospital);
+  const [complaintType, setComplaintType] = useState({
+    isVictim: false,
+    isWitness: false,
+    query: '',
+  });
+
   const protectorData = useSelector((state:any) => state.protector.protectorData);
   const mapNumber = route.params?.mapNumber ?? undefined;
-  
- 
-  console.log("-----------",protectorData);
-  
-  
- 
-  
-  const handleVictim = () => {
-     setVictimButton(true);
-     setWitnessButton(false);
-     setQuery("I'm a victim");
-  }
-
-  const handleWitness = () => {
-     setVictimButton(false);
-     setWitnessButton(true);
-     setQuery("I'm a witness");
+   
+  const handleComplaint = (role:string) => {
+     if(role === "Victim"){
+       setComplaintType({
+          isVictim:true,
+          isWitness:false,
+          query:"I'm a victim"
+       })
+     }
+     else if(role === "Witness"){
+       setComplaintType({
+         isVictim:false,
+         isWitness:true,
+         query:"I'm a witness"
+       })  
+     }
   }
 
   const handleHelpButton = () => {
-    if(query){
+    if(complaintType.query){
+      let query = complaintType.query;
       navigation.navigate('HelpDescription' , {query , mapNumber});
     }
   }
@@ -72,7 +72,21 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
       // Linking.openURL('geo:21.145345,72.7567583;u=35');
     }
   }
-   
+
+  const getProtectorLocation = (mapNumber : number) => {
+    if (mapNumber === 1 &&  protectorData && protectorData.policeStationLocation) {
+      return protectorData.policeStationLocation;
+    }
+    if (mapNumber === 2 && protectorData && protectorData.hospitalLocation) {
+      return protectorData.hospitalLocation;
+    }
+    return { latitude: 37.78825, longtitude: -122.4324 };
+  }
+  
+  
+  const location = getProtectorLocation(mapNumber);
+  console.log(location);
+  
     
   return (
     <SafeAreaView style={styles.helpScreenMain}>
@@ -99,26 +113,14 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               scrollEnabled={false}
               zoomEnabled={false}
               region={{
-                latitude: mapNumber === 1 ? 
-                            protectorData && protectorData.policeStationLocation ? 
-                            protectorData.policeStationLocation.latitude : 37.78825 : 
-                            protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.latitude : 37.78825,
-                longitude: mapNumber === 1 ? 
-                           protectorData && protectorData.policeStationLocation ? 
-                           protectorData.policeStationLocation.longtitude : -122.4324 :
-                           protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.longtitude : -122.4324  ,
+                latitude: location.latitude,
+                longitude: location.longtitude,
                 latitudeDelta: 0.015,
                 longitudeDelta: 0.0121,
               }}>
               {
-                <Marker coordinate={{latitude: mapNumber === 1 ? 
-                                              protectorData && protectorData.policeStationLocation ? 
-                                              protectorData.policeStationLocation.latitude : 37.78825 : 
-                                              protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.latitude : 37.78825, 
-                                     longitude: mapNumber === 1 ? 
-                                                protectorData && protectorData.policeStationLocation ? 
-                                                protectorData.policeStationLocation.longtitude : -122.4324 :
-                                                protectorData && protectorData.hospitalLocation ? protectorData.hospitalLocation.longtitude : -122.4324}}>
+                <Marker coordinate={{latitude: location.latitude, 
+                                     longitude: location.longtitude}}>
                   {mapNumber === 1 ? (
                     <Icon name="local-police" size={40} color={'#5F4C24'} />
                   ) : mapNumber === 2 ? (
@@ -136,35 +138,35 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
 
         {/* Query Button */}
         <View style={styles.queryBtnView}>
-          <Pressable onPress={() => handleVictim()}>
+          <Pressable onPress={() => handleComplaint("Victim")}>
             <View
-              style={[styles.queryBtn, isVictim && styles.activeBackground]}>
+              style={[styles.queryBtn, complaintType.isVictim && styles.activeBackground]}>
               <Text>
                 <Icon
                   name="warning"
                   size={35}
-                  style={[styles.icon, isVictim && styles.activeIcon]}
+                  style={[styles.icon, complaintType.isVictim && styles.activeIcon]}
                 />
               </Text>
               <Text
-                style={[styles.textStyle, isVictim && styles.activeTextStyle]}>
+                style={[styles.textStyle, complaintType.isVictim && styles.activeTextStyle]}>
                 I'm a{'\n'}victim
               </Text>
             </View>
           </Pressable>
 
-          <Pressable onPress={() => handleWitness()}>
+          <Pressable onPress={() => handleComplaint("Witness")}>
             <View
-              style={[styles.queryBtn, isWitness && styles.activeBackground]}>
+              style={[styles.queryBtn, complaintType.isWitness && styles.activeBackground]}>
               <Text>
                 <Icon
                   name="visibility"
                   size={35}
-                  style={[styles.icon, isWitness && styles.activeIcon]}
+                  style={[styles.icon, complaintType.isWitness && styles.activeIcon]}
                 />
               </Text>
               <Text
-                style={[styles.textStyle, isWitness && styles.activeTextStyle]}>
+                style={[styles.textStyle, complaintType.isWitness && styles.activeTextStyle]}>
                 I'm a{'\n'}witness
               </Text>
             </View>
@@ -173,7 +175,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
 
         <Pressable onPress={() => handleHelpButton()}>
           <View style={styles.helpBtnView}>
-            <View style={[styles.helpBtn , !query && {backgroundColor:'#FDA993'}]}>
+            <View style={[styles.helpBtn , !complaintType.query && {backgroundColor:'#FDA993'}]}>
               <Text>
                 <IconFont name="bell" size={30} color={'white'} />
               </Text>
@@ -197,7 +199,7 @@ const styles = StyleSheet.create({
   },
   whatHappenedText: {
     marginLeft: 24,
-    fontSize: 33,
+    fontSize: 25,
     color: 'black',
     fontWeight: '600',
   },

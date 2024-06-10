@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView, BackHandler } from 'react-native';
-import CustomHeader from '../../component/CustomHeader';
+import React, { useState } from 'react';
+import { Text, View, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BottomSheet from '../../component/BottomSheet';
 import DeleteAccountSheet from '../../component/DeleteAccountSheet';
@@ -8,8 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import CustomProfileOption from '../../component/CustomProfileOption';
 import { firebase } from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native'
-import AppStack from '../../stack/AppStack';
 import { addToken, setProfileCompleted } from '../../redux/userprofile/action';
 
 
@@ -27,34 +24,16 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [isDeleteAccountSheetVisible, setDeleteAccountSheetVisible] = useState(false);
   const userProfile = useSelector((state: { userProfile: UserProfile }) => state.userProfile);
-  const userPhoneNumber = useSelector((state:any) => state.userProfile.phoneNumber);
-  const isProfileDeleted = useSelector((state:any) => state.userProfile.isProfileDeleted);
-  const complaintData = useSelector((state:any) => state.userProfile.complaints);
-  const token = useSelector((state : any) => state.userProfile.token);
   const subScriptionType = useSelector((state:any) => state.subscription.subScriptionType);
-  const userId = firebase.auth().currentUser?.uid; 
   const dispatch = useDispatch();
-
   const { imageUri, userName } = userProfile;
 
-
-  useEffect(() => {
-    console.log(subScriptionType);
-  },[]);
-
-  const openBottomSheet = () => {
-    setBottomSheetVisible(true);
-  };
-
-  const openDeleteAccountSheet = () => {
-    setDeleteAccountSheetVisible(true);
-  };
 
   const handleLogout = async() => {
     await AsyncStorage.clear();
     dispatch(addToken(''));
     dispatch(setProfileCompleted(false));
-    
+    navigation.navigate('PhoneNumber');
   } 
  
 
@@ -71,7 +50,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
             />
           </View>
 
-          <TouchableOpacity style={styles.editProfileButton} onPress={openBottomSheet}>
+          <TouchableOpacity style={styles.editProfileButton} onPress={() => setBottomSheetVisible(true)}>
             <View style={styles.editProfileButtonContent}>
               <Icon name='border-color' size={15} color={'black'} />
               <Text style={styles.editProfileButtonText}>Edit Profile</Text>
@@ -98,7 +77,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           </View>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.deleteAccountButton} onPress={openDeleteAccountSheet}>
+        <TouchableOpacity style={styles.deleteAccountButton} onPress={() => setDeleteAccountSheetVisible(true)}>
           <View style={styles.deleteAccountButtonContent}>
             <Icon name='delete-forever' size={25} color={'white'} />
             <Text style={styles.deleteAccountButtonText}>Delete Account</Text>
@@ -110,7 +89,7 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
       {isBottomSheetVisible && <BottomSheet setBottomSheetVisible={setBottomSheetVisible} />}
 
       {/* Render delete account sheet if visible */}
-      {isDeleteAccountSheetVisible && <DeleteAccountSheet setDeleteAccountSheetVisible={setDeleteAccountSheetVisible} />}
+      {isDeleteAccountSheetVisible && <DeleteAccountSheet setDeleteAccountSheetVisible={setDeleteAccountSheetVisible} navigation={navigation}/>}
     </View>
   );
 };

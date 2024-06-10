@@ -10,18 +10,22 @@ import { addToken, setProfileCompleted} from '../redux/userprofile/action';
 
 
 
+
 interface DeleteAccountSheetProps {
     setDeleteAccountSheetVisible:any;
     call?:any;
+    navigation:any;
+    
 }
 
 const height = Dimensions.get('screen').height;
 
-const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountSheetVisible , call}) => {
+const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountSheetVisible , call , navigation}) => {
   const slide = React.useRef(new Animated.Value(300)).current;
   const userId = firebase.auth().currentUser?.uid; 
   const token = useSelector((state : any) => state.userProfile.token);
   const dispatch = useDispatch();
+  
 
   const slideUp = () => {
     Animated.timing(slide, {
@@ -70,10 +74,12 @@ const DeleteAccountSheet:React.FC<DeleteAccountSheetProps> = ({setDeleteAccountS
       dispatch(addToken(''));
       dispatch(setProfileCompleted(false));
       await AsyncStorage.clear();
+      navigation.navigate('PhoneNumber');
       slideDown();
       setTimeout(() => {
         setDeleteAccountSheetVisible(false);  
       }, 800);
+     
       
     }
     

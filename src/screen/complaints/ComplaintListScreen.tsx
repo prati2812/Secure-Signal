@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, StatusBar, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
-import CustomHeader from '../../component/CustomHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import ComplaintsCard from '../../component/ComplaintsCard';
 import { COMPLAINT, fetchUserComplaints } from '../../redux/userprofile/action';
@@ -53,9 +52,10 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
         if(!policeStationStatus){
            return 'clock';
         }
-        else if(policeStationStatus && (policeStationStatus === "Completed" || policeStationStatus === "Not Completed")){
-           return 'thumbs-down'; 
+        else if(policeStationStatus && (policeStationStatus === "Not Completed")){
+           return 'window-close'; 
         }
+        return 'thumbs-down';
     }
     if(complaintStatus === "pending" && isInjured === "Yes"){
        if(!policeStationStatus && !hospitalStatus){
@@ -184,11 +184,15 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
             showsVerticalScrollIndicator={false} />
             
             
-            <FAB
-              style={styles.fab}
-              icon="filter-outline"
-              color='white'
-              onPress={() => setComplaintBottomSheetVisible(true)} />
+            {
+               complaints.length > 0 && 
+               <FAB
+               style={styles.fab}
+               icon="filter-outline"
+               color='white'
+               onPress={() => setComplaintBottomSheetVisible(true)} />
+ 
+            }
             </>
       )}
     </View>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, StatusBar, ScrollView } from 'react-native';
+import { Text, View, StyleSheet, StatusBar, ScrollView, FlatList } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import { Dispatch, useEffect, useState } from 'react';
@@ -20,14 +20,11 @@ interface LocationHistoryProps {
 
 const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
     const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
-    const [isVisble , setVisible] = useState(false);
     const userId = firebase.auth().currentUser?.uid;
-    const token = useSelector((state : any) => state.userProfile.token);
     const locationData = useSelector((state: any) => state.location.locations);
-    const dispatch = useDispatch();
+    
 
     useEffect(() => {
-      // fetchTravellingLocation();
       dispatchStore(fetchLocation(userId));
     },[]); 
 
@@ -48,57 +45,52 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
     }
 
 
+    const renderItem = ({ item }: { item: any }) => {
+      let date = dateConvert(item.createdAt);
+      return (
+        <NotificationCard
+          icon={'pin-drop'}
+          message={item.placeName}
+          time={date}
+          color={'green'}
+          isRead={true}
+          handleIsRead={() => {}}
+        />
+      );
+    };
 
-   
+    const keyExtractor = (item: any, index: { toString: () => any; }) => index.toString();
 
   return (
     <>
-    <View style={styles.container}>
-         <StatusBar backgroundColor={'#3ebb6e'}/>
-          {
-             locationData.length > 0 ? (
-              <ScrollView
-              contentContainerStyle={{paddingTop:15}}
-              showsVerticalScrollIndicator={false}>
- 
-          {
-              locationData.length > 0 &&   locationData.map((item: { createdAt: string; placeName: string; } , key: React.Key | null | undefined) => {
-                 let date = dateConvert(item.createdAt);
-                 return (
-                   <NotificationCard 
-                     key={key}
-                     icon={'pin-drop'}
-                     message={item.placeName}
-                     time={date}
-                     color={'green'} 
-                     isRead={true} 
-                     handleIsRead={() => {}}/>     
-                 )
-              })
-            
-          }
+      <View style={styles.container}>
+        <StatusBar backgroundColor={'#3ebb6e'} />
+        {locationData.length > 0 ? (
+          <FlatList
+            data={locationData}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={{paddingTop: 15}}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <View style={{flex: 1, top: '20%'}}>
+            <PushNotification />
+          </View>
+        )}
+        {locationData.length > 0 && (
+          <FAB
+            style={styles.fab}
+            icon="filter-outline"
+            color="white"
+            onPress={() => setBottomSheetVisible(true)}
+          />
+        )}
+      </View>
 
-            
- 
-           </ScrollView>
-             ) : (
-                 <View style={{flex:1 , top:'20%'}}>
-                       <PushNotification />
-                 </View>
-             )
-          }
-
-            <FAB
-              style={styles.fab}
-              icon="filter-outline"
-              color='white'
-              onPress={() => setBottomSheetVisible(true)} />  
-          
-    </View>
-    
-    {
-         isBottomSheetVisible && <LocationBottomSheet setBottomSheetVisible={setBottomSheetVisible} />
-    }
+      {isBottomSheetVisible && (
+        <LocationBottomSheet setBottomSheetVisible={setBottomSheetVisible} />
+      )}
     </>
   );
 };

@@ -17,6 +17,8 @@ export const IS_PROFILE_COMPLETED = 'IS_PROFILE_COMPLETED';
 export const COMPLAINTS_DATA = 'COMPLAINTS_DATA';
 export const COMPLAINT = 'COMPLAINT';
 export const COMPLAINT_STATUS_TYPES = 'COMPLAINT_STATUS_TYPES';
+export const IS_DELETED = 'IS_DELETED';
+
 
 
 export const changeUserName = (userId:string | undefined) => {
@@ -34,6 +36,7 @@ export const changeUserName = (userId:string | undefined) => {
             isSubscribed,
             subScriptionType,
             subscriptionEndTime,
+            isDeleted
           } = userData;
 
 
@@ -70,7 +73,6 @@ export const changeUserName = (userId:string | undefined) => {
               payload: false,
             });
             
-  
           }
 
 
@@ -82,6 +84,14 @@ export const changeUserName = (userId:string | undefined) => {
               payload: imageUrl,
             });
           }
+          
+
+         
+            
+             dispatch({
+               type:IS_DELETED,
+               payload: isDeleted,
+             })
           
           
 

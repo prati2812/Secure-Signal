@@ -24,7 +24,6 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
   const [read , setRead] = useState(false);
   const userId = firebase.auth().currentUser?.uid; 
-  const token = useSelector((state : any) => state.userProfile.token);
   const notificationReadStatus = useSelector((state: any) => state.notifications.notificationAllReadOrNot);
   const notificationDeleteStatus = useSelector((state : any) => state.notifications.deleteAllNotificationOrNot);
   const emergencyContactNotification = useSelector((state : any) => state.notifications.fetchSelectedContactNotification);
@@ -44,20 +43,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
     dispatchStore(fetchPoliceStationStatusNotification(userId));
   },[read]); 
 
-  useEffect(() => {
-     if(notificationTypes){
-      console.log("--------",notificationTypes);
-     }
-  },[notificationTypes])
-  
-  
-  
-  
-  
 
-  const handleSetting = () => {  
-      setBottomSheetVisible(true);
-  }
+  
 
   // Read Emergency Notification 
   const handleNotificationRead = async(notification_id : String) => {
@@ -133,7 +120,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
         <CustomHeader
           name={'Notification'}
           icon={'dots-vertical'}
-          call={handleSetting}
+          call={() =>setBottomSheetVisible(true)}
           backIcon={'keyboard-backspace'}
           backCall={() => navigation.goBack()}
         />

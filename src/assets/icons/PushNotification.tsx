@@ -136,7 +136,13 @@ const PushNotification = (props: PushNotificationProps) => (
         d="M204.316 209.445a52.381 52.381 0 0137.29 0l-2.071-41.433a16.573 16.573 0 00-16.574-16.573 16.573 16.573 0 00-16.573 16.573z"
         fill="#3ebb6e"
       />
+       
     </Svg>
+
+    <View style={{marginTop:-50}}>
+           <Text style={{fontSize:20 , fontWeight:'600' , color:'black'}}>No Data Available</Text>
+    </View> 
+   
 
     </View>  
 );

@@ -1,33 +1,24 @@
-import React, { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
-import {Text, View, StyleSheet, StatusBar, ScrollView, Dimensions, TouchableOpacity, Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , AppState, BackHandler, Alert, Keyboard, ActivityIndicator} from 'react-native';
+import React, { Dispatch,  useEffect,  useState } from 'react';
+import {View, StyleSheet, StatusBar, ScrollView, Dimensions,  Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , ActivityIndicator} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
-import { VolumeManager } from 'react-native-volume-manager';
 import { firebase } from '@react-native-firebase/auth';
-import {addToken, changeUserName, fetchUserComplaints} from '../../redux/userprofile/action';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addMatchingContacts, addSelectedContact, updateContactList} from '../../redux/contacts/action';
-import axios from 'axios';
+import {changeUserName, fetchUserComplaints} from '../../redux/userprofile/action';
+import {addSelectedContact} from '../../redux/contacts/action';
 import Contact from '../../component/Contact';
 import HomeCustomHeader from '../../component/HomeCustomHeader';
-import { allNotificationReadOrNot, deleteAllNotificationOrNot } from '../../redux/notifications/action';
+import { allNotificationReadOrNot } from '../../redux/notifications/action';
 import Geolocation from 'react-native-geolocation-service';
-import { IS_SUBSCRIBED, updateSubscriptionDetails } from '../../redux/subscription/action';
+import { updateSubscriptionDetails } from '../../redux/subscription/action';
 import { fetchLocation, findNearestHospital, findNearestPoliceStation } from '../../redux/location/action';
 import instance from '../../axios/axiosInstance';
 import store from '../../redux/store';
-import { NavigationContainer } from '@react-navigation/native';
-import AppStack from '../../stack/AppStack';
-import AuthStack from '../../stack/AuthStack';
 import ProtectorBottomSheet from '../../component/ProtectorBottomSheet';
 import OptionSelection from '../../component/OptionSection';
 import PoliceStationMap from '../../component/PoliceStationMap';
 import HospitalMap from '../../component/HospitalMap';
-import { Searchbar } from 'react-native-paper';
-import { RAPID_API_FIND_PLACE_BASE_URL, RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_FIND_PLACE_HOST, X_RAPID_API_FIND_PLACE_KEY, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
 import TravellingLocationMap from '../../component/TravellingLocationMap';
 import InfoCard from '../../component/InfoCard';
 import WarningSheet from '../../component/WarningSheet';
@@ -67,7 +58,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [selectedOption , setSelectedOption] = useState('Police Station');
   const [selectedStation , setSelectedStation] = useState(null);
   const [isInfoSheetVisible , setInfoSheetVisible] = useState(false);
-  const [mapNumber , setMapNumber] = useState(1);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : any) => state.contacts.selectedContact);
   const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
@@ -618,29 +608,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     
   }
 
-  // Navigate to the HelpScreen
-  const handleLocationMap = (mapNumber:number , station : any) => {
-    // setMapNumber(mapNumber);
-    // setProtectorSheetVisible(true);
-    console.log(mapNumber);
-    
-    console.log("---------" , station);
-    
-  }
 
-  // Navigate to the Notification Screen
-  const handleNotification = () =>{
-    navigation.navigate('Notification');
-  }
-
-  // Navigate to the Emergency Contact List Screen
-  const handleContactList = () => {
-      navigation.navigate('EmergencyContactList');
-  }
-
-  const handleLocation = () =>{
-    navigation.navigate('TopTabNavigator');
-  }
+ 
+  
 
   const handleSelectedOption = (title:string) => {
       setSelectedOption(title);
@@ -649,7 +619,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const handleMarkerClick = (station:any) => {
      setSelectedStation(station);
      setInfoSheetVisible(true);   
-     console.log(station);
+    
      
   }
   
@@ -664,12 +634,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         <HomeCustomHeader
           name="Secure Signal"
           icon="bell"
-          call={handleNotification}
+          call={() => navigation.navigate('Notification')}
           isRead={notificationReadStatus}
           accountIcon="account-circle"
-          accountClick={handleLocation}
+          accountClick={() => navigation.navigate('TopTabNavigator')}
           contactIcon="account-plus"
-          contactClick={handleContactList}
+          contactClick={() => navigation.navigate('EmergencyContactList')}
         />
 
         {loading ? (

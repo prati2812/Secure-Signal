@@ -1,37 +1,36 @@
 import React, {useState, useRef, useMemo, useEffect} from 'react';
-import {View, Text, TextInput, TouchableOpacity , StyleSheet , ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image, Dimensions, StatusBar, Pressable} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity , StyleSheet , ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image, Dimensions, StatusBar, Pressable, NativeSyntheticEvent, TextInputKeyPressEventData} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HandleError from '../../component/useError';
 import auth from '@react-native-firebase/auth';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { requestUserPermission } from '../../utils/NotificationService';
 import instance from '../../axios/axiosInstance';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { height, regex, width } from '../../utils/constant';
 
 
 interface OtpNumberScreenProps {
   navigation: any; 
 }  
 
-const width = Dimensions.get('screen').width;
-const height = Dimensions.get('screen').height;
+
 
 
 const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
-  const regex = /[.,+\-' ']/;
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState(Array(6).fill(''));
   const [isError, setIsError] = useState(false);
-  const inputRef = useRef<TextInput>(null);
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
   const [isResendEnabled, setIsResendEnabled] = useState(false); 
   const [timeLeft, setTimeLeft] = useState(30); 
+  const inputRefs = useRef<(TextInput | null)[]>([]);
   
 
   const verificationId = useSelector((state : any) => state.verification.verificationId);
   const phoneNumber = useSelector((state:any) =>  state.userProfile.phoneNumber);
   
 
-  const onPress = () => inputRef.current?.focus();
+  
 
   useEffect(() => {
     requestUserPermission();
@@ -77,9 +76,11 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
           setOtp(otp);
           return false;  
         }
-    
+        
+        let otpContent = otp.join('');
+        
         setIndicatorVisible(true);
-        const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+        const credential = auth.PhoneAuthProvider.credential(verificationId, otpContent);
         const dataa = await auth().signInWithCredential(credential);
         const userId = dataa.user.uid;
         const phoneNumber = dataa.user.phoneNumber;
@@ -122,44 +123,67 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
     
   };
 
+
+  
+  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
+    if (e.nativeEvent.key === 'Backspace' && otp[index] === '') {
+      if (index > 0) {
+        inputRefs.current[index - 1].focus();
+      }
+      
+    }
+  };
+
+  // otp validation
+  const otpValidation = (text: string, index: number) => {
+    const newOtp = [...otp];
+    newOtp[index] = text;
+
+    if (text.length === 1 && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+
+    if (!text) {
+      setIsError(true);
+    } else if (regex.test(text)) {
+      setIsError(true);
+    } else if (newOtp.join('').length < 6) {
+      setIsError(true);
+    } else {
+      setIsError(false);
+    }
+
+    setOtp(newOtp);
+  };
+
+
   // Otp filled in boxes
   const otpContent = useMemo(
     () => (
       <View style={styles.otpContainerView}>
-        {Array.from({length: 6}).map((_, i) => (
-          <Text
-            key={i}
-            onPress={onPress}
-            style={[styles.otpTextStyle, otp[i] ? styles.otpFilledStyle : {}]}>
-            {otp[i]}
-          </Text>
+        {otp.map((value, i) => (
+         <TextInput
+         key={i}
+         ref={(el) => (inputRefs.current[i] = el)}
+         value={value}
+         onChangeText={(text) => otpValidation(text, i)}
+         style={[
+           styles.otpTextStyle,
+           otp[i] ? styles.otpFilledStyle : {},
+         ]}
+         maxLength={1}
+         keyboardType="number-pad"
+         onFocus={() => inputRefs.current[i].setNativeProps({ selection: { start: 0, end: 0 } })}
+         onKeyPress={(e) => handleKeyPress(e,i)}
+         onSubmitEditing={handleOtpNumber}
+       />
         ))}
       </View>
     ),
     [otp],
   );
 
-  // otp validation
-  const otpValidation = (text: string) => {
-    if(!text) {
-      setIsError(true);
-      setOtp(text);
-    }
-    else if(regex.test(text)){
-      setIsError(true);
-      setOtp(text);
-    } 
-    else if ((text.length < 6)) {
-      setIsError(true);
-      setOtp(text);
-    }
-    else{
-      setIsError(false);
-      setOtp(text);
-    } 
-    
-  }
-
+  
   const isDisabled = isError || isIndicatorVisible;
   return (
     <View style={styles.container}>
@@ -191,7 +215,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
               </Text>
             </View>
             <View style={styles.otpNumberViewTextTextInput}>
-              <TextInput
+              {/* <TextInput
                 maxLength={6}
                 ref={inputRef}
                 style={styles.otpTextInput}
@@ -199,7 +223,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
                 value={otp}
                 keyboardType="number-pad"
                 onSubmitEditing={handleOtpNumber}
-              />
+              /> */}
               {otpContent}
             </View>
             {isError && otp.length >= 1 && otp.length <= 6 && regex.test(otp) ? (

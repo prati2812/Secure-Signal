@@ -10,9 +10,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  BackHandler,
   Alert,
-  AppState
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,7 +22,6 @@ import { useSelector , useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeUserName, setProfileCompleted } from '../../redux/userprofile/action';
 import { firebase } from '@react-native-firebase/auth';
-import { addSubscriptionDetails } from '../../redux/subscription/action';
 import instance from '../../axios/axiosInstance';
 import store from '../../redux/store';
 
@@ -40,7 +37,6 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const [isError , setIsError] = useState(false);
   const [isImageSelectionSheetVisible , setImageSelectionSheetVisible] = useState(false);
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
-  const [isExit , setExit] = useState(false);
   const [notificationToken , setNotificationToken] = useState<string | null>('');
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -50,6 +46,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
   const phoneNumber = useSelector((state: any) => state.userProfile.phoneNumber);
   const name  = useSelector((state : any) => state.userProfile.userName);
+  const isDeleted = useSelector((state : any) => state.userProfile.isDeleted);
   const userId = firebase.auth().currentUser?.uid;
      
 
@@ -72,10 +69,35 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
 
   useEffect(() => {
     setUserName(name);
-    console.log("==========" , name);
-    
-    profileExist();
   },[name]);
+
+  useEffect(() => {
+    const profileExist = async() => {
+   
+   
+      if (isDeleted) {
+        setLoading(false);
+      } else if (name) {
+        if(isDeleted){
+          setLoading(false);
+        }
+        else{
+         await AsyncStorage.setItem('profileExist', 'true');
+         dispatch(setProfileCompleted(true));
+         navigation.navigate('NavigationStack');
+         setLoading(false);  
+        }
+        
+      } else if (name === undefined) {
+        setLoading(false);
+      }
+    
+     
+     
+   }
+   profileExist();
+
+  },[name , isDeleted]);
 
 
   // get FCM token from AsyncStorage
@@ -85,21 +107,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   }
 
 
-  const profileExist = () => {
-    
-    if(name){
-      console.log("--------------", name);
-      
-      AsyncStorage.setItem("profileExist", "true");
-      dispatch(setProfileCompleted(true));
-      navigation.navigate('NavigationStack');  
-      setLoading(false);  
-    }
-    else if(name === undefined){
-      setLoading(false);
-    }
-    
-  }
+  
   
   const closeApp = () => {
     dispatch({
@@ -174,7 +182,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
         AsyncStorage.setItem("profileExist", "true");
         dispatch(setProfileCompleted(true));  
         setIndicatorVisible(false);
-        navigation.navigate('HomeScreen');
+        navigation.navigate('NavigationStack');
       }
       else{
         setIndicatorVisible(false);

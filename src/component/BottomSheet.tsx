@@ -5,7 +5,6 @@ import ImagePickerSheet from './ImagePickerSheet';
 import { useSelector , useDispatch } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
 import { changeUserName } from '../redux/userprofile/action';
-import axios from 'axios';
 import instance from '../axios/axiosInstance';
 import store from '../redux/store';
 
@@ -25,13 +24,10 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
 
   const slide = React.useRef(new Animated.Value(300)).current;
-  const dispatch = useDispatch();
-
 
   const imageUri = useSelector((state : any) => state.userProfile.imageUri);
   const userName = useSelector((state : any) => state.userProfile.userName);
   const imageResponse = useSelector((state:any) => state.userProfile.imageResponse);
-  const token = useSelector((state : any) => state.userProfile.token);
   const userId = firebase.auth().currentUser?.uid;
 
 
@@ -58,10 +54,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
     useEffect(() => {
       if(userName){
         setedittedUserName(userName);
-      }  
-      
-      
-      
+      } 
       slideUp()
     },[])
 
@@ -69,8 +62,7 @@ const BottomSheet:React.FC<BottomSheetProps> = ({setBottomSheetVisible}) => {
 
 
    // Close BottomSheet
-    const closeModal = () => {
-      
+    const closeModal = () => { 
        slideDown();
        setTimeout(() => {
         setBottomSheetVisible(false);

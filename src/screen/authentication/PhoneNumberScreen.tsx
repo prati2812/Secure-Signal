@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image, Dimensions, Pressable} from "react-native";
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, {  useState } from "react";
+import { Text, TextInput, View, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image,  Pressable} from "react-native";
 import HandleError from "../../component/useError";
-import auth, { firebase } from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 import { useDispatch } from "react-redux";
 import { addVerificationId } from "../../redux/credential/action";
+import { height, regex, width } from "../../utils/constant";
 
 
 
@@ -12,11 +12,9 @@ interface PhoneNumberScreenProps {
   navigation: any; 
 }
 
-const width = Dimensions.get('screen').width;
-const height = Dimensions.get('screen').height;
+
 
 const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => {
-  const regex = /[.,+\-' ']/;
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isError, setIsError] = useState(false);
   const [isIndicatorVisible, setIndicatorVisible] = useState(false);
@@ -60,7 +58,7 @@ const PhoneNumberScreen: React.FC<PhoneNumberScreenProps> = ({ navigation }) => 
         setIndicatorVisible(true);
         try {
           const confirmation = await auth().signInWithPhoneNumber(phoneNo);
-          console.log("========",confirmation.verificationId);
+          
   
           dispatch(addVerificationId(confirmation.verificationId));
   
