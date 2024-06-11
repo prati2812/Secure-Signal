@@ -43,6 +43,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState<Contact[]>([]);
   const [filteredMatchingContactData , setFilteredMatchingContactData] = useState<Contact[]>([]);
+  const [tempSelectedContacts, setTempSelectedContacts] = useState<Contact[]>([]);
   const [isSearchContact , setSearchContact] = useState(false);
   const [updatedContact , setUpdatedContact] = useState<Contact[]>([]);
   const [matchingUpdatedContact , setMatchingUpdatedContact] = useState<Contact[]>([]);
@@ -62,6 +63,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   const contacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.contacts);
   const matchedContacts = useSelector((state : EmergencyContactListScreenProps) => state.contacts.matchingContacts);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
+  
+  
   
 
   useEffect(() => {                  
@@ -91,6 +94,11 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       handleMatchingUpdatedContactList();
   },[isUpdated]);
   
+  useEffect(() => {
+     if(selectedContacts.length === 0){
+        setSelected(0);
+     }
+  },[isSelected])
   
   
 
@@ -177,7 +185,6 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       );
 
       if (filteredContacts.length > 0) {
-        setIndicatorValue(indicatorValue + 1);
         setMatchingUpdatedContact(filteredContacts);
       }
       
@@ -278,24 +285,23 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   // Select Contact From Contact List
   const handleSelectedContact = (item : Contact) => { 
   
-      if (selectedContacts && selectedContacts.some((contact: { recordID: string; }) => contact.recordID === item.recordID)){
-         setSelected(isSelected-1);
-         dispatch({
-          type:'REMOVE_SELECTED_CONTACTS',
-          payload:item.recordID
-        });
-      } 
-      else {
-       setSelected(isSelected+1);     
-       dispatch({
-          type: 'ADD_SELECTED_CONTACTS',
-          payload:item,
-        });
-          
-      }
+    if (tempSelectedContacts.some(contact => contact.recordID === item.recordID)) {
+       console.log(tempSelectedContacts);
+       
+      setTempSelectedContacts(tempSelectedContacts.filter(contact => contact.recordID !== item.recordID));
+      setSelected(isSelected - 1);
+      setIndicatorValue(indicatorValue - 1);
+    } else {
+      console.log("=====================" , item);
+      
+      setIndicatorValue(indicatorValue + 1);
+      setTempSelectedContacts([...tempSelectedContacts, item]);
+      console.log(tempSelectedContacts);
+      
+    }
   
-     setVisible(true);
-     setSelectedContact(true);  
+    setVisible(true);
+    setSelectedContact(true);
   
        
   }
@@ -307,6 +313,17 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     setVisible(false); 
     setSelectedContact(false);
   
+
+    for(let i = 0; i < tempSelectedContacts.length; i++){
+      dispatch({
+        type:'ADD_SELECTED_CONTACTS',
+        payload:tempSelectedContacts[i],
+     })
+    }
+    
+   
+    console.log("selected" , selectedContacts);
+    
     // Update non-app contact list if selected contacts are from there
     let updatedNonMatchingContacts = updatedContact;
     if (
@@ -348,14 +365,14 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
     let emergencyContactList: Contact[] = [];
 
-    selectedContacts.forEach((item: Contact) => {
+    tempSelectedContacts.forEach((item: Contact) => {
          emergencyContactList.push(item);
     })
   
     const response = await instance.post('/emergencyContact', {emergencyContactList,userId});
 
     if(response.status === 201){
-        sendNotification();
+         sendNotification();
         navigation.navigate('HomeScreen');
     }
     else{
@@ -376,12 +393,14 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
     let selectedUserId = [];
     let tokenMapping = [];
     
-    for(const contact of selectedContacts){ 
+    for(const contact of tempSelectedContacts){ 
       if(contact.userId){
          selectedUserId.push(contact.userId);
       }
     }
 
+    console.log("============" , selectedUserId);
+    
     
      
     for(let i=0; i < selectedUserId.length; i++){
@@ -408,6 +427,8 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
 
               if(response.status === 200){  
                     let userId = tokenMapping[i].userId;
+                    console.log(userName);
+                    
                     let senderName = userName;
                     const response = await instance.post('/saveEmergencyContactNotification' , {
                     userId , senderName});
@@ -434,12 +455,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   // Delete Selected Contact
   const handleDeleteSelectedContact = async(contact: Contact) => {
     console.log("=======" , contact);   
+   
     dispatchStore(removeSelectedContact(userId, contact));
-    setSelected(isSelected-1);
     
-    
-     // Filter out the deleted contact from the unselected contacts
-     const unselectedContacts = contacts.filter(item => item.recordID !== contact.recordID); 
+    const unselectedContacts = contacts.filter(item => item.recordID !== contact.recordID); 
     dispatch(addContact(unselectedContacts));
     
     setUpdated(!isUpdated);
@@ -466,7 +485,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
       />
 
       {
-          contacts.length === 0 && 
+          contacts.length === 0 && selectedContacts.length === 0 &&
             <View style={{marginTop:20 , flex:1 , alignItems:'center' , justifyContent:'center'}}>
                 <Text style={{fontSize:30}}>No Contacts</Text>
             </View>
@@ -539,9 +558,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                     <MatchingContact
                       contact={item}
                       key={key}
-                      isSelected={(isSelectedContact === true && selectedContacts.some(
-                        (contact: { recordID: any; }) => contact.recordID === item.recordID,
-                      ))}
+                      isSelected={
+                        isSelectedContact === true &&
+                        tempSelectedContacts.some(contact => contact.recordID === item.recordID)
+                      }
                       handleMatchingSelected={() => {handleSelectedContact(item)}}
                     />
                   );
@@ -554,11 +574,9 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                        contact={item}
                        key={key}
                        isSelected={
-                         isSelectedContact === true && selectedContacts &&
-                         selectedContacts.some(
-                           (contact: { recordID: string; }) => contact.recordID === item.recordID,
-                         )
-                       }
+                        isSelectedContact === true &&
+                        tempSelectedContacts.some(contact => contact.recordID === item.recordID)
+                      }
                        handleMatchingSelected={() => {handleSelectedContact(item)}}
                      />
                    );
@@ -591,9 +609,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                 <Contact
                   contact={item}
                   key={key}
-                  isSelected={(isSelectedContact === true && selectedContacts && selectedContacts.some(
-                    (contact: { recordID: string; }) => contact.recordID === item.recordID,
-                  ))}
+                  isSelected={
+                    isSelectedContact === true &&
+                    tempSelectedContacts.some(contact => contact.recordID === item.recordID)
+                  }
                   handleSelected={() => handleSelectedContact(item)}
                 />
               );
@@ -605,9 +624,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
                  <Contact 
                    key={key} 
                    contact={item} 
-                   isSelected={(isSelectedContact === true && selectedContacts.some(
-                     (contact: { recordID: string; }) => contact.recordID === item.recordID,
-                  ))} 
+                   isSelected={
+                    isSelectedContact === true &&
+                    tempSelectedContacts.some(contact => contact.recordID === item.recordID)
+                  }
                    handleSelected={() => handleSelectedContact(item)}     
                  />           
                );
@@ -629,7 +649,7 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
      
 
      {/* Selected Contact List */}
-      {  isSelected > 0 && (
+      {  indicatorValue > 0 && (
         <TouchableOpacity
           style={styles.guardiansBtnView} onPress={() => handleSetasGuardian()}>
           <View style={styles.guardiansBtn}>

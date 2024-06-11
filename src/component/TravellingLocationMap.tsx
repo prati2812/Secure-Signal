@@ -3,12 +3,14 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import { Searchbar } from 'react-native-paper';
+import { Modal, Searchbar } from 'react-native-paper';
 import { RAPID_API_FIND_PLACE_BASE_URL, RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPID_API_FIND_PLACE_HOST, X_RAPID_API_FIND_PLACE_KEY, X_RAPID_API_PLACE_AUTOCOMPLETE_HOST, X_RAPID_API_PLACE_AUTOCOMPLETE_KEY } from '@env';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from 'react-native-geolocation-service';
 import instance from '../axios/axiosInstance';
+import { useSelector } from 'react-redux';
+import { height } from '../utils/constant';
 
 
 interface Place {
@@ -16,19 +18,22 @@ interface Place {
     place_id : string;
 }
 
-interface TravellingLocationMapProps {}
+interface TravellingLocationMapProps {
+  navigation:any;
+}
 
-const height = Dimensions.get('screen').height;
 
-const TravellingLocationMap = (props: TravellingLocationMapProps) => {
+
+const TravellingLocationMap:React.FC<TravellingLocationMapProps> = ({navigation}) => {
     const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
     const [searchQuery, setSearchQuery] = useState('');
-    const [desiredLocation , setDesiredLocation] = useState<Place[]>([]);
     const [suggestion , setSuggestion] = useState<string[]>([]);
     const [isVisble , setVisible] = useState(false);
+    const [visible, setVisibleSubscription] = React.useState(false);
     const [isSetDestinationLocation , setDestinationLocation] = useState(false);
     const [destination , setDestination] = useState({ latitude: 0, longitude: 0 });
     const userId = firebase.auth().currentUser?.uid;  
+    const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
   
     useEffect(() => {
        getCurrentLocation();  
@@ -36,8 +41,12 @@ const TravellingLocationMap = (props: TravellingLocationMapProps) => {
 
 
     useEffect(() => {
-        placeAutoComplete();       
-      } , [searchQuery]);
+      if (isSubscribed && searchQuery) {
+          placeAutoComplete();  
+      } else if (!isSubscribed) {
+          setVisibleSubscription(true);
+      }        
+  }, [searchQuery]);
 
       const getCurrentLocation = async () => {
         Geolocation.getCurrentPosition(
@@ -142,6 +151,11 @@ const TravellingLocationMap = (props: TravellingLocationMapProps) => {
        
   }
 
+  const handleSubscriptionNavigation = () => {
+    navigation.navigate('Subscription');
+    setVisibleSubscription(false);
+ }
+
   
 
   return (
@@ -207,6 +221,22 @@ const TravellingLocationMap = (props: TravellingLocationMapProps) => {
           </View>
         </TouchableOpacity>
       )}
+      {
+        <>
+          <Modal
+            visible={visible}
+            onDismiss={() =>setVisibleSubscription(false)}
+            contentContainerStyle={style.containerStyle}>
+            <View style={{alignItems:'center',justifyContent:'center'}}>
+                   <Text style={{flexWrap:'wrap' , marginLeft:10, marginRight:10 , fontSize:20, fontWeight:'700', color:'black'}}>Subscribe now to unlock this and many other exclusive features!</Text>
+                   <TouchableOpacity style={{backgroundColor:'#3ebb6e' , borderRadius:8 , justifyContent:'center', marginTop:20, padding:10}}
+                    onPress={() => handleSubscriptionNavigation()}>
+                         <Text style={{color:'white' , textAlign:'center' , fontSize:20}}>Subscribe Now</Text>
+                   </TouchableOpacity>
+            </View>
+          </Modal>
+        </>
+      }
     </View>
   );
 };
@@ -269,4 +299,13 @@ const style = StyleSheet.create({
       nearStationMap: {
         flex: 1,
       },
+      containerStyle:{
+        backgroundColor:'white',
+        marginLeft:30,
+        marginRight:30,
+        height:'35%',
+        borderRadius:20,
+        elevation:5,
+      },
+    
 });

@@ -16,25 +16,33 @@ const NotificationCard:React.FC<NotificationCardProps> = ({icon,message , time ,
 
   
   return (
-    <TouchableOpacity onPress={() => handleIsRead()}>
-    <View style={styles.notificationView}>
-                 <View style={styles.notificationIcon}>
-                        <Icon name={icon} size={45} color={color} />
-                 </View>
-                 <View style={styles.notificationData}>
-                       <Text style={styles.notificationMessage}>
-                              {message}
-                       </Text>
-                       <Text style={styles.notificationTime}>
-                              {time}
-                       </Text>
-                 </View>
+    <TouchableOpacity>
+      <View style={styles.notificationView}>
+        <View style={styles.notificationIcon}>
+          <Icon name={icon} size={45} color={color} />
+        </View>
+        <View style={styles.notificationData}>
+          <Text style={styles.notificationMessage}>{message}</Text>
+          <Text style={styles.notificationTime}>{time}</Text>
+        </View>
 
-                 {
-                    isRead === false && <View style={{borderWidth:7, borderColor:'green' , borderRadius:10,}}></View>
-                 }
-                
-    </View>
+        {/* {isRead === false && (
+          <View
+            style={{
+              borderWidth: 7,
+              borderColor: 'green',
+              borderRadius: 10,
+            }}></View>
+        )} */}
+
+        {isRead === false && (
+          <TouchableOpacity
+            style={{backgroundColor: '#3ebb6e', padding: 7, borderRadius: 5}}
+            onPress={() => handleIsRead()}>
+            <Text style={{color: 'white'}}>Mark As Read</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </TouchableOpacity>
   );
 };

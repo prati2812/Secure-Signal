@@ -32,6 +32,17 @@ const width =  Dimensions.get('window').width;
 const height = Dimensions.get('screen').height;
 
 
+interface PoliceStationProfile {
+  userName: string;
+  phoneNumber: string;
+}
+
+interface Station {
+  policeStationProfile: PoliceStationProfile;
+  hospitalProfile:PoliceStationProfile;
+  distance: number;
+  
+}
 
 interface Contact {
   recordID: string;
@@ -48,6 +59,7 @@ interface RootState {
 
 interface HomeScreenProps {
   navigation: any; 
+  selectedStations?: Station | null;
 }
 
 
@@ -57,7 +69,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [isWarningSheetVisble, setWarningSheetVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedOption , setSelectedOption] = useState('Police Station');
-  const [selectedStation , setSelectedStation] = useState(null);
+  const [selectedStation , setSelectedStation] = useState<Station | null>(null);
   const [isInfoSheetVisible , setInfoSheetVisible] = useState(false);
   const [visible, setVisible] = React.useState(false);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
@@ -130,10 +142,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   useEffect(() => {
    
     if(volumUp === 3){
-       sendSMS();
-       backgroundService();
-       setWarningSheetVisible(true);
-       setVolumeUp(0);
+       if(isSubscribed){
+        sendSMS();
+        backgroundService();
+        setWarningSheetVisible(true);
+        setVolumeUp(0); 
+       }
+       else{
+        setVisible(true);
+       }
+       
     }
     if(volumeDown === 3){
      stop();
@@ -670,8 +688,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           </View>
         ) : (
            <View style={{flex:1}}>
-             {selectedOption === 'Travelling Location' ? (
-                    <TravellingLocationMap />
+             {selectedOption === 'Travel Location' ? (
+                    <TravellingLocationMap navigation={navigation} />
                   ) : (
                  <><MapView
                     style={style.nearStationMap}
@@ -717,7 +735,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                         icon={'local-police'}
                         color={'#5F4C24'}
                       />
-                    )}
+               )}
                   {selectedOption === 'Hospital' &&
                     selectedStation?.hospitalProfile &&
                     isInfoSheetVisible && (
@@ -734,7 +752,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                         color={'#008ECC'}
                       />
                     )}
-              <View style={{ flexDirection: 'row', position: 'absolute' }}>
+              <View style={{ flexDirection: 'row', position: 'absolute' , }}>
                       <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
@@ -742,8 +760,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                           gap: 10,
                           paddingLeft: 5,
                           paddingRight: 5,
-                          paddingBottom: 5,
-                          alignItems: 'center',
+                          paddingBottom: 5, 
                         }}
                         style={{}}>
                         <OptionSelection
@@ -757,21 +774,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                           selected={selectedOption === 'Hospital'} />
 
                         <OptionSelection
-                          title="Travelling Location"
+                          title="Travel Location"
                           onSelect={handleSelectedOption}
-                          selected={selectedOption === 'Travelling Location'} />
+                          selected={selectedOption === 'Travel Location'} />
                       </ScrollView>
                     </View>    
            </View>  
         )}
       </View>
-      {isProtectorSheetVisible && (
-        <ProtectorBottomSheet
-          setProtectorSheetVisible={setProtectorSheetVisible}
-          navigation={navigation}
-          mapNumber={mapNumber}
-        />
-      )}
       {
          isWarningSheetVisble &&(
             <WarningSheet setWarningSheetVisible={setWarningSheetVisible}/>

@@ -92,6 +92,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
       console.log("Hospital Complaint Status Notification Successfully Read");
       dispatchStore(allNotificationReadOrNot(userId));
       setRead(!read);  
+      navigation.navigate("TopTabNavigator" , {screen:'Complaints'});
     }
   }
 
@@ -102,11 +103,15 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
       console.log("Police Station Complaint Status Notification Successfully Read");
       dispatchStore(allNotificationReadOrNot(userId));
       setRead(!read);  
+      
     }
   }
   
 
+  
+
   const isVisble = emergencyContactNotification.length > 0  || liveLocationNotification.length > 0 || safeArrivalNotification.length > 0 || hospitalStatusNotification.length > 0 || policeStationStatusNotification.length > 0;
+
 
   
   return (

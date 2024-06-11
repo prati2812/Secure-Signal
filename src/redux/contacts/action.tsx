@@ -54,7 +54,7 @@ export const removeSelectedContact = (userId:string | undefined, contact:Object)
       })  
     }
     else{
-      console.log("something occured");
+     
     }
   }   
     

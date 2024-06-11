@@ -32,11 +32,11 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
     
     const token = useSelector((state:any) => state.userProfile.token);
 
-    useEffect(() => {
-      if(userId){
-        fetchUserProfile();
-      }
-   },[]); 
+  //   useEffect(() => {
+  //     if(userId){
+  //       fetchUserProfile();
+  //     }
+  //  },[]); 
  
     const fetchUserProfile = async() => {
         const response = await instance.post('/fetchUserDetails',{ userId });
@@ -75,7 +75,7 @@ const MatchingContact: React.FC<MatchingContactProps> = ({contact , isSelected ,
            {
                
                       <Image
-                        source={{uri: imageData ?  imageData  : 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
+                        source={{uri: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
                         style={{flex:1}}
                       />  
            }

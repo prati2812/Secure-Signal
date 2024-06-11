@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
-import {PermissionsAndroid , Platform} from 'react-native';
 import notifee from '@notifee/react-native';
+
+
+
 
 
 export async function requestUserPermission() {
@@ -37,6 +39,8 @@ export const notificationListener = () => {
       'Notification caused app to open from background state:',
       remoteMessage.notification,
     );
+     handleNotification(remoteMessage);
+    
   });
 
 
@@ -48,6 +52,8 @@ export const notificationListener = () => {
           'Notification caused app to open from quit state:',
           remoteMessage.notification,
         );
+        
+        handleNotification(remoteMessage);
       }
     })
     .catch(error => console.log('failed', error));
@@ -55,7 +61,8 @@ export const notificationListener = () => {
   // Foreground State
   messaging().onMessage(async remoteMessage => {
     console.log('foreground', remoteMessage);
-
+    handleNotification(remoteMessage);
+    
     const channelId = await notifee.createChannel({
       id: 'default',
       name: 'Default Channel',
@@ -76,3 +83,13 @@ export const notificationListener = () => {
 
 
 };
+
+
+const handleNotification = (remoteMessage) => {
+  console.log("Handling notification:", remoteMessage);
+  
+  if(remoteMessage.notification.title === "Emergency Contact Set")    
+          navigation.navigate("TopTabNavigator", { screen: 'Complaints' });
+      
+  
+}

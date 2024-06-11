@@ -65,12 +65,12 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
           <CustomProfileOption optionName='PhoneNumber' data={firebase.auth().currentUser?.phoneNumber} icon='call' />
 
           <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Subscription')}>
-            <CustomProfileOption optionName='subscription' icon='bolt' data={subScriptionType ? subScriptionType: ''}/>
+            <CustomProfileOption optionName='subscription' icon='bolt' data={subScriptionType ? subScriptionType: 'No Subscription'}/>
           </TouchableOpacity>   
         </View>
 
         
-        <TouchableOpacity style={[styles.deleteAccountButton , {backgroundColor:'white' , borderColor:'red' , borderWidth:1}]} onPress={() => handleLogout()}>
+        <TouchableOpacity style={[styles.deleteAccountButton , {backgroundColor:'white' , borderColor:'red' , borderWidth:1 , marginBottom:-10}]} onPress={() => handleLogout()}>
           <View style={styles.deleteAccountButtonContent}>
             <Icon name='logout' size={25} color={'red'} />
             <Text style={[styles.deleteAccountButtonText , {color:'red'}]}>Log out</Text>

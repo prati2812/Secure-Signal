@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Text, View, StyleSheet, Dimensions} from 'react-native';
+import { View,  Dimensions} from 'react-native';
 import { Path, Polygon, Svg  , Circle , Rect} from 'react-native-svg';
 
 interface NotifyIconProps {}

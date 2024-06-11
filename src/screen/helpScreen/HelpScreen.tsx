@@ -99,7 +99,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.whatHappenedView}>
-          <Text style={styles.whatHappenedText}>What {'\n'}happened ?</Text>
+          <Text style={styles.whatHappenedText}>What happened ?</Text>
         </View>
 
         {/* location map */}
@@ -150,7 +150,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               </Text>
               <Text
                 style={[styles.textStyle, complaintType.isVictim && styles.activeTextStyle]}>
-                I'm a{'\n'}victim
+                I'm a victim
               </Text>
             </View>
           </Pressable>
@@ -167,7 +167,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               </Text>
               <Text
                 style={[styles.textStyle, complaintType.isWitness && styles.activeTextStyle]}>
-                I'm a{'\n'}witness
+                I'm a witness
               </Text>
             </View>
           </Pressable>
@@ -227,14 +227,15 @@ const styles = StyleSheet.create({
     padding:10,
   },
   queryBtn:{
-    width:100, 
-    backgroundColor:'lightgray' , 
-    height:110, 
-    borderRadius:20, 
+    backgroundColor:'lightgray' ,  
+    borderRadius:10, 
     overflow:'hidden',
     elevation:5,
     alignItems:'center',
     justifyContent:'center', 
+    flexDirection:'row',
+    padding:10,
+    gap:5
   },
   textStyle:{
     fontSize:18,

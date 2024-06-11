@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, Pressable, TouchableOpacity , StatusBar} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import HelpIcon from '../../component/HelpIcon';
+import HelpIcon from '../../assets/icons/HelpIcon';
 import CustomHeader from '../../component/CustomHeader';
 
 

@@ -19,6 +19,7 @@ const AppRedux = () => (
 
 // Register background handler
 messaging().setBackgroundMessageHandler(async remoteMessage => {
+    console.log("==========");
     console.log('Message handled in the background!', remoteMessage);     
 });
 
