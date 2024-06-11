@@ -1,5 +1,5 @@
 import React, { Dispatch,  useEffect,  useState } from 'react';
-import {View, StyleSheet, StatusBar, ScrollView, Dimensions,  Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , ActivityIndicator} from 'react-native';
+import {View, StyleSheet, StatusBar, ScrollView, Dimensions,  Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , ActivityIndicator, Text, TouchableOpacity} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import { useSelector } from 'react-redux';
 import BackgroundService from 'react-native-background-actions';
@@ -22,6 +22,7 @@ import HospitalMap from '../../component/HospitalMap';
 import TravellingLocationMap from '../../component/TravellingLocationMap';
 import InfoCard from '../../component/InfoCard';
 import WarningSheet from '../../component/WarningSheet';
+import { Modal } from 'react-native-paper';
 
 
 
@@ -58,6 +59,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [selectedOption , setSelectedOption] = useState('Police Station');
   const [selectedStation , setSelectedStation] = useState(null);
   const [isInfoSheetVisible , setInfoSheetVisible] = useState(false);
+  const [visible, setVisible] = React.useState(false);
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   const selectedContacts = useSelector((state : any) => state.contacts.selectedContact);
   const isSubscribed = useSelector((state:any) => state.subscription.isSubscribed);
@@ -154,9 +156,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
           
         }
       }, 1000);
-    } else {
-      
-      navigation.navigate('Subscription');
     }
   
     return () => {
@@ -244,14 +243,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
 
   // check subscription status
   const checkSubscriptionStatus = () => {
-    let date = new Date();
-    let currentFormattedDate = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()} `;
-    let  currentDate = new Date(currentFormattedDate);
-    let endDate = new Date(subScriptionEndTime);
-    if(currentDate > endDate){
-      console.log(currentDate , subScriptionEndTime);
+    const [datePart, timePart] = subScriptionEndTime.split(' ');
+    const [month, day, year] = datePart.split('/').map(Number);
+    const [hours, minutes] = timePart.split(':').map(Number);
+    const dateObj = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+
+    // Format the Date object to the desired string format
+    const formattedDateStr = dateObj.toISOString().replace('.000', '.283');
+    const currentDate = new Date();
+     const subscriptionDate = new Date(formattedDateStr);
+    
+    
+    
+     
+
+    
+    if(currentDate > subscriptionDate){
+       console.log("---------");
+       
        dispatchStore(updateSubscriptionDetails(userId));
+       dispatchStore(changeUserName(userId));
     }
+   
     
   }
 
@@ -617,12 +630,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   }
 
   const handleMarkerClick = (station:any) => {
-     setSelectedStation(station);
-     setInfoSheetVisible(true);   
-    
      
+     if(isSubscribed){
+      setSelectedStation(station);
+      setInfoSheetVisible(true);
+    }
+    else{
+       setVisible(true);
+    }
+
   }
-  
+
+  const handleSubscriptionNavigation = () => {
+     navigation.navigate('Subscription');
+     setVisible(false);
+  }
 
 
   return (
@@ -755,6 +777,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             <WarningSheet setWarningSheetVisible={setWarningSheetVisible}/>
          )
       }
+       {
+        <>
+          <Modal
+            visible={visible}
+            onDismiss={() =>setVisible(false)}
+            contentContainerStyle={style.containerStyle}>
+            <View style={{alignItems:'center',justifyContent:'center'}}>
+                   <Text style={{flexWrap:'wrap' , marginLeft:10, marginRight:10 , fontSize:20, fontWeight:'700', color:'black'}}>Subscribe now to unlock this and many other exclusive features!</Text>
+                   <TouchableOpacity style={{backgroundColor:'#3ebb6e' , borderRadius:8 , justifyContent:'center', marginTop:20, padding:10}}
+                    onPress={() => handleSubscriptionNavigation()}>
+                         <Text style={{color:'white' , textAlign:'center' , fontSize:20}}>Subscribe Now</Text>
+                   </TouchableOpacity>
+            </View>
+          </Modal>
+        </>
+      }
     </>
   );
 };
@@ -884,6 +922,14 @@ const style = StyleSheet.create({
     fontSize: 17,
     color: 'black',
     fontWeight: '400',
+  },
+  containerStyle:{
+    backgroundColor:'white',
+    marginLeft:30,
+    marginRight:30,
+    height:'35%',
+    borderRadius:20,
+    elevation:5,
   },
 
 });

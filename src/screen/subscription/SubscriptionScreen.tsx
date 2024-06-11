@@ -85,7 +85,7 @@ const SubscriptionScreen:React.FC<SubscriptionScreenProps> = ({navigation}) => {
             await instance.post('/paymentSucess' , 
             {userId , selectedSubscription}).then(()=>{
                dispatchStore(changeUserName(userId));
-               navigation.navigate('Home');
+               navigation.navigate('HomeScreen');
             }).catch((error) =>{
                 console.log(error);
             });

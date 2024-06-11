@@ -1,15 +1,11 @@
 import React,{Dispatch, useEffect, useState} from 'react';
-import { Text, View, StyleSheet , StatusBar, Pressable, ScrollView, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { View, StyleSheet , StatusBar, ScrollView} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import NotificationBottomSheet from '../../component/NotificationBottomSheet';
 import { allNotificationReadOrNot, fetchEmergencyContactNotification, fetchHospitalStatusNotification, fetchLiveLocationNotification, fetchPoliceStationStatusNotification, fetchSafeArrivalNotification } from '../../redux/notifications/action';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
-import axios from 'axios';
-import NotifyIcon from '../../assets/icons/NotifyIcon';
 import PushNotification from '../../assets/icons/PushNotification';
 import instance from '../../axios/axiosInstance';
 import store from '../../redux/store';
@@ -110,6 +106,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
   }
   
 
+  const isVisble = emergencyContactNotification.length > 0  || liveLocationNotification.length > 0 || safeArrivalNotification.length > 0 || hospitalStatusNotification.length > 0 || policeStationStatusNotification.length > 0;
 
   
   return (
@@ -119,7 +116,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
 
         <CustomHeader
           name={'Notification'}
-          icon={'dots-vertical'}
+          icon={isVisble ? 'dots-vertical' : ''}
           call={() =>setBottomSheetVisible(true)}
           backIcon={'keyboard-backspace'}
           backCall={() => navigation.goBack()}

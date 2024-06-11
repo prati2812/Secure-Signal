@@ -87,6 +87,7 @@ const OtpNumberScreen: React.FC<OtpNumberScreenProps> = ({navigation}) => {
         
         
         
+        console.log("==========" , dataa);
         
         const response = await instance.post("/userAuthentication" , {userId , phoneNumber});
         
