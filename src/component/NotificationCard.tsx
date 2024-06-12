@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface NotificationCardProps {
@@ -16,7 +16,7 @@ const NotificationCard:React.FC<NotificationCardProps> = ({icon,message , time ,
 
   
   return (
-    <TouchableOpacity>
+    <Pressable>
       <View style={styles.notificationView}>
         <View style={styles.notificationIcon}>
           <Icon name={icon} size={45} color={color} />
@@ -43,7 +43,7 @@ const NotificationCard:React.FC<NotificationCardProps> = ({icon,message , time ,
           </TouchableOpacity>
         )}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

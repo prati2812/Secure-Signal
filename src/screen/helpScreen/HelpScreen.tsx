@@ -43,20 +43,39 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   const mapNumber = route.params?.mapNumber ?? undefined;
    
   const handleComplaint = (role:string) => {
-     if(role === "Victim"){
-       setComplaintType({
-          isVictim:true,
-          isWitness:false,
-          query:"I'm a victim"
-       })
-     }
-     else if(role === "Witness"){
-       setComplaintType({
-         isVictim:false,
-         isWitness:true,
-         query:"I'm a witness"
-       })  
-     }
+    if(mapNumber === 1){
+      if(role === "Victim"){
+        setComplaintType({
+           isVictim:true,
+           isWitness:false,
+           query:"I'm a victim"
+        })
+      }
+      else if(role === "Witness"){
+        setComplaintType({
+          isVictim:false,
+          isWitness:true,
+          query:"I'm a witness"
+        })  
+      } 
+    }
+    else if(mapNumber === 2){
+      if(role === "Victim"){
+        setComplaintType({
+           isVictim:true,
+           isWitness:false,
+           query:"I'm a injured"
+        })
+      }
+      else if(role === "Witness"){
+        setComplaintType({
+          isVictim:false,
+          isWitness:true,
+          query:"Someone is injured"
+        })  
+      }
+    }
+     
   }
 
   const handleHelpButton = () => {
@@ -150,7 +169,8 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               </Text>
               <Text
                 style={[styles.textStyle, complaintType.isVictim && styles.activeTextStyle]}>
-                I'm a victim
+                { mapNumber === 1 ? "I'm a victim" : "I'm a injured"}  
+                
               </Text>
             </View>
           </Pressable>
@@ -167,7 +187,10 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
               </Text>
               <Text
                 style={[styles.textStyle, complaintType.isWitness && styles.activeTextStyle]}>
-                I'm a witness
+                {
+                  mapNumber === 1 ? "I'm a witness" : "Someone is injured"
+                }  
+                
               </Text>
             </View>
           </Pressable>
@@ -255,7 +278,7 @@ const styles = StyleSheet.create({
     color:'white',
   },
   helpBtnView:{
-    marginTop:'15%',
+    marginTop:'10%',
     marginBottom:10,
   },
   helpBtn:{

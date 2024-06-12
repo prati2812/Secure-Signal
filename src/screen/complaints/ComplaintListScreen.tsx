@@ -8,6 +8,7 @@ import { dispatchStore } from '../account/EditProfile';
 import { firebase } from '@react-native-firebase/auth';
 import { FAB } from 'react-native-paper';
 import ComplaintFilterBottomSheet from '../../component/ComplaintFilterBottomSheet';
+import PushNotification from '../../assets/icons/PushNotification';
 
 
 interface ComplaintListScreenProps {
@@ -161,28 +162,32 @@ const ComplaintListScreen:React.FC<ComplaintListScreenProps> = ({navigation}) =>
           <ActivityIndicator size="large" color={'#3ebb6e'} />
         </View>
       ) : (
-        <><FlatList
-            data={filteredComplaints.sort(
-              (
-                a: { complaints: { createdAt: string; }; },
-                b: { complaints: { createdAt: string; }; }
-              ) => new Date(b.complaints.createdAt).getTime() -
-                new Date(a.complaints.createdAt).getTime()
-            )}
-            renderItem={renderComplaint}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={{ paddingTop: 20, paddingBottom: 10 }}
-            ListEmptyComponent={<View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: 25, color: 'black', fontWeight: '700' }}>
-                No Complaint
-              </Text>
-            </View>}
-            refreshControl={<RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh} />}
-
-            showsVerticalScrollIndicator={false} />
-            
+        <>{
+             filteredComplaints.length > 0 ? (
+              <FlatList
+              data={filteredComplaints.sort(
+                (
+                  a: { complaints: { createdAt: string; }; },
+                  b: { complaints: { createdAt: string; }; }
+                ) => new Date(b.complaints.createdAt).getTime() -
+                  new Date(a.complaints.createdAt).getTime()
+              )}
+              renderItem={renderComplaint}
+              keyExtractor={(item, index) => index.toString()}
+              contentContainerStyle={{ paddingTop: 20, paddingBottom: 10 }}
+              refreshControl={<RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh} />}
+  
+              showsVerticalScrollIndicator={false} />
+              
+             ) : (
+              <View style={{flex: 1, top: '20%'}}>
+              <PushNotification />
+            </View>
+             )
+        }
+     
             
             {
                complaints.length > 0 && 

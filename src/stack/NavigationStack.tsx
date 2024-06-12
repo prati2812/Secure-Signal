@@ -12,7 +12,7 @@ import LiveLocationRouteScreen from "../screen/location/LiveLocationRouteScreen"
 import ComplaintListScreen from "../screen/complaints/ComplaintListScreen";
 import ComplaintScreen from "../screen/complaints/ComplaintScreen";
 import TopTabNavigator from "../navigator/TopTabNavigator";
-import HomeScreen from "../screen/dashBoardScreen/HomeScreen";
+import HomeScreen from "../screen/dashBoardScreen/HomeScreen/HomeScreen";
 
 
 

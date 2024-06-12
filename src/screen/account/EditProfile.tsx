@@ -57,7 +57,7 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
   useEffect(() => {
     getToken();
     dispatchStore(changeUserName(userId))
-    .then(() => profileExist())
+    .then(() => setLoading(false))
     .catch(() => setLoading(false));
   },[]);
 
@@ -179,7 +179,10 @@ const EditProfile: React.FC<EditProfileProps> = ({navigation}) => {
       const response = await instance.post('/uploadImage',formData);
   
       if(response.status === 201){
-        AsyncStorage.setItem("profileExist", "true");
+        const responseData = await response.data;
+        const {token} = responseData;
+        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem("profileExist", "true");
         dispatch(setProfileCompleted(true));  
         setIndicatorVisible(false);
         navigation.navigate('NavigationStack');

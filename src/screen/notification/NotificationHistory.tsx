@@ -158,7 +158,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                 },
               )}
               {
-                (notificationTypes === "All" || notificationTypes === "Live Location") && liveLocationNotification.length > 0 && 
+                (notificationTypes === "All" || notificationTypes === "Live Location") && liveLocationNotification.length > 0 &&
                   liveLocationNotification.map(
                     (
                       item: {
@@ -183,7 +183,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({navigation}) =
                              }
                            />
                          );
-                    },) 
+                    })
               }
               {
                 (notificationTypes === "All" || notificationTypes === "Safe Arrival") && safeArrivalNotification.length > 0 && 

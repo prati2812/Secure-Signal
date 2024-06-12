@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, StatusBar, ScrollView, FlatList } from 'react-native';
+import { Text, View, StyleSheet, StatusBar, ScrollView, FlatList, RefreshControl } from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import { Dispatch, useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ interface LocationHistoryProps {
 
 const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
     const [isBottomSheetVisible , setBottomSheetVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const userId = firebase.auth().currentUser?.uid;
     const locationData = useSelector((state: any) => state.location.locations);
     
@@ -28,6 +29,12 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
       dispatchStore(fetchLocation(userId));
     },[]); 
 
+
+    const onRefresh = () => {
+      setRefreshing(true);
+      dispatchStore(fetchLocation(userId));
+      setRefreshing(false);
+    };
 
 
     // format the date
@@ -59,7 +66,8 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
       );
     };
 
-    const keyExtractor = (item: any, index: { toString: () => any; }) => index.toString();
+
+  const keyExtractor = (item: any, index: { toString: () => any; }) => index.toString();
 
   return (
     <>
@@ -71,6 +79,9 @@ const LocationHistory:React.FC<LocationHistoryProps> = ({navigation}) => {
             renderItem={renderItem}
             keyExtractor={keyExtractor}
             contentContainerStyle={{paddingTop: 15}}
+            refreshControl={<RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh} />}
             showsVerticalScrollIndicator={false}
           />
         ) : (

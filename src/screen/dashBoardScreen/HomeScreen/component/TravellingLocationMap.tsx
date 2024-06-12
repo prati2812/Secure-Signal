@@ -8,9 +8,10 @@ import { RAPID_API_FIND_PLACE_BASE_URL, RAPID_API_PLACE_AUTOCOMPLETE_URL, X_RAPI
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from 'react-native-geolocation-service';
-import instance from '../axios/axiosInstance';
+import instance from '../../../../axios/axiosInstance';
 import { useSelector } from 'react-redux';
-import { height } from '../utils/constant';
+import { height } from '../../../../utils/constant';
+import LinearGradient from 'react-native-linear-gradient';
 
 
 interface Place {
@@ -225,15 +226,21 @@ const TravellingLocationMap:React.FC<TravellingLocationMapProps> = ({navigation}
         <>
           <Modal
             visible={visible}
-            onDismiss={() =>setVisibleSubscription(false)}
+            onDismiss={() =>setVisible(false)}
             contentContainerStyle={style.containerStyle}>
-            <View style={{alignItems:'center',justifyContent:'center'}}>
-                   <Text style={{flexWrap:'wrap' , marginLeft:10, marginRight:10 , fontSize:20, fontWeight:'700', color:'black'}}>Subscribe now to unlock this and many other exclusive features!</Text>
+           
+            <LinearGradient
+               colors={['#3ebb6e', '#cbe4cb']} 
+               style={{flex:1 , alignItems:'center' , justifyContent:'center' , borderRadius:10 , overflow:'hidden'}}> 
+  
+            
+                   <Text style={{flexWrap:'wrap' , marginLeft:10, marginRight:10 , fontSize:20, fontWeight:'700', color:'white'}}>Subscribe now to unlock this and many other exclusive features!</Text>
                    <TouchableOpacity style={{backgroundColor:'#3ebb6e' , borderRadius:8 , justifyContent:'center', marginTop:20, padding:10}}
                     onPress={() => handleSubscriptionNavigation()}>
                          <Text style={{color:'white' , textAlign:'center' , fontSize:20}}>Subscribe Now</Text>
                    </TouchableOpacity>
-            </View>
+            
+            </LinearGradient>
           </Modal>
         </>
       }

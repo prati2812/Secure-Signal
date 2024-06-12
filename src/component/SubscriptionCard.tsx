@@ -1,7 +1,5 @@
 import React,{useState} from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import PaymentCard from './PaymentCard';
 import CrossLine from './CrossLine';
 import { useSelector } from 'react-redux';
 
@@ -24,7 +22,7 @@ const SubscriptionCard:React.FC<SubscriptionCardProps> = ({subscriptionType , pr
      onSelect(subscriptionType , price); 
   }
   return (
-    <Pressable style={[styles.subscriptionCardView , selected && styles.isSelected , subScriptionType === subscriptionType && styles.subscribedBannerCard]} onPress={handlePress} disabled={subScriptionType === subscriptionType}>
+    <Pressable style={[styles.subscriptionCardView , selected && styles.isSelected , subScriptionType === subscriptionType && styles.subscribedBannerCard]} onPress={handlePress} disabled={subScriptionType === subscriptionType || isSubscribed}>
          {
             isSubscribed && subScriptionType === subscriptionType ? <CrossLine /> : null
          }     

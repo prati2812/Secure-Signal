@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import { StyleSheet } from 'react-native';
+import {Marker} from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
-import InfoCard from './InfoCard';
 
 interface PoliceStationMapProps {
   onMarkerPress: (station: any) => void;

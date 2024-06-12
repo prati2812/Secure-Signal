@@ -22,90 +22,74 @@ export const IS_DELETED = 'IS_DELETED';
 
 
 export const changeUserName = (userId:string | undefined) => {
-  return async (dispatch:Dispatch) => { 
-      try {
-        const response = await instance.post('/fetchUserDetails', {userId});
-
-        if (response.status === 200) {
-          const {userData, imageBuffer} = await response.data;
-           
-
-          const {
-            phoneNumber,
-            userName,
-            isSubscribed,
-            subScriptionType,
-            subscriptionEndTime,
-            isDeleted
-          } = userData;
-
-
-          
-          
-
-          dispatch({
-            type: CHANGE_USER_NAME,
-            payload: userName,
-          });
-          dispatch({
-            type: ADD_USER_PHONE_NUMBER,
-            payload: phoneNumber,
-          });
-
-
-          if(isSubscribed && subscriptionEndTime && subScriptionType){
-            dispatch({
-              type: IS_SUBSCRIBED,
-              payload: isSubscribed,
-            });
-            dispatch({
-              type: SUBSCRIPTION_TYPE,
-              payload: subScriptionType,
-            });
-            dispatch({
-              type: SUBSCRIPTION_END_TIME,
-              payload: subscriptionEndTime,
-            });  
-          }
-          else{
-            dispatch({
-              type: IS_SUBSCRIBED,
-              payload: false,
-            });
-            
-          }
-
-
-          if(imageBuffer){
-            const base64Image = base64.fromByteArray(imageBuffer.data);
-            const imageUrl = `data:image/jpeg;base64,${base64Image}`;
-            dispatch({
-              type: ADD_IMAGE_URI,
-              payload: imageUrl,
-            });
-          }
-          
-
-         
-            
-             dispatch({
-               type:IS_DELETED,
-               payload: isDeleted,
-             })
-          
-          
-
-          
-          
-        } else {
-          console.log('Something occured');
-        }
-      } catch (error) {
-         console.log("errror" , error);
-         
-      }
+  return async (dispatch: Dispatch) => {
+    try {
+      const response = await instance.post('/fetchUserDetails', {userId});
+     
       
-    }  
+      if (response.status === 200) {
+        const {userData, imageBuffer} = await response.data;
+
+        const {
+          phoneNumber,
+          userName,
+          isSubscribed,
+          subScriptionType,
+          subscriptionEndTime,
+          isDeleted,
+        } = userData;
+
+        dispatch({
+          type: CHANGE_USER_NAME,
+          payload: userName,
+        });
+        dispatch({
+          type: ADD_USER_PHONE_NUMBER,
+          payload: phoneNumber,
+        });
+
+        if (isSubscribed && subscriptionEndTime && subScriptionType) {
+          dispatch({
+            type: IS_SUBSCRIBED,
+            payload: isSubscribed,
+          });
+          dispatch({
+            type: SUBSCRIPTION_TYPE,
+            payload: subScriptionType,
+          });
+          dispatch({
+            type: SUBSCRIPTION_END_TIME,
+            payload: subscriptionEndTime,
+          });
+        } else {
+          dispatch({
+            type: IS_SUBSCRIBED,
+            payload: false,
+          });
+        }
+
+        if (imageBuffer) {
+          const base64Image = base64.fromByteArray(imageBuffer.data);
+          const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+          dispatch({
+            type: ADD_IMAGE_URI,
+            payload: imageUrl,
+          });
+        }
+
+        dispatch({
+          type: IS_DELETED,
+          payload: isDeleted,
+        });
+
+       
+      } else {
+        console.log('Something occured');
+      }
+    } catch (error) {
+      console.log('errror', error);
+    }
+  };  
        
 };
 

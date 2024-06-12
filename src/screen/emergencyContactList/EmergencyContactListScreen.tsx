@@ -1,5 +1,5 @@
 import React,{useEffect , useState , Dispatch} from 'react';
-import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity} from 'react-native';
+import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity, BackHandler} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import { Searchbar } from 'react-native-paper';
 import Contacts  from 'react-native-contacts';
@@ -65,13 +65,10 @@ const EmergencyContactListScreen:React.FC<EmergencyContactListScreenProps> = ({n
   const userName  = useSelector((state : RootState) => state.userProfile.userName);
   
   
-  
+ 
 
   useEffect(() => {                  
-    if (contacts.length > 0) {
-    } else {
-      handleContactList();
-    }
+     handleContactList();
   }, []);
  
   useEffect(() => { 

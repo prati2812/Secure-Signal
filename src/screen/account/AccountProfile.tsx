@@ -30,7 +30,10 @@ const AccountProfile: React.FC<AccountProfileProps> = ({ navigation }) => {
 
 
   const handleLogout = async() => {
-    await AsyncStorage.clear();
+    await new Promise(resolve => setTimeout(resolve, 2000)); 
+
+
+    await AsyncStorage.multiRemove(["token" , "profileExist"]);
     dispatch(addToken(''));
     dispatch(setProfileCompleted(false));
     navigation.navigate('PhoneNumber');

@@ -1,5 +1,5 @@
 import React,{useEffect} from 'react';
-import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid, StatusBar, Dimensions } from 'react-native';
+import { Text, View, StyleSheet, Pressable, TouchableOpacity,Animated, Platform, PermissionsAndroid, StatusBar, Dimensions, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { CameraOptions, ImageLibraryOptions, MediaType, launchCamera , launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch } from 'react-redux';
@@ -16,7 +16,11 @@ interface ImagePickerSheetProps {
 const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionSheetVisible}) => {
     const slide = React.useRef(new Animated.Value(300)).current;
     const dispatch = useDispatch();
-
+    
+    useEffect(() => {
+      requestImageSelectionPermission();
+      slideUp();
+    },[]);
 
       const slideUp = () => {
         Animated.timing(slide, {
@@ -35,13 +39,9 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
         }).start();
       };
   
-      useEffect(() => {
-        slideUp()
-      })
+     
 
-      useEffect(() => {
-          requestImageSelectionPermission();
-      },[]);
+    
 
       const closeModal = () => {
          slideDown();
@@ -60,7 +60,7 @@ const ImagePickerSheet:React.FC<ImagePickerSheetProps> = ({setImageSelectionShee
             {    
             }
             else{
-                requestImageSelectionPermission();
+              Alert.alert('Permissions required', 'Camera and storage permissions are required to select images.');
             }
          }
       }

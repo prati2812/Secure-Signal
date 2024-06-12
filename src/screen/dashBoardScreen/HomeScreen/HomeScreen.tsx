@@ -1,28 +1,30 @@
 import React, { Dispatch,  useEffect,  useState } from 'react';
-import {View, StyleSheet, StatusBar, ScrollView, Dimensions,  Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , ActivityIndicator, Text, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, StatusBar, ScrollView, Dimensions,  Platform, PermissionsAndroid , NativeModules, NativeEventEmitter , ActivityIndicator, Text, TouchableOpacity, Image, Alert, BackHandler} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import { useSelector } from 'react-redux';
 import BackgroundService from 'react-native-background-actions';
 import { SendDirectSms } from 'react-native-send-direct-sms';
 import { firebase } from '@react-native-firebase/auth';
-import {changeUserName, fetchUserComplaints} from '../../redux/userprofile/action';
-import {addSelectedContact} from '../../redux/contacts/action';
-import Contact from '../../component/Contact';
-import HomeCustomHeader from '../../component/HomeCustomHeader';
-import { allNotificationReadOrNot } from '../../redux/notifications/action';
+import {changeUserName, fetchUserComplaints} from '../../../redux/userprofile/action';
+import {addSelectedContact} from '../../../redux/contacts/action';
+import Contact from '../../../component/Contact';
+import HomeCustomHeader from './component/HomeCustomHeader';
+import { allNotificationReadOrNot } from '../../../redux/notifications/action';
 import Geolocation from 'react-native-geolocation-service';
-import { updateSubscriptionDetails } from '../../redux/subscription/action';
-import { fetchLocation, findNearestHospital, findNearestPoliceStation } from '../../redux/location/action';
-import instance from '../../axios/axiosInstance';
-import store from '../../redux/store';
-import ProtectorBottomSheet from '../../component/ProtectorBottomSheet';
-import OptionSelection from '../../component/OptionSection';
-import PoliceStationMap from '../../component/PoliceStationMap';
-import HospitalMap from '../../component/HospitalMap';
-import TravellingLocationMap from '../../component/TravellingLocationMap';
-import InfoCard from '../../component/InfoCard';
-import WarningSheet from '../../component/WarningSheet';
+import { updateSubscriptionDetails } from '../../../redux/subscription/action';
+import { fetchLocation, findNearestHospital, findNearestPoliceStation } from '../../../redux/location/action';
+import instance from '../../../axios/axiosInstance';
+import store from '../../../redux/store';
+import ProtectorBottomSheet from '../../../component/ProtectorBottomSheet';
+import OptionSelection from './component/OptionSection';
+import PoliceStationMap from './component/PoliceStationMap';
+import HospitalMap from './component/HospitalMap';
+import TravellingLocationMap from './component/TravellingLocationMap';
+import InfoCard from './component/InfoCard';
 import { Modal } from 'react-native-paper';
+import LinearGradient from 'react-native-linear-gradient';
+import { useNavigationState } from '@react-navigation/native';
+import WarningSheet from './component/WarningSheet';
 
 
 
@@ -35,6 +37,7 @@ const height = Dimensions.get('screen').height;
 interface PoliceStationProfile {
   userName: string;
   phoneNumber: string;
+  address:string;
 }
 
 interface Station {
@@ -65,7 +68,6 @@ interface HomeScreenProps {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
-  const [isProtectorSheetVisible, setProtectorSheetVisible] = useState(false);
   const [isWarningSheetVisble, setWarningSheetVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedOption , setSelectedOption] = useState('Police Station');
@@ -83,6 +85,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   const [volumeDown , setVolumeDown] = useState(0);
   const subScriptionEndTime = useSelector((state:any) => state.subscription.subScriptionEndTime);
   const locationData = useSelector((state: any) => state.location.locations);
+  const routes = useNavigationState(state => state.routes);
   
   useEffect(() => {
     dispatchStore(changeUserName(userId))
@@ -95,11 +98,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
   },[]);
 
 
+ 
+  
+
+
   useEffect(() => {
-    // Request location SMS permission
+    
     requestLocationSMSPermission();
     getCurrentLocation();  
-    // Define a function to check if both nearestPoliceStation and notificationReadStatus are not null
+    
     const checkValuesNotNull = () => {
         if (nearestPoliceStation !== null && notificationReadStatus !== null && nearestHospital !== null && location !== null) {
             return true;
@@ -107,7 +114,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
         return false;
     };
 
-    // If both values are null, dispatch actions
+    
     if (!checkValuesNotNull()) {
         dispatchStore(allNotificationReadOrNot(userId));
         dispatchStore(findNearestPoliceStation(userId , location.latitude.toString() , location.longitude.toString()));
@@ -128,7 +135,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             setVolumeDown(prevVolumeUp => prevVolumeUp + 1); 
          }
          if(keyMessage === 'BACK_PRESS_KEY'){
-             navigation.goBack();
+             
+             if (routes[routes.length - 1].name === 'HomeScreen') {
+              BackHandler.exitApp();
+            } else {
+              navigation.goBack();
+            }
          }
          
        });
@@ -136,7 +148,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     
       return () => subscription.remove();    
   
-  },[]);
+  },[routes]);
 
 
   useEffect(() => {
@@ -267,17 +279,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
     const dateObj = new Date(Date.UTC(year, month - 1, day, hours, minutes));
 
     // Format the Date object to the desired string format
-    const formattedDateStr = dateObj.toISOString().replace('.000', '.283');
+    const formattedDateStr = dateObj.toISOString();
     const currentDate = new Date();
-     const subscriptionDate = new Date(formattedDateStr);
-    
-    
-    
-     
-
+    const subscriptionDate = new Date(formattedDateStr);
     
     if(currentDate > subscriptionDate){
-       console.log("---------");
+       
        
        dispatchStore(updateSubscriptionDetails(userId));
        dispatchStore(changeUserName(userId));
@@ -732,6 +739,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                           selectedStation.policeStationProfile.phoneNumber
                         }
                         distance={selectedStation.distance.toFixed(2)}
+                        address={selectedStation.policeStationProfile.address}
                         icon={'local-police'}
                         color={'#5F4C24'}
                       />
@@ -748,6 +756,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
                           selectedStation.hospitalProfile.phoneNumber
                         }
                         distance={selectedStation.distance.toFixed(2)}
+                        address={selectedStation.hospitalProfile.address}
                         icon={'local-hospital'}
                         color={'#008ECC'}
                       />
@@ -793,13 +802,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
             visible={visible}
             onDismiss={() =>setVisible(false)}
             contentContainerStyle={style.containerStyle}>
-            <View style={{alignItems:'center',justifyContent:'center'}}>
-                   <Text style={{flexWrap:'wrap' , marginLeft:10, marginRight:10 , fontSize:20, fontWeight:'700', color:'black'}}>Subscribe now to unlock this and many other exclusive features!</Text>
+           
+            <LinearGradient
+               colors={['#3ebb6e', '#cbe4cb']} 
+               style={{flex:1 , alignItems:'center' , justifyContent:'center' , borderRadius:10 , overflow:'hidden'}}> 
+  
+            
+                   <Text style={{flexWrap:'wrap' , marginLeft:10, marginRight:10 , fontSize:20, fontWeight:'700', color:'white'}}>Subscribe now to unlock this and many other exclusive features!</Text>
                    <TouchableOpacity style={{backgroundColor:'#3ebb6e' , borderRadius:8 , justifyContent:'center', marginTop:20, padding:10}}
                     onPress={() => handleSubscriptionNavigation()}>
                          <Text style={{color:'white' , textAlign:'center' , fontSize:20}}>Subscribe Now</Text>
                    </TouchableOpacity>
-            </View>
+            
+            </LinearGradient>
           </Modal>
         </>
       }
@@ -934,12 +949,9 @@ const style = StyleSheet.create({
     fontWeight: '400',
   },
   containerStyle:{
-    backgroundColor:'white',
     marginLeft:30,
     marginRight:30,
     height:'35%',
-    borderRadius:20,
-    elevation:5,
   },
 
 });

@@ -32,8 +32,8 @@ interface HelpDescriptionScreenProps {
 const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation,route}) => {
     const [complaintIsInjured , setComplaintIsInjured] = useState({
        isYes:false,
-       isNo:true,
-       isInjured:'No'
+       isNo:false,
+       isInjured:''
     });  
     const [complaint, setComplaint] = useState('');
     const [uri , setUri] = useState<ImageInfo[]>([]);
@@ -160,7 +160,10 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         complaintData.append('userId', userId);
         complaintData.append('complaintBy', complaintBy);
         complaintData.append('complaint', complaint);
-        complaintData.append('isInjured', complaintIsInjured.isInjured);
+        {
+           mapNumber === 2 ? complaintData.append('isInjured', "Yes") : complaintData.append('isInjured', complaintIsInjured.isInjured);
+        }
+        
         complaintData.append(
           'complaint_location',
           JSON.stringify({"latitude": complaint_location.latitude , "longtitude": complaint_location.longitude}),
@@ -196,7 +199,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
              
            }
            
-           if(complaintIsInjured.isInjured === "Yes"){
+           if(mapNumber === 2 || complaintIsInjured.isInjured === "Yes"){
           
              let hospitalId;
              if(mapNumber === 2){
@@ -250,129 +253,131 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
   return (
     <SafeAreaView style={styles.helpDescriptionMain}>
       <CustomHeader
-          name={complaintBy}
-          backIcon={'keyboard-backspace'}
-          backCall={() => navigation.goBack()}
-        />  
-    
-      <ScrollView showsVerticalScrollIndicator={false}>
+        name={complaintBy}
+        backIcon={'keyboard-backspace'}
+        backCall={() => navigation.goBack()}
+      />
 
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.whatHappenedView}>
           <Text style={styles.whatHappenedText}>What happened ?</Text>
         </View>
 
-         {/* Complain Chat Box */}
+        {/* Complain Chat Box */}
         <View style={styles.multiLineTextInputView}>
-              <TextInput
-                multiline={true}
-                numberOfLines={5}
-                placeholder='Enter Complain'
-                underlineColorAndroid ='rgba(0,0,0,0)'
-                activeUnderlineColor='transparent'
-                underlineColor='transparent'
-                style={styles.multiLineTextInput}
-                onChangeText={(text) => setComplaint(text)}
-                value={complaint}
-                cursorColor='black'
-              />
+          <TextInput
+            multiline={true}
+            numberOfLines={5}
+            placeholder="Enter Complain"
+            underlineColorAndroid="rgba(0,0,0,0)"
+            activeUnderlineColor="transparent"
+            underlineColor="transparent"
+            style={styles.multiLineTextInput}
+            onChangeText={text => setComplaint(text)}
+            value={complaint}
+            cursorColor="black"
+          />
         </View>
 
         {/* selected images */}
         <ScrollView
-           horizontal
-           showsHorizontalScrollIndicator={false} 
-           style={styles.dataScrollView}> 
-          <> 
-          { 
-            
-             uri.length ?
-              
-                  uri.map((item , index) => (
-                    
-                    <View style={styles.dataShowView} key={index}>
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.dataScrollView}>
+          <>
+            {uri.length
+              ? uri.map((item, index) => (
+                  <View style={styles.dataShowView} key={index}>
+                    <View style={styles.dataImageView}>
+                      <Image
+                        source={{uri: item.path}}
+                        resizeMode="cover"
+                        style={styles.imageView}
+                      />
 
-                      <View style={styles.dataImageView}>
-  
-                         <Image
-                            source={{ uri: item.path }}
-                            resizeMode='cover'
-                            style={styles.imageView} />
-  
-                              <TouchableOpacity style={styles.imageCloseIcon} onPress={() => removeImage(index)}>
-                                <Icon name='close' size={25} color={'white'} />
-                              </TouchableOpacity>
-  
-  
-                      </View>
+                      <TouchableOpacity
+                        style={styles.imageCloseIcon}
+                        onPress={() => removeImage(index)}>
+                        <Icon name="close" size={25} color={'white'} />
+                      </TouchableOpacity>
                     </View>
-                  ))  
-                
-              : null
-          }
+                  </View>
+                ))
+              : null}
           </>
-        </ScrollView> 
+        </ScrollView>
 
-         {/* Upload a photos */}
-        <TouchableOpacity style={styles.uploadDataView}
-            onPress={()=> handleUploadPhotos()}>
-             <View
-                style={styles.uploadPhotoView}>
-                  <Text style={styles.uploadPhotoText}>
-                       Select photos
+        {/* Upload a photos */}
+        <Pressable
+          style={styles.uploadDataView}
+          onPress={() => handleUploadPhotos()}>
+          <View style={styles.uploadPhotoView}>
+            <Text style={styles.uploadPhotoText}>Select photos</Text>
+          </View>
+        </Pressable>
+
+        {mapNumber === 1 && (
+          <>
+            <View style={styles.divder}></View>
+
+            <View style={styles.questionTextView}>
+              <Text style={styles.questionText}>Is anyone injured?</Text>
+            </View>
+
+            <View style={styles.questionOptionSelectionView}>
+              <Pressable onPress={() => hanldeInjured('Yes')} style={{flex: 1}}>
+                <View
+                  style={[
+                    styles.questionOptionView,
+                    complaintIsInjured.isYes && styles.activateOptionView,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.option,
+                      complaintIsInjured.isYes && styles.activateOption,
+                    ]}>
+                    Yes
                   </Text>
-             </View>
-        </TouchableOpacity>
-
-         {/* Divider  */}
-        <View style={styles.divder}></View>
-
-        <View style={styles.questionTextView}>
-              <Text style={styles.questionText}>
-                   Is anyone injured?
-              </Text>
-        </View>
-
-        <View style={styles.questionOptionSelectionView}>
-             
-             <Pressable onPress={() => hanldeInjured("Yes")} style={{flex:1}}>
-              <View style={[styles.questionOptionView , complaintIsInjured.isYes && styles.activateOptionView]}>
-                   <Text style={[styles.option , complaintIsInjured.isYes && styles.activateOption]}>
-                         Yes
-                   </Text>
-              </View>
+                </View>
               </Pressable>
 
-              <Pressable onPress={()=> hanldeInjured("No")} style={{flex:1}}>
-              <View style={[styles.questionOptionView , complaintIsInjured.isNo && styles.activateOptionView]}>
-                   <Text style={[styles.option , complaintIsInjured.isNo && styles.activateOption]}>
-                         No 
-                   </Text>
-              </View>
+              <Pressable onPress={() => hanldeInjured('No')} style={{flex: 1}}>
+                <View
+                  style={[
+                    styles.questionOptionView,
+                    complaintIsInjured.isNo && styles.activateOptionView,
+                  ]}>
+                  <Text
+                    style={[
+                      styles.option,
+                      complaintIsInjured.isNo && styles.activateOption,
+                    ]}>
+                    No
+                  </Text>
+                </View>
               </Pressable>
-
-        </View>
+            </View>
+          </>
+        )}
 
         <View style={styles.helpSubmitBtnView}>
-              <Pressable onPress={()=> handleHelpConfirmation()}
-                disabled={isDisabled}>
-              <View style={[styles.helpSubmitBtn , isDisabled && {backgroundColor:'#FDA993'}]}>
-                 {
-                    isIndicatorVisible ? <ActivityIndicator size={25} color={'white'}/>
-                    :   <Text style={styles.helpSubmitText}>
-                           I need help
-                        </Text>                  
-                 }  
-                     
-              </View>
-              </Pressable>    
+          <Pressable
+            onPress={() => handleHelpConfirmation()}
+            disabled={isDisabled}>
+            <View
+              style={[
+                styles.helpSubmitBtn,
+                isDisabled && {backgroundColor: '#FDA993'},
+              ]}>
+              {isIndicatorVisible ? (
+                <ActivityIndicator size={25} color={'white'} />
+              ) : (
+                <Text style={styles.helpSubmitText}>I need help</Text>
+              )}
+            </View>
+          </Pressable>
         </View>
-
-
-        
-
-
       </ScrollView>
-      
     </SafeAreaView>
   );
 };
