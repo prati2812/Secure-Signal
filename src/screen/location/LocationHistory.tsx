@@ -3,8 +3,8 @@ import { Text, View, StyleSheet, StatusBar, ScrollView, FlatList, RefreshControl
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
 import { Dispatch, useEffect, useState } from 'react';
-import NotificationBottomSheet from '../../component/NotificationBottomSheet';
-import LocationBottomSheet from '../../component/LocationBottomSheet';
+import NotificationBottomSheet from '../notification/component/NotificationBottomSheet';
+import LocationBottomSheet from './component/LocationBottomSheet';
 import { firebase } from '@react-native-firebase/auth';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';

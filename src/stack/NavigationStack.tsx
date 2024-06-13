@@ -6,8 +6,8 @@ import HelpConfirmationScreen from "../screen/helpScreen/HelpConfirmationScreen"
 import LocationRouteScreen from "../screen/location/LocationRouteScreen";
 import NotificationHistory from "../screen/notification/NotificationHistory";
 import LocationHistory from "../screen/location/LocationHistory";
-import EmergencyContactListScreen from "../screen/emergencyContactList/EmergencyContactListScreen";
-import SubscriptionScreen from "../screen/subscription/SubscriptionScreen";
+import EmergencyContactListScreen from "../screen/emergencyContactList/ContactListScreen/EmergencyContactListScreen";
+import SubscriptionScreen from "../screen/subscription/SubscriptionScreen/SubscriptionScreen";
 import LiveLocationRouteScreen from "../screen/location/LiveLocationRouteScreen";
 import ComplaintListScreen from "../screen/complaints/ComplaintListScreen";
 import ComplaintScreen from "../screen/complaints/ComplaintScreen";

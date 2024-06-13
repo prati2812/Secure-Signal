@@ -4,10 +4,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePickerSheet from './ImagePickerSheet';
 import { useSelector , useDispatch } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
-import { changeUserName } from '../redux/userprofile/action';
-import instance from '../axios/axiosInstance';
-import store from '../redux/store';
-import { height } from '../utils/constant';
+import { changeUserName } from '../../../redux/userprofile/action';
+import instance from '../../../axios/axiosInstance';
+import store from '../../../redux/store';
+import { height } from '../../../utils/constant';
 
 
 

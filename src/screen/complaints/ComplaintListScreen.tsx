@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, StatusBar, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import ComplaintsCard from '../../component/ComplaintsCard';
+import ComplaintsCard from './component/ComplaintsCard';
 import { COMPLAINT, fetchUserComplaints } from '../../redux/userprofile/action';
 import { useState } from 'react';
 import { dispatchStore } from '../account/EditProfile';
 import { firebase } from '@react-native-firebase/auth';
 import { FAB } from 'react-native-paper';
-import ComplaintFilterBottomSheet from '../../component/ComplaintFilterBottomSheet';
+import ComplaintFilterBottomSheet from './component/ComplaintFilterBottomSheet';
 import PushNotification from '../../assets/icons/PushNotification';
 
 

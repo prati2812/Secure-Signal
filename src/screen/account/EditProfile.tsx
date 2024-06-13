@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import HandleError from '../../component/useError';
 import { Dispatch, useEffect, useState } from 'react';
-import ImagePickerSheet from '../../component/ImagePickerSheet';
+import ImagePickerSheet from './component/ImagePickerSheet';
 import { useSelector , useDispatch} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { changeUserName, setProfileCompleted } from '../../redux/userprofile/action';

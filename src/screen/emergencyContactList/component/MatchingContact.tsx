@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSelector } from 'react-redux';
-import instance from '../axios/axiosInstance';
+import instance from '../../../axios/axiosInstance';
 import base64 from 'base64-js';
 
 interface ContactRoot {

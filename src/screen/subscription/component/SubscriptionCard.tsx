@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import CrossLine from './CrossLine';
 import { useSelector } from 'react-redux';

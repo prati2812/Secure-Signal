@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { Dispatch, useEffect } from 'react';
-import { Text, View, StyleSheet, Animated, Pressable, TouchableOpacity } from 'react-native';
-import NotificationFilter from './NotificationFilter';
-import instance from '../axios/axiosInstance';
+import { View, StyleSheet, Animated, Pressable, TouchableOpacity } from 'react-native';
+import NotificationFilter from '../../../component/NotificationFilter';
+import instance from '../../../axios/axiosInstance';
 import { firebase } from '@react-native-firebase/auth';
-import { deleteAllNotificationOrNot } from '../redux/notifications/action';
 import { useDispatch } from 'react-redux';
-import store from '../redux/store';
-import { fetchLocation } from '../redux/location/action';
+import store from '../../../redux/store';
+import { fetchLocation } from '../../../redux/location/action';
 
 interface LocationBottomSheetProps {
     setBottomSheetVisible: any;
@@ -16,7 +15,6 @@ interface LocationBottomSheetProps {
 const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetVisible}) => {
     const slide = React.useRef(new Animated.Value(300)).current;
     const userId = firebase.auth().currentUser?.uid;
-    const dispatch = useDispatch();
 
     useEffect(() => {
       slideUp()
@@ -52,7 +50,6 @@ const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetV
     const handleDeleteAllLocation = async() => {
         const response = await instance.post("/deleteAllTravellingLocation" , {userId});
         if(response.status === 200){
-          console.log("successfully Delete All Notification");
           dispatchStore(fetchLocation(userId));
           closeModal();
        }  
@@ -60,7 +57,7 @@ const LocationBottomSheet:React.FC<LocationBottomSheetProps> = ({setBottomSheetV
 
     return (
     <Pressable style={styles.container} onPress={closeModal}>
-      <Pressable style={{ width: '100%', height: '13%'}}>
+      <Pressable style={{ width: '100%', height: '15%'}}>
         <Animated.View style={[styles.bottomSheet , {transform: [{ translateY: slide}]}]}>
         <View style={styles.notificationBottomSheet}>
 

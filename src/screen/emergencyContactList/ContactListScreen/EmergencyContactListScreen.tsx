@@ -1,17 +1,17 @@
 import React,{useEffect , useState , Dispatch} from 'react';
 import { Text, View, StyleSheet, Platform, PermissionsAndroid,  ScrollView, TouchableOpacity, BackHandler} from 'react-native';
-import CustomHeader from '../../component/CustomHeader';
+import CustomHeader from '../../../component/CustomHeader';
 import { Searchbar } from 'react-native-paper';
 import Contacts  from 'react-native-contacts';
-import Contact from '../../component/Contact';
+import Contact from '../component/Contact';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch , useSelector } from 'react-redux';
-import { removeSelectedContact , addContact, addMatchingContacts} from '../../redux/contacts/action';
+import { removeSelectedContact , addContact, addMatchingContacts} from '../../../redux/contacts/action';
 import { firebase } from '@react-native-firebase/auth';
-import SectionList from '../../component/SectionList';
-import MatchingContact from '../../component/MatchingContact';
-import instance from '../../axios/axiosInstance';
-import store from '../../redux/store';
+import SectionList from '../component/SectionList';
+import MatchingContact from '../component/MatchingContact';
+import instance from '../../../axios/axiosInstance';
+import store from '../../../redux/store';
 
 
 interface Contact {

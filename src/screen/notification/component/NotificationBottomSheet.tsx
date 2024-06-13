@@ -1,14 +1,14 @@
 import * as React from 'react';
 import {Text, View, StyleSheet, Pressable, Animated, StatusBar, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import NotificationFilter from './NotificationFilter';
+import NotificationFilter from '../../../component/NotificationFilter';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { firebase } from '@react-native-firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
-import { addNotificationTypes, deleteAllNotificationOrNot } from '../redux/notifications/action';
+import { addNotificationTypes, deleteAllNotificationOrNot } from '../../../redux/notifications/action';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import instance from '../axios/axiosInstance';
+import instance from '../../../axios/axiosInstance';
 import { SelectList } from 'react-native-dropdown-select-list';
 
 

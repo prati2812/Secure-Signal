@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import MapView, { Marker, Polyline } from 'react-native-maps';
-import { useSelector } from 'react-redux';
 import  poyline from 'google-polyline';
 import instance from '../../axios/axiosInstance';
 import { RAPID_API_BASE_URL, X_RAPID_API_HOST, X_RAPID_API_KEY } from '@env';
@@ -22,7 +21,6 @@ const LiveLocationRouteScreen:React.FC<LiveLocationRouteScreenProps> = ({route})
     const [routeData, setRouteData] = useState<{ routes: any[] } | null>(null);
     const [coordinates, setCoordinates] = useState<[number, number][]>([]);
     const userId = firebase.auth().currentUser?.uid;
-    const token = useSelector((state: any) => state.userProfile.token);
     const senderId = route.params?.senderId;
     
 

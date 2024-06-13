@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Text, View, StyleSheet, Animated, Pressable, TouchableOpacity } from 'react-native';
-import NotificationFilter from './NotificationFilter';
+import NotificationFilter from '../../../component/NotificationFilter';
 import { useDispatch } from 'react-redux';
-import { addComplaintStatusType } from '../redux/userprofile/action';
+import { addComplaintStatusType } from '../../../redux/userprofile/action';
 
 interface ComplaintFilterBottomSheetProps {
     setComplaintBottomSheetVisible:any;
@@ -57,6 +57,7 @@ const ComplaintFilterBottomSheet:React.FC<ComplaintFilterBottomSheetProps> = ({s
                    <View style={styles.filterOptionContainer}>
 
                             <TouchableOpacity onPress={() => handleComplaintStatus("All")}>
+                                  
                                   <Text style={[styles.filterOption , {color:'blue'}]}>All</Text>
                             </TouchableOpacity>
 

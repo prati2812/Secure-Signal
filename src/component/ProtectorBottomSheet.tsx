@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { Text, View, StyleSheet, Animated, Pressable, ScrollView } from 'react-native';
-import ComplaintsCard from './ComplaintsCard';
+import ComplaintsCard from '../screen/complaints/component/ComplaintsCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProtectorData } from '../redux/protector/action';
 

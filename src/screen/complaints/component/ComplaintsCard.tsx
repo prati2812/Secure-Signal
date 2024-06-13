@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FontIcon from 'react-native-vector-icons/FontAwesome5';
-import { useSelector } from 'react-redux';
 
 interface ComplaintsCardProps {
    icon:string;

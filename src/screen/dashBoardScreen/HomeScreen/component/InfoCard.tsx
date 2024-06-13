@@ -93,7 +93,7 @@ const InfoCard:React.FC<InfoCardProps> = ({setInfoSheetVisible , station , navig
             <Text style={{color: 'black', fontSize: 15}}>{address}</Text>
           </View>
 
-          <View style={{padding: 5, marginTop: 5,}}>
+          <View style={{padding: 5, marginTop: 5, marginLeft:20 , marginRight:20}}>
             <TouchableOpacity
               style={{
                 backgroundColor: '#3ebb6e',

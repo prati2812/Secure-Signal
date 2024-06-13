@@ -1,24 +1,18 @@
-import React, {useState , useEffect, useCallback} from 'react';
+import React, {useState} from 'react';
 import {
   Text,
   View,
   StyleSheet,
   StatusBar,
   Pressable,
-  Image,
   ScrollView,
   Dimensions,
-  BackHandler,
-  NativeEventEmitter,
-  NativeModules,
-  Linking,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconFont from 'react-native-vector-icons/FontAwesome';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import { useSelector } from 'react-redux';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import CustomHeader from '../../component/CustomHeader';
 
 
@@ -104,7 +98,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({navigation , route}) => {
   
   
   const location = getProtectorLocation(mapNumber);
-  console.log(location);
+  
   
     
   return (

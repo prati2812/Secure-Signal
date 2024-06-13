@@ -38,8 +38,10 @@ const TravellingLocationMap:React.FC<TravellingLocationMapProps> = ({navigation}
   
     useEffect(() => {
        getCurrentLocation();  
-    },[]);
+    },[location]);
 
+    
+    
 
     useEffect(() => {
       if (isSubscribed && searchQuery) {

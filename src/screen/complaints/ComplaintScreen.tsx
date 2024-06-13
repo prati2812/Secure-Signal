@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Text, View, StyleSheet, StatusBar, ScrollView, Image, Pressable, Linking, ActivityIndicator } from 'react-native';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import base64 from 'base64-js';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Modal } from 'react-native-paper';
@@ -133,7 +132,7 @@ const shouldDisplayComponent = (complaintData: { complaints: { isInjured: any; p
 
 const displayContent = shouldDisplayComponent(complaintData);
 
-const hideModal = () => setVisible(false);
+
  
  
   return (
@@ -267,9 +266,9 @@ const hideModal = () => setVisible(false);
         <>
           <Modal
             visible={visible}
-            onDismiss={hideModal}
+            onDismiss={() => setVisible(false)}
             contentContainerStyle={styles.containerStyle}>
-            <Image
+            <FastImage
               source={{
                 uri: imageUri
                   ? imageUri

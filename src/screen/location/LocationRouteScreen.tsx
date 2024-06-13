@@ -72,7 +72,7 @@ const LocationRouteScreen = (props: LocationRouteScreenProps) => {
              const routeGeometry = routeData.routes[0].geometry;
              const data = poyline.decode(routeGeometry);
              setCoordinates(data); 
-             console.log("======" , data);
+            
              
          }
      }

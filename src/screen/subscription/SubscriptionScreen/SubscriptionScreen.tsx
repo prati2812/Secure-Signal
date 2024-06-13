@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Text, View, StyleSheet, ScrollView, Alert} from 'react-native';
-import CustomHeader from '../../component/CustomHeader';
-import SubscriptionCard from '../../component/SubscriptionCard';
+import CustomHeader from '../../../component/CustomHeader';
+import SubscriptionCard from '../component/SubscriptionCard';
 import { Dispatch, useState } from 'react';
 import { initPaymentSheet, presentPaymentSheet} from '@stripe/stripe-react-native';
 import { firebase } from '@react-native-firebase/auth';
 import { useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
-import instance from '../../axios/axiosInstance';
-import { changeUserName } from '../../redux/userprofile/action';
-import store from '../../redux/store';
+import instance from '../../../axios/axiosInstance';
+import { changeUserName } from '../../../redux/userprofile/action';
+import store from '../../../redux/store';
 
 
 

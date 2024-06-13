@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, StatusBar, Image, TouchableOpacity, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import BottomSheet from '../../component/BottomSheet';
-import DeleteAccountSheet from '../../component/DeleteAccountSheet';
+import BottomSheet from './component/BottomSheet';
+import DeleteAccountSheet from './component/DeleteAccountSheet';
 import { useDispatch, useSelector } from 'react-redux';
-import CustomProfileOption from '../../component/CustomProfileOption';
+import CustomProfileOption from './component/CustomProfileOption';
 import { firebase } from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addToken, setProfileCompleted } from '../../redux/userprofile/action';

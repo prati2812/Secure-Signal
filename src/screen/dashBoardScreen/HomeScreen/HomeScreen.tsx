@@ -7,7 +7,7 @@ import { SendDirectSms } from 'react-native-send-direct-sms';
 import { firebase } from '@react-native-firebase/auth';
 import {changeUserName, fetchUserComplaints} from '../../../redux/userprofile/action';
 import {addSelectedContact} from '../../../redux/contacts/action';
-import Contact from '../../../component/Contact';
+import Contact from '../../emergencyContactList/component/Contact';
 import HomeCustomHeader from './component/HomeCustomHeader';
 import { allNotificationReadOrNot } from '../../../redux/notifications/action';
 import Geolocation from 'react-native-geolocation-service';
@@ -67,7 +67,7 @@ interface HomeScreenProps {
 
 
 const HomeScreen: React.FC<HomeScreenProps> = ({navigation}) => {
-  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [location, setLocation] = useState({ latitude: 37.78825, longitude: -122.4324 });
   const [isWarningSheetVisble, setWarningSheetVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedOption , setSelectedOption] = useState('Police Station');

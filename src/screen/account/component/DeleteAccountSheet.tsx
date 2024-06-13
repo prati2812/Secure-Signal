@@ -5,8 +5,8 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { Text, View, StyleSheet, Pressable, Animated, TouchableOpacity, StatusBar, BackHandler, Dimensions } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import instance from '../axios/axiosInstance';
-import { addToken, setProfileCompleted} from '../redux/userprofile/action';
+import instance from '../../../axios/axiosInstance';
+import { addToken, setProfileCompleted} from '../../../redux/userprofile/action';
 
 
 

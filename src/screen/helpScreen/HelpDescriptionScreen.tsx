@@ -175,6 +175,7 @@ const HelpDescriptionScreen: React.FC<HelpDescriptionScreenProps> = ({navigation
         const response = await instance.post('/uploadComplaints', complaintData);
 
         if(response.status === 200){
+         
           
           let policeStationId;
           if(mapNumber === 1){

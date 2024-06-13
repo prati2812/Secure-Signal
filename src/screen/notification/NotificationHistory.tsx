@@ -2,7 +2,7 @@ import React,{Dispatch, useEffect, useState} from 'react';
 import { View, StyleSheet , StatusBar, ScrollView} from 'react-native';
 import CustomHeader from '../../component/CustomHeader';
 import NotificationCard from '../../component/NotificationCard';
-import NotificationBottomSheet from '../../component/NotificationBottomSheet';
+import NotificationBottomSheet from './component/NotificationBottomSheet';
 import { allNotificationReadOrNot, fetchEmergencyContactNotification, fetchHospitalStatusNotification, fetchLiveLocationNotification, fetchPoliceStationStatusNotification, fetchSafeArrivalNotification } from '../../redux/notifications/action';
 import { useSelector } from 'react-redux';
 import { firebase } from '@react-native-firebase/auth';
