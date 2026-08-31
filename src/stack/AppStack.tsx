@@ -1,24 +1,53 @@
-import React from "react";
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import React, { useEffect} from "react";
 import { NavigationContainer } from '@react-navigation/native'
-import SplashScreen from "../screen/SplashScreen";
-import HomeScreen from "../screen/HomeScreen";
-import PhoneNumberScreen from "../screen/authentication/PhoneNumberScreen";
-import OtpNumberScreen from "../screen/authentication/OtpNumberScreen";
-import EditProfile from "../screen/account/EditProfile";
+import AuthStack from "./AuthStack";
+import NavigationStack from "./NavigationStack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch, useSelector } from "react-redux";
+import { addToken, setProfileCompleted } from "../redux/userprofile/action";
 
-const Stack = createNativeStackNavigator();
+
+
+
+
 
 const AppStack: React.FC = () => {
+  const token = useSelector((state: any) => state.userProfile.token);
+  const isProfile = useSelector((state:any) => state.userProfile.isProfileCompleted);
+  const dispatch = useDispatch(); 
+
+  const getToken = async() => {
+    const token = await AsyncStorage.getItem('token');
+    if(token){
+      dispatch(addToken(token));
+    }
+
+    const profileExist = await AsyncStorage.getItem("profileExist");
+    if(profileExist){
+       dispatch(setProfileCompleted(true));
+    }
+    else{
+      dispatch(setProfileCompleted(false));
+    }
+    
+  }
+  
+  useEffect(() => {
+    getToken();
+  },[]);
+
+
+  
   return (
+    
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="PhoneNumber" component={PhoneNumberScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="OtpNumber" component={OtpNumberScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="EditProfile" component={EditProfile} options={{headerShown: false}}/>
-        <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-      </Stack.Navigator>
+        {
+          token && isProfile
+            ?
+            <NavigationStack/> 
+            : 
+            <AuthStack/>
+        }
     </NavigationContainer>
   );
 }
